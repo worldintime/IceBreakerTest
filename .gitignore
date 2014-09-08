@@ -16,3 +16,4 @@
 /tmp
 /.idea
 /vendor/cache
+/config/database.yml
