@@ -33,8 +33,8 @@ module IceBr8kr
         address:              'smtp.gmail.com',
         port:                 587,
         domain:               'http://localhost:3000/users/confirmation',
-        user_name:            'worldintime@gmail.com',
-        password:             '0471991281muwvil047',
+        user_name:            '@gmail.com',
+        password:             '',
         authentication:       'plain',
         enable_starttls_auto: true  }
   end
