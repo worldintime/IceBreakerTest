@@ -11,7 +11,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140908115242) do
+ActiveRecord::Schema.define(version: 20140909074023) do
+
+  create_table "sessions", force: true do |t|
+    t.string   "auth_token"
+    t.string   "device"
+    t.string   "device_token"
+    t.integer  "user_id"
+    t.datetime "updated_at"
+    t.string   "api_key"
+    t.datetime "created_at"
+  end
 
   create_table "users", force: true do |t|
     t.string   "first_name"
@@ -31,6 +41,10 @@ ActiveRecord::Schema.define(version: 20140908115242) do
     t.datetime "last_sign_in_at"
     t.string   "current_sign_in_ip"
     t.string   "last_sign_in_ip"
+    t.string   "confirmation_token"
+    t.datetime "confirmed_at"
+    t.datetime "confirmation_sent_at"
+    t.string   "unconfirmed_email"
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
