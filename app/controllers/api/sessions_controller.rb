@@ -3,17 +3,19 @@ class Api::SessionsController < ApplicationController
 
   def create
     user = User.find_for_authentication(email: params[:email])
-    puts user.inspect
-    puts user.valid_password?(params[:password])
-    if user && user.valid_password?(params[:password])
+    if user
+      if user.valid_password?(params[:password])
       session = create_session user
       render json: {success: true,
                        info: 'Logged in',
-                       data: {authentication_token: session[:auth_token], email: user.email},
-                       status: 200
+                       data: {authentication_token: session[:auth_token], user: user},
+                     status: 200
       }
+      else
+        render json: {errors: 'Email or password is incorrect!'} , status: 200
+      end
     else
-      render json: user.errors.full_messages, status: 401
+      render json: {errors: 'User not found!'}, status: 200
     end
   end
 
@@ -23,7 +25,7 @@ class Api::SessionsController < ApplicationController
       destroy_session session
       render json: { success: true, info: 'Logged out', status: 200 }
     else
-      render json: user.errors.full_messages, status: 401
+      render json: { success: false, info: 'Not found', status: 200 }
     end
   end
 

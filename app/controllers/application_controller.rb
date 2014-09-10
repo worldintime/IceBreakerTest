@@ -15,12 +15,16 @@ class ApplicationController < ActionController::Base
   def api_authenticate_user
     @session = Session.where(auth_token: params[:authentication_token]).first
     unless @session
-      bad_request ['session invalid or expired'], 401
+      render json: {success: false,
+                       info: 'Session expired. Please login',
+                     status: 400}
     else
       @session[:updated_at] = Time.now
       @current_user = @session.user
       unless @current_user
-        bad_request ['session invalid or expired'], 401
+        render json: {success: true,
+                         info: 'Session expired. Please login',
+                       status: 400}
         session = Session.find_by_user_id(@session.user_id)
         session.destroy
       end
