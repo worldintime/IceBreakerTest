@@ -14,7 +14,7 @@ class Api::UsersController < ApplicationController
                      status: 200
       }
     else
-      render json: user.errors.full_messages, status: 200
+      render json: {errors: user.errors.full_messages, success: false}, status: 200
     end
 
   end

@@ -1,15 +1,22 @@
 class Omniauth::SessionsController < ApplicationController
 
-    def create
-      puts '+++++++++++++++++++++++++++++ENTER'
-      user = User.from_omniauth(env["omniauth.auth"])
-      session[:user_id] = user.id
-      pust session[:user_id] + '+++++++++++++++++++++++++'
-      render text: "#{session[:user_id]}".html_safe
-    end
 
-    def destroy
-  		reset_session
-  		redirect_to root_url, notice => 'Signed out'
-	  end
+  def create
+    user = User.from_omniauth(env["omniauth.auth"])
+    session[:user_id] = user.id
+    omniauth = request.env['omniauth.auth']
+
+    if omniauth
+      first_name = omniauth['extra']['raw_info']['first_name']
+      last_name = omniauth['extra']['raw_info']['last_name']
+      email = omniauth['extra']['raw_info']['email']
+      image = omniauth['info']['image']
+      gender = omniauth['extra']['raw_info']['gender']
+      birthday = omniauth['extra']['raw_info']['birthday']
+      uid = omniauth['uid']
+      render text: first_name + " - " + last_name + " - " + email + " - " + image + " - " + birthday + " - " + gender + " - " + uid
+    else
+      render text: 'Error: Omniauth is empty'
+    end
+  end
 end
