@@ -45,8 +45,7 @@ ActiveRecord::Schema.define(version: 20140909141312) do
     t.datetime "confirmed_at"
     t.datetime "confirmation_sent_at"
     t.string   "unconfirmed_email"
-    t.string   "provider"
-    t.string   "provider_id"
+    t.string   "facebook_id"
     t.string   "oauth_token"
     t.datetime "oauth_expires_at"
   end
