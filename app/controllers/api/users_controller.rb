@@ -1,5 +1,5 @@
 class Api::UsersController < ApplicationController
-  before_filter :set_access_control_headers
+  before_action :api_authenticate_user, only: [:edit_profile]
 
   def create
 
@@ -9,12 +9,47 @@ class Api::UsersController < ApplicationController
 
     if user.save
       render json: {success: true,
-                    info: 'Message sent on your email, please check it',
-                    data: {user: user},
-                    status: 200
+                       info: 'Message sent on your email, please check it',
+                       data: {user: user},
+                     status: 200
       }
     else
       render json: user.errors.full_messages, status: 200
+    end
+
+  end
+
+  def edit_profile
+
+    if @current_user
+      @current_user.update_attributes(user_params)
+      render json: {success: true,
+                       info: 'Profile successfully updated.',
+                     status: 200
+      }
+    else
+      render json: {success: false,
+                       info: 'Session expired. Please login.',
+                     status: 200
+      }
+    end
+
+  end
+
+  def forgot_password
+
+    user = User.find_by_email(params[:email])
+    if user
+      password = SecureRandom.hex(8)
+      user.update_attributes(password: password, password_confirmation: password)
+
+      render json: {success: true,
+                       info: 'New password was sent on your email',
+                     status: 200}
+    else
+      render json: {success: false,
+                       info: "Email doesn't exist",
+                     status: 200}
     end
 
   end

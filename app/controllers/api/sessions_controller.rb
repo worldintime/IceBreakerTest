@@ -1,5 +1,4 @@
 class Api::SessionsController < ApplicationController
-  before_filter :set_access_control_headers
 
   def create
     user = User.find_for_authentication(email: params[:email])
@@ -8,13 +7,15 @@ class Api::SessionsController < ApplicationController
       session = create_session user
       render json: {success: true,
                        info: 'Logged in',
-        data: {authentication_token: session[:auth_token], email: user.email}, status: 200
-        }
+                       data: {authentication_token: session[:auth_token], user: user},
+                     status: 200
+      }
       else
-        render json: user.errors.full_messages, status: 401
+        render json: {errors: 'Email or password is incorrect!'} , status: 200
       end
     else
-      render json: 'User not found!', status: 401, message: 'User not found!'
+      render json: {errors: 'User not found!'}, status: 200
+
     end
   end
 
@@ -24,7 +25,7 @@ class Api::SessionsController < ApplicationController
       destroy_session session
       render json: { success: true, info: 'Logged out', status: 200 }
     else
-      render json: user.errors.full_messages, status: 401
+      render json: { success: false, info: 'Not found', status: 200 }
     end
   end
 
