@@ -15,7 +15,7 @@ default: &default
   pool: 5
   username: root
   password:
-  socket: /var/run/mysqld/mysqld.sock
+
 
 development:
   <<: *default
@@ -50,5 +50,5 @@ test:
 production:
   <<: *default
   database: IceBr8kr_production
-  username: IceBr8kr
-  password: <%= ENV['ICEBR8KR_DATABASE_PASSWORD'] %>
+  username: root
+  password: "L71NK96SZj"

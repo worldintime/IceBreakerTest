@@ -44,6 +44,13 @@ ActiveRecord::Schema.define(version: 20140910102720) do
     t.string   "address"
     t.float    "latitude",               limit: 24
     t.float    "longitude",              limit: 24
+    t.string   "facebook_id"
+    t.string   "oauth_token"
+    t.datetime "oauth_expires_at"
+    t.string   "avatar_file_name"
+    t.string   "avatar_content_type"
+    t.integer  "avatar_file_size"
+    t.datetime "avatar_updated_at"
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
