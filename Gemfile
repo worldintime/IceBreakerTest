@@ -14,8 +14,10 @@ gem 'coffee-rails', '~> 4.0.0'
 
 gem 'factory_girl_rails', '~> 4.4.1'
 gem 'devise', '~> 3.3.0'
+gem 'paperclip', '~> 4.2.0'
 
-
+gem 'omniauth'
+gem 'omniauth-facebook'
 
 group :test do
   gem 'shoulda', '~> 3.5.0'
