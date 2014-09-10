@@ -51,4 +51,4 @@ production:
   <<: *default
   database: IceBr8kr_production
   username: root
-  password:
+  password: "L71NK96SZj"
