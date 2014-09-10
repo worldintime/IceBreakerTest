@@ -8,5 +8,6 @@ class User < ActiveRecord::Base
   validates_presence_of :first_name, :last_name, :gender, :email, :user_name
   validates_confirmation_of :password
 
-
+  reverse_geocoded_by :latitude, :longitude
+  after_validation :reverse_geocode
 end

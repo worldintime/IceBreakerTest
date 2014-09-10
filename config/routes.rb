@@ -4,6 +4,8 @@ Rails.application.routes.draw do
 
   namespace :api, defaults: {format: 'json'} do
     resources :users
+    post 'search', to: 'users#search'
+
     post 'sessions', to: 'sessions#create', as: 'login'
     delete 'sessions', to: 'sessions#destroy', as: 'logout'
   end
