@@ -1,10 +1,8 @@
 class Api::SessionsController < ApplicationController
-
+  before_filter :set_access_control_headers
 
   def create
     user = User.find_for_authentication(email: params[:email])
-    puts user.inspect
-    puts user.valid_password?(params[:password])
     if user && user.valid_password?(params[:password])
       session = create_session user
       render json: {success: true,
@@ -24,6 +22,18 @@ class Api::SessionsController < ApplicationController
       render json: { success: true, info: 'Logged out', status: 200 }
     else
       render json: user.errors.full_messages, status: 401
+    end
+  end
+
+  def reset_password
+    @user = User.find_by_email(params[:email])
+    if @user.present?
+      @user.send_reset_password_instructions
+      render json: {
+          message: 'Confirmation instructions sent. Please check your email.'
+      }
+    else
+      bad_request ['Cant find user with that email.'], 406
     end
   end
 

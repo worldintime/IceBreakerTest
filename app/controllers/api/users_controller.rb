@@ -1,10 +1,11 @@
 class Api::UsersController < ApplicationController
+  before_filter :set_access_control_headers
 
   def create
 
     user = User.new(first_name: params[:first_name], last_name: params[:last_name], password: params[:password],
                     gender: params[:gender], date_of_birth: params[:date_of_birth], user_name: params[:user_name],
-                    password_confirmation: params[:password_confirmation], email: params[:email])
+                    password_confirmation: params[:password_confirmation], email: params[:email], avatar: params[:avatar])
 
     if user.save
       render json: {success: true,
@@ -31,7 +32,7 @@ class Api::UsersController < ApplicationController
 
   def user_params
     params.require(:user).permit(:first_name, :last_name, :email, :gender, :date_of_birth,
-                                 :user_name, :password, :password_confirmation)
+                                 :user_name, :password, :password_confirmation, :avatar)
   end
 
 end

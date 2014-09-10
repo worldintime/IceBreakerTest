@@ -1,8 +1,7 @@
 class ApplicationController < ActionController::Base
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
-  protect_from_forgery with: :exception
-
+  protect_from_forgery
   before_filter :set_access_control_headers
 
   def set_access_control_headers
@@ -12,19 +11,5 @@ class ApplicationController < ActionController::Base
      headers['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept, Authorization'
   end
 
-  def api_authenticate_user
-    @session = Session.where(auth_token: params[:authentication_token]).first
-    unless @session
-      bad_request ['session invalid or expired'], 401
-    else
-      @session[:updated_at] = Time.now
-      @current_user = @session.user
-      unless @current_user
-        bad_request ['session invalid or expired'], 401
-        session = Session.find_by_user_id(@session.user_id)
-        session.destroy
-      end
-    end
-  end
 
 end
