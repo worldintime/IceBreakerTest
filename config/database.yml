@@ -14,7 +14,7 @@ default: &default
   encoding: utf8
   pool: 5
   username: root
-  password: '12345'
+  password:
   socket: /var/run/mysqld/mysqld.sock
 
 development:
@@ -51,4 +51,4 @@ production:
   <<: *default
   database: IceBr8kr_production
   username: root
-  password: '12345'
+  password:
