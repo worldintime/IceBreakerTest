@@ -3,15 +3,18 @@ class Api::SessionsController < ApplicationController
 
   def create
     user = User.find_for_authentication(email: params[:email])
-    if user && user.valid_password?(params[:password])
+    if user
+      if user.valid_password?(params[:password])
       session = create_session user
       render json: {success: true,
                        info: 'Logged in',
-                       data: {authentication_token: session[:auth_token], email: user.email},
-                       status: 200
-      }
+        data: {authentication_token: session[:auth_token], email: user.email}, status: 200
+        }
+      else
+        render json: user.errors.full_messages, status: 401
+      end
     else
-      render json: user.errors.full_messages, status: 401
+      render json: 'User not found!', status: 401, message: 'User not found!'
     end
   end
 
