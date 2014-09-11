@@ -7,6 +7,7 @@ Rails.application.routes.draw do
     post 'logout', to: 'sessions#destroy', as: 'logout'
     post 'forgot_password', to: 'users#forgot_password'
     post 'edit_profile', to: 'users#edit_profile'
+    post 'upload_avatar', to: 'users#upload_avatar'
   end
 
   scope module: 'omniauth' do
