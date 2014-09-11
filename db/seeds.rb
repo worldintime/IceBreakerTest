@@ -7,8 +7,11 @@
 #   Mayor.create(name: 'Emanuel', city: cities.first)
 
 User.delete_all
+puts "Populating database by users..."
 10.times do
   FactoryGirl.create :user,
-                     latitude: rand(40.0000..50.0000),
-                     longitude: rand(20.0000..30.0000)
+                     latitude:  rand(48.623..48.63),
+                     longitude: rand(22.297..22.3)
 end
+puts "User's locations:"
+p User.all.map(&:address)

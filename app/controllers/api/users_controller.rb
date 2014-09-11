@@ -1,5 +1,5 @@
 class Api::UsersController < ApplicationController
-  before_action :api_authenticate_user, only: [:edit_profile]
+  before_action :api_authenticate_user, except: [:create, :forgot_password]
 
   def create
 
@@ -55,17 +55,31 @@ class Api::UsersController < ApplicationController
   end
 
   def search
-    # location: { latitude: 48.643316, longitude: 22.439396 }
-    latitude  = params[:location][:latitude]
-    longitude = params[:location][:longitude]
+    lat = @current_user.latitude
+    lng = @current_user.longitude
 
-    if latitude.nil? || longitude.nil?
+    if lat.nil? || lng.nil?
       render json: { success: false,
                         info: 'Latitude or Longitude are missed',
                       status: 200 }
     end
 
-    @designated_users = User.near([latitude, longitude], 0.1, units: :km)
+    @designated_users = User.near([lat, lng], 0.1).where.not(id: @current_user.id)
+  end
+
+  def set_location
+    lat = params[:location][:latitude]
+    lng = params[:location][:longitude]
+
+    if lat.nil? || lng.nil?
+      render json: { success: false,
+                        info: 'Latitude or Longitude are missed',
+                      status: 200 }
+    elsif @current_user.update_attributes(latitude: lat, longitude: lng)
+      render json: { success: true,
+                        info: 'New location was set successfully',
+                      status: 200 }
+    end
   end
 
 
