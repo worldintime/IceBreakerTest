@@ -59,19 +59,13 @@ class Api::UsersController < ApplicationController
     latitude  = params[:location][:latitude]
     longitude = params[:location][:longitude]
 
-    render json: { error: 'Latitude or Longitude are missed' } if latitude.nil? || longitude.nil?
+    if latitude.nil? || longitude.nil?
+      render json: { success: false,
+                        info: 'Latitude or Longitude are missed',
+                      status: 200 }
+    end
 
-    designated_users = User.near([latitude, longitude], 0.1, units: :km)
-
-    render json: { success: true,
-                   data: designated_users,
-                   status: 200
-    }
-    #id
-    #first_name
-    #last_name
-    #address
-    #avatar
+    @designated_users = User.all#User.near([latitude, longitude], 0.1, units: :km)
   end
 
 
