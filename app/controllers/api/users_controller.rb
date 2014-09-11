@@ -65,7 +65,7 @@ class Api::UsersController < ApplicationController
                       status: 200 }
     end
 
-    @designated_users = User.all#User.near([latitude, longitude], 0.1, units: :km)
+    @designated_users = User.near([latitude, longitude], 0.1, units: :km)
   end
 
 
