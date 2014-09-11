@@ -1,5 +1,5 @@
 class Api::UsersController < ApplicationController
-  before_action :api_authenticate_user, only: [:edit_profile, :upload_avatar]
+  before_action :api_authenticate_user, only: [:edit_profile]
 
   def create
 
@@ -20,9 +20,9 @@ class Api::UsersController < ApplicationController
   end
 
   def upload_avatar
-
-    if @current_user
-      @current_user.update_attribute(:avatar, params[:avatar])
+    user = User.first
+    if user
+      user.update_attribute(:avatar, params[:avatar])
       render json: {success: true,
                     info: 'Image successfully uploaded.',
                     status: 200

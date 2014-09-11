@@ -11,7 +11,28 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140909141835) do
+ActiveRecord::Schema.define(version: 20140911152816) do
+
+  create_table "conversations", force: true do |t|
+    t.integer  "sender_id"
+    t.integer  "receiver_id"
+    t.string   "initial"
+    t.string   "reply"
+    t.string   "finished"
+    t.boolean  "initial_viewed"
+    t.boolean  "reply_viewed"
+    t.boolean  "finished_viewed"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "mutes", force: true do |t|
+    t.integer  "receiver_id"
+    t.integer  "sender_id"
+    t.integer  "conversation_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "sessions", force: true do |t|
     t.string   "auth_token"
@@ -45,14 +66,13 @@ ActiveRecord::Schema.define(version: 20140909141835) do
     t.datetime "confirmed_at"
     t.datetime "confirmation_sent_at"
     t.string   "unconfirmed_email"
+    t.string   "facebook_id"
+    t.string   "oauth_token"
+    t.datetime "oauth_expires_at"
     t.string   "avatar_file_name"
     t.string   "avatar_content_type"
     t.integer  "avatar_file_size"
     t.datetime "avatar_updated_at"
-    t.string   "provider"
-    t.string   "provider_id"
-    t.string   "oauth_token"
-    t.datetime "oauth_expires_at"
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree

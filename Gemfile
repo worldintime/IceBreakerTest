@@ -19,6 +19,8 @@ gem 'paperclip', '~> 4.2.0'
 gem 'omniauth'
 gem 'omniauth-facebook'
 
+gem 'rufus-scheduler', '~> 3.0.9'
+
 group :test do
   gem 'shoulda', '~> 3.5.0'
 end

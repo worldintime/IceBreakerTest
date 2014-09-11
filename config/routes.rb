@@ -4,11 +4,16 @@ Rails.application.routes.draw do
   namespace :api, defaults: {format: 'json'} do
     resources :users
     post 'sessions', to: 'sessions#create', as: 'login'
-    post 'logout', to: 'sessions#destroy', as: 'logout'
+    delete 'sessions', to: 'sessions#destroy', as: 'logout'
     post 'forgot_password', to: 'users#forgot_password'
     post 'edit_profile', to: 'users#edit_profile'
-    post 'upload_avatar', to: 'users#upload_avatar'
+    match 'upload_avatar', to: 'users#upload_avatar', via: [:get, :post, :options]
+    post 'unread_messages', to: 'conversations#unread_messages'
+    post 'create_message', to: 'conversations#create_message'
+    post 'messaging', to: 'conversations#messaging'
   end
+
+  # match 'upload_avatar', :controller => 'web_hits', :action => 'options', :constraints => {:method => 'OPTIONS'}
 
   scope module: 'omniauth' do
     get '/auth/:provider/callback' => 'sessions#create'
