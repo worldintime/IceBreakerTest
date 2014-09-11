@@ -33,7 +33,7 @@ SignUp:
 		date_of_birth: 'Not required',
 		user_name: 'Required',
 		password: 'Required', 
-		password_confirmation: 'Required'}, 
+		password_confirmation: 'Required', 
 	Success: 'Message sent on your email, please check it'
 	Failed: Validation errors
 
