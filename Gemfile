@@ -14,6 +14,10 @@ gem 'coffee-rails', '~> 4.0.0'
 
 gem 'factory_girl_rails', '~> 4.4.1'
 gem 'devise', '~> 3.3.0'
+gem 'rabl-rails', '~> 0.3.4'
+
+gem 'geocoder', '~> 1.2.4'
+
 gem 'paperclip', '~> 4.2.0'
 
 gem 'omniauth'

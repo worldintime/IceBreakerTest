@@ -54,6 +54,20 @@ class Api::UsersController < ApplicationController
 
   end
 
+  def search
+    # location: { latitude: 48.643316, longitude: 22.439396 }
+    latitude  = params[:location][:latitude]
+    longitude = params[:location][:longitude]
+
+    if latitude.nil? || longitude.nil?
+      render json: { success: false,
+                        info: 'Latitude or Longitude are missed',
+                      status: 200 }
+    end
+
+    @designated_users = User.near([latitude, longitude], 0.1, units: :km)
+  end
+
 
   private
 
