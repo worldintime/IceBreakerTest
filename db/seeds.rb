@@ -5,3 +5,10 @@
 #
 #   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
 #   Mayor.create(name: 'Emanuel', city: cities.first)
+
+User.delete_all
+10.times do
+  FactoryGirl.create :user,
+                     latitude: rand(40.0000..50.0000),
+                     longitude: rand(20.0000..30.0000)
+end
