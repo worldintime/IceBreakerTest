@@ -27,23 +27,23 @@ SignUp:
             url: 	"/api/users",
             type: 	'POST', 
             data:    first_name: 'Required',
-		last_name: 'Required',
-		email: 'Required',
-		gender: 'Required',
-		date_of_birth: 'Not required',
-		user_name: 'Required',
-		password: 'Required', 
-		password_confirmation: 'Required', 
-	Success: 'Message sent on your email, please check it'
-	Failed: Validation errors
+	    last_name: 'Required',
+            email: 'Required',
+            gender: 'Required',
+	    date_of_birth: 'Not required',
+	    user_name: 'Required',
+	    password: 'Required', 
+            password_confirmation: 'Required', 
+	    Success: 'Message sent on your email, please check it'
+	    Failed: Validation errors
 
 SignIn: 
             url: 	"/api/sessions", 
             type: 	'POST', 
             data: 	email: '###########',
-		password: '############',
-	Success: 'Logged in'
-	Failed: 'Email or password is incorrect!' 
+	    password: '############',
+	    Success: 'Logged in'
+	    Failed: 'Email or password is incorrect!' 
 
 Logout: 
             url: "/api/sessions", 
