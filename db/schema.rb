@@ -11,7 +11,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140910102720) do
+ActiveRecord::Schema.define(version: 20140912125603) do
+
+  create_table "canneds", force: true do |t|
+    t.text     "body"
+    t.integer  "user_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "sessions", force: true do |t|
     t.string   "auth_token"
@@ -41,9 +48,10 @@ ActiveRecord::Schema.define(version: 20140910102720) do
     t.datetime "last_sign_in_at"
     t.string   "current_sign_in_ip"
     t.string   "last_sign_in_ip"
-    t.string   "address"
-    t.float    "latitude",               limit: 24
-    t.float    "longitude",              limit: 24
+    t.string   "confirmation_token"
+    t.datetime "confirmed_at"
+    t.datetime "confirmation_sent_at"
+    t.string   "unconfirmed_email"
     t.string   "facebook_id"
     t.string   "oauth_token"
     t.datetime "oauth_expires_at"
@@ -51,6 +59,9 @@ ActiveRecord::Schema.define(version: 20140910102720) do
     t.string   "avatar_content_type"
     t.integer  "avatar_file_size"
     t.datetime "avatar_updated_at"
+    t.string   "address"
+    t.float    "latitude",               limit: 24
+    t.float    "longitude",              limit: 24
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree

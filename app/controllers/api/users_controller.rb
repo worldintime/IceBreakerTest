@@ -1,5 +1,5 @@
 class Api::UsersController < ApplicationController
-  before_action :api_authenticate_user, except: [:create, :forgot_password]
+  before_action :api_authenticate_user, except: [:create, :forgot_password, :custom_canned_statement]
 
   def create
 
@@ -35,6 +35,43 @@ class Api::UsersController < ApplicationController
     end
 
   end
+
+
+  def custom_canned_statement
+    puts @current_user
+    new_statement = Canned.new(body: params[:statement], user_id: @current_user)
+
+    if new_statement.save
+      render json: { success: true,
+                        info: 'Canned statement saved',
+                      status: 200
+      }
+    else
+      render json: { success: false,
+                       info: 'Canned statement not saved',
+                     status: 200
+      }
+    end  
+
+  end
+
+  def destroy_canned_statement
+    destroy_statement = Canned.find_by_id(body: params[:id_statement], user_id: @current_user)
+
+    if destroy_statement.destroy
+      render json: { success: true,
+                        info: 'Canned statement destroy',
+                      status: 200
+      }
+    else
+      render json: { success: true,
+                        info: 'No such canned statement',
+                      status: 200
+      }
+    end
+
+  end
+    
 
   def forgot_password
 
