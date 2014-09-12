@@ -3,8 +3,8 @@ Rails.application.routes.draw do
 
   namespace :api, defaults: {format: 'json'} do
     resources :users
-    post 'sessions', to: 'sessions#create', as: 'login'
-    delete 'sessions', to: 'sessions#destroy', as: 'logout'
+    post 'sessions', to: 'sessions#create', as: :login
+    post 'destroy_sessions', to: "sessions#destroy_sessions"
     post 'forgot_password', to: 'users#forgot_password'
     post 'edit_profile', to: 'users#edit_profile'
     match 'upload_avatar', to: 'users#upload_avatar', via: [:get, :post, :options]

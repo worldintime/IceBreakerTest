@@ -19,7 +19,7 @@ class Api::SessionsController < ApplicationController
     end
   end
 
-  def destroy
+  def destroy_sessions
     session = Session.where(auth_token: params[:authentication_token]).first
     if session
       destroy_session session
@@ -67,7 +67,7 @@ class Api::SessionsController < ApplicationController
   end
 
   def session_params
-    params.require(:session).permit(:auth_token, :device, :device_token, :user_id, :updated_at, :email, :password,
+    params.require(:session).permit(:auth_token, :device, :device_token, :updated_at, :email, :password,
                                     :user_id)
   end
 

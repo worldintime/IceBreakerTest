@@ -5,7 +5,6 @@ class ApplicationController < ActionController::Base
 
   before_action :set_access_control_headers
 
-
    def set_access_control_headers
       headers['Access-Control-Allow-Origin'] = '*'
       headers['Access-Control-Allow-Methods'] = 'POST, PUT, DELETE, GET, OPTIONS'
@@ -18,19 +17,18 @@ class ApplicationController < ActionController::Base
     unless @session
       render json: {success: false,
                        info: 'Session expired. Please login',
-                     status: 400}
+                     status: 200}
     else
       @session[:updated_at] = Time.now
       @current_user = @session.user
       unless @current_user
         render json: {success: true,
                          info: 'Session expired. Please login',
-                       status: 400}
+                       status: 200}
         session = Session.find_by_user_id(@session.user_id)
         session.destroy
       end
     end
   end
-
 
 end

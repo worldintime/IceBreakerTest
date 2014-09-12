@@ -2,9 +2,9 @@ class User < ActiveRecord::Base
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
   has_many :sessions
-  has_many :mutes
-  has_many :conversations_my, class_name: Conversation, foreign_key: :sender_id
-  has_many :conversations_his, class_name: Conversation, foreign_key: :receiver_id
+  has_many :muted, class_name: Mute, foreign_key: :sender_id
+  has_many :sent_messages, class_name: Conversation, foreign_key: :sender_id
+  has_many :received_messages, class_name: Conversation, foreign_key: :receiver_id
 
   devise :database_authenticatable, :registerable, :confirmable,
          :recoverable, :rememberable, :trackable, :validatable
