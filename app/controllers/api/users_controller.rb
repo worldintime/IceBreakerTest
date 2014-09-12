@@ -1,5 +1,6 @@
 class Api::UsersController < ApplicationController
   before_action :api_authenticate_user, except: [:create, :forgot_password]
+  swagger_controller :users, "User Management"
 
   def create
 
@@ -17,6 +18,15 @@ class Api::UsersController < ApplicationController
       render json: {errors: user.errors.full_messages, success: false}, status: 200
     end
 
+  end
+
+  swagger_api :create do
+    summary "Creates a new User"
+    param :form, :first_name, :string, :required, "First name"
+    param :form, :last_name, :string, :required, "Last name"
+    param :form, :email, :string, :required, "Email address"
+    response :unauthorized
+    response :not_acceptable
   end
 
   def edit_profile
