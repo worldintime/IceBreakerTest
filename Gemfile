@@ -19,6 +19,7 @@ gem 'rabl-rails', '~> 0.3.4'
 gem 'geocoder', '~> 1.2.4'
 
 gem 'paperclip', '~> 4.2.0'
+gem 'grocer'
 
 gem 'omniauth'
 gem 'omniauth-facebook'

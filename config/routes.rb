@@ -5,6 +5,7 @@ Rails.application.routes.draw do
     resources :users
     post 'search', to: 'users#search'
     post 'location', to: 'users#set_location'
+    post 'send_push_notification', to: 'users#send_push_notification'
 
     post 'sessions', to: 'sessions#create', as: 'login'
     delete 'sessions', to: 'sessions#destroy', as: 'logout'

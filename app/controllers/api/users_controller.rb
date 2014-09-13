@@ -1,5 +1,5 @@
 class Api::UsersController < ApplicationController
-  before_action :api_authenticate_user, except: [:create, :forgot_password]
+  before_action :api_authenticate_user, except: [:create, :forgot_password, :send_push_notification]
 
   def create
 
@@ -79,6 +79,35 @@ class Api::UsersController < ApplicationController
       render json: { success: true,
                         info: 'New location was set successfully',
                       status: 200 }
+    end
+  end
+
+  def send_push_notification
+    devise = params[:devise_type]
+
+    result = false
+    message = 'Something wrong'
+    if devise == 'IOS'
+      notification = Grocer::Notification.new(
+          device_token:      params[:devise_token],
+          alert:             'message'
+          #  badge:             42
+          # expiry:            0,#,Time.now + 60*60, # optional; 0 is default, meaning the message is not stored
+          # identifier:        1234,                 # optional
+          # content_available: true                  # optional; any truthy value will set 'content-available' to 1
+      )
+      IceBr8kr::Application::IOS_PUSHER.push(notification)
+      result = true
+      message = 'push sended to IOS'
+    elsif devise == 'Android'
+      result = true
+      message = 'push sended to Android'
+    end
+
+    if result == true
+      render json: { success: 'true', message: message }, status: 200
+    else
+      render json: { success: 'false', message: message }, status: 200
     end
   end
 
