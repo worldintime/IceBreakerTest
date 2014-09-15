@@ -24,6 +24,8 @@ gem 'grocer'
 gem 'omniauth'
 gem 'omniauth-facebook'
 
+gem 'swagger-docs'
+
 group :test do
   gem 'shoulda', '~> 3.5.0'
 end
