@@ -17,3 +17,4 @@
 /.idea
 /vendor/cache
 /config/database.yml
+/public/api
