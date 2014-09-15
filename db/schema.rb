@@ -13,6 +13,10 @@
 
 ActiveRecord::Schema.define(version: 20140910102720) do
 
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+  enable_extension "pgcrypto"
+
   create_table "sessions", force: true do |t|
     t.string   "auth_token"
     t.string   "device"
