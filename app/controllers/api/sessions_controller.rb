@@ -5,14 +5,14 @@ class Api::SessionsController < ApplicationController
     user = User.find_for_authentication(email: params[:email])
     if user
       if user.valid_password?(params[:password])
-      session = create_session user
-      render json: {success: true,
-                       info: 'Logged in',
-                       data: {authentication_token: session[:auth_token], user: user},
-                     status: 200
-      }
+      session = create_session user, params[:auth]
+      render json: { success: true,
+                        info: 'Logged in',
+                        data: {authentication_token: session[:auth_token], user: user},
+                      status: 200
+                   }
       else
-        render json: {errors: 'Email or password is incorrect!'} , status: 200
+        render json: { errors: 'Email or password is incorrect!' } , status: 200
       end
     else
       render json: {errors: 'User not found!'}, status: 200
@@ -25,7 +25,7 @@ class Api::SessionsController < ApplicationController
     param :form, :password, :string, :required, "Password"
   end
 
-  def destroy
+  def destroy_sessions
     session = Session.where(auth_token: params[:authentication_token]).first
     if session
       destroy_session session
@@ -35,7 +35,7 @@ class Api::SessionsController < ApplicationController
     end
   end
 
-  swagger_api :destroy do
+  swagger_api :destroy_sessions do
     summary "Logout current User"
     param :form, :authentication_token, :string, :required, "Authentication token"
   end
@@ -59,12 +59,12 @@ class Api::SessionsController < ApplicationController
 
   private
 
-  def create_session user
+  def create_session user, auth
     range = [*'0'..'9', *'a'..'z', *'A'..'Z']
     session = {user_id: user.id, auth_token: Array.new(30){range.sample}.join, updated_at: Time.now}
-    if params[:device].present? && params[:device_token].present?
-      session[:device] = params[:device]
-      session[:device_token] = params[:device_token]
+    if auth.present? && params[:device_token].present?
+      session[:device] = auth
+      session[:device_token] = auth
     end
     new_session = Session.create(session)
     session
@@ -83,7 +83,7 @@ class Api::SessionsController < ApplicationController
   end
 
   def session_params
-    params.require(:session).permit(:auth_token, :device, :device_token, :user_id, :updated_at, :email, :password,
+    params.require(:session).permit(:auth_token, :device, :device_token, :updated_at, :email, :password,
                                     :user_id)
   end
 

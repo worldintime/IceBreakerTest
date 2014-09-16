@@ -3,6 +3,10 @@ class User < ActiveRecord::Base
   # :confirmable, :lockable, :timeoutable and :omniauthable
   has_many :sessions
   has_many :canned_statements
+  has_many :muted, class_name: Mute, foreign_key: :sender_id
+  has_many :sent_messages, class_name: Conversation, foreign_key: :sender_id
+  has_many :received_messages, class_name: Conversation, foreign_key: :receiver_id
+
   devise :database_authenticatable, :registerable, :confirmable,
          :recoverable, :rememberable, :trackable, :validatable
 
@@ -28,4 +32,5 @@ class User < ActiveRecord::Base
       user.save(validate: false)
     end
   end
+
 end

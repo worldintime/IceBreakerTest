@@ -1,4 +1,5 @@
 class Api::UsersController < ApplicationController
+
   before_action :api_authenticate_user, except: [:create, :forgot_password, :send_push_notification]
   swagger_controller :users, "User Management"
 
@@ -8,13 +9,29 @@ class Api::UsersController < ApplicationController
                     password_confirmation: params[:password_confirmation], email: params[:email], avatar: params[:avatar])
 
     if user.save
-      render json: {success: true,
-                       info: 'Message sent on your email, please check it',
-                       data: {user: user},
-                     status: 200
-      }
+      render json: { success: true,
+                        info: 'Message sent on your email, please check it',
+                        data: {user: user},
+                      status: 200
+                   }
     else
-      render json: {errors: user.errors.full_messages, success: false}, status: 200
+      render json: { errors: user.errors.full_messages, success: false }, status: 200
+    end
+
+  end
+
+  def upload_avatar
+    if @current_user
+      @current_user.update_attribute(:avatar, params[:avatar])
+      render json: { success: true,
+                        info: 'Image successfully uploaded.',
+                      status: 200
+                   }
+    else
+      render json: { success: false,
+                        info: 'Failed to upload image.',
+                      status: 200
+                   }
     end
   end
 
@@ -33,15 +50,15 @@ class Api::UsersController < ApplicationController
   def edit_profile
     if @current_user
       @current_user.update_attributes(user_params)
-      render json: {success: true,
-                       info: 'Profile successfully updated.',
-                     status: 200
-      }
+      render json: { success: true,
+                        info: 'Profile successfully updated.',
+                      status: 200
+                   }
     else
       render json: {success: false,
                        info: 'Session expired. Please login.',
                      status: 200
-      }
+                   }
     end
   end
 
@@ -57,7 +74,6 @@ class Api::UsersController < ApplicationController
     param :form, :password, :string, :required, "Password"
     param :form, :avatar, :string, :optional, "User's avatar"
   end
-
 
   def custom_canned_statement
     new_statement = CannedStatement.new(body: params[:statement], user_id: @current_user.id)
@@ -95,18 +111,20 @@ class Api::UsersController < ApplicationController
     
 
   def forgot_password
-    user = User.find_by_email(params[:email])
-    if user
+    @user = User.find_by_email(params[:email])
+    if @user
       password = SecureRandom.hex(8)
-      user.update_attributes(password: password, password_confirmation: password)
-
-      render json: {success: true,
-                       info: 'New password was sent on your email',
-                     status: 200}
+      @user.update_attributes(password: password, password_confirmation: password)
+      @user.send_reset_password_instructions
+      render json: { success: true,
+                        info: 'New password was sent on your email',
+                      status: 200
+                   }
     else
-      render json: {success: false,
-                       info: "Email doesn't exist",
-                     status: 200}
+      render json: { success: false,
+                        info: "Email doesn't exist",
+                      status: 200
+                   }
     end
   end
 
