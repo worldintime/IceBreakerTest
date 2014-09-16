@@ -20,6 +20,18 @@ class Api::UsersController < ApplicationController
 
   end
 
+  swagger_api :create do
+    summary "Creates a new User"
+    param :form, :first_name, :string, :required, "First name"
+    param :form, :last_name, :string, :required, "Last name"
+    param :form, :gender, :string, :required, "Gender"
+    param :form, :date_of_birth, :date, :optional, "Date of birth"
+    param :form, :user_name, :string, :required, "User name"
+    param :form, :email, :string, :required, "Email address"
+    param :form, :password, :string, :required, "Password"
+    param :form, :avatar, :string, :optional, "User's avatar"
+  end
+
   def upload_avatar
     if @current_user
       @current_user.update_attribute(:avatar, params[:avatar])
@@ -35,16 +47,10 @@ class Api::UsersController < ApplicationController
     end
   end
 
-  swagger_api :create do
-    summary "Creates a new User"
-    param :form, :first_name, :string, :required, "First name"
-    param :form, :last_name, :string, :required, "Last name"
-    param :form, :gender, :string, :required, "Gender"
-    param :form, :date_of_birth, :date, :optional, "Date of birth"
-    param :form, :user_name, :string, :required, "User name"
-    param :form, :email, :string, :required, "Email address"
-    param :form, :password, :string, :required, "Password"
+  swagger_api :upload_avatar do
+    summary "Upload user's avatar"
     param :form, :avatar, :string, :optional, "User's avatar"
+    param :form, :authentication_token, :string, :required, "Authentication token"
   end
 
   def edit_profile
@@ -92,6 +98,12 @@ class Api::UsersController < ApplicationController
 
   end
 
+  swagger_api :custom_canned_statement do
+    summary "Create user's canned statement"
+    param :form, :authentication_token, :string, :required, "Authentication token"
+    param :form, :statement, :text, :required, "Canned statement text"
+  end
+
   def destroy_canned_statement
     destroy_statement = CannedStatement.where(id: params[:statement_id], user_id: @current_user.id).first
 
@@ -108,7 +120,12 @@ class Api::UsersController < ApplicationController
     end
 
   end
-    
+
+  swagger_api :destroy_canned_statement do
+    summary "Destroy user's canned statement"
+    param :form, :authentication_token, :string, :required, "Authentication token"
+    param :form, :statement_id, :integer, :required, "Canned statement id"
+  end
 
   def forgot_password
     @user = User.find_by_email(params[:email])
@@ -173,13 +190,13 @@ class Api::UsersController < ApplicationController
   end
 
   def send_push_notification
-    devise = params[:devise_type]
+    device = params[:device]
 
     result = false
     message = 'Something wrong'
-    if devise == 'IOS'
+    if device == 'IOS'
       notification = Grocer::Notification.new(
-          device_token:      params[:devise_token],
+          device_token:      params[:device_token],
           alert:             'message'
           #  badge:             42
           # expiry:            0,#,Time.now + 60*60, # optional; 0 is default, meaning the message is not stored
@@ -189,7 +206,7 @@ class Api::UsersController < ApplicationController
       IceBr8kr::Application::IOS_PUSHER.push(notification)
       result = true
       message = 'push sended to IOS'
-    elsif devise == 'Android'
+    elsif device == 'Android'
       result = true
       message = 'push sended to Android'
     end

@@ -1,6 +1,7 @@
 class Api::ConversationsController < ApplicationController
 
   before_action :api_authenticate_user
+  swagger_controller :conversations, "Conversation Management"
 
   def messaging
     if Mute.where(sender_id: [params[:sender_id],params[:receiver_id]],
@@ -60,15 +61,35 @@ class Api::ConversationsController < ApplicationController
     end
   end
 
+  swagger_api :messaging do
+    summary "Messaging between users"
+    param :form, :authentication_token, :string, :required, "Authentication token"
+    param :form, :sender_id, :integer, :required, "Sender id"
+    param :form, :receiver_id, :integer, :required, "Receiver id"
+    param :form, :type, :string, :required, "Message type: initial/reply/finished/ignore"
+    param :form, :msg, :string, :required, "Message"
+    param :form, :conversation_id, :integer, :required, "Conversation id. Receives after type:initial, and required for other types"
+  end
+
   def conversation_detail
     if @current_user
       conversation = Conversation.find_by_id(params[:conversation_id])
+
       if conversation
         render json: { success: true,
-                          data: { initial: conversation.initial,
-                                    reply: conversation.reply,
-                                 finished: conversation.finished,
-                                   ignore: conversation.ignored
+                          data: {   sender: { id: conversation.sender_id,
+                                              avatar: conversation.check_if_sender(@current_user),
+                                              initial: conversation.initial,
+                                              finished: conversation.finished},
+
+                                  receiver: { id: conversation.receiver_id,
+                                              first_name: @current_user.first_name,
+                                              last_name: @current_user.last_name,
+                                              avatar: conversation.receiver_avatar(@current_user),
+                                              reply: conversation.reply,
+
+                                              },
+                                  conversation_id: params[:conversation_id],
                                 }
 
                      }
@@ -79,6 +100,12 @@ class Api::ConversationsController < ApplicationController
                      }
       end
     end
+  end
+
+  swagger_api :conversation_detail do
+    summary "Conversation detail"
+    param :form, :authentication_token, :string, :required, "Authentication token"
+    param :form, :conversation_id, :integer, :required, "Conversation id"
   end
 
   def unread_messages
@@ -102,10 +129,19 @@ class Api::ConversationsController < ApplicationController
     end
   end
 
+  swagger_api :unread_messages do
+    summary "Number of unread messages"
+    param :form, :authentication_token, :string, :required, "Authentication token"
+  end
+
   def history_of_digital_hello
     if @current_user
-      history = Conversation.where(sender_id: @current_user.id,
-                                   receiver_id: @current_user.id)
+      conv_arel = Conversation.arel_table
+
+      history = Conversation.where(conv_arel[:sender_id].eq(@current_user.id).or(conv_arel[:receiver_id].eq(@current_user.id)))
+
+          # Conversation.where(sender_id: @current_user.id,
+          #                          receiver_id: @current_user.id)
       if history
         render json: { success: true,
                           data: Hash[history.each_with_index.map{|h,i| ["conversation#{i}", h.to_json(@current_user)]}],
@@ -118,6 +154,11 @@ class Api::ConversationsController < ApplicationController
                      }
       end
     end
+  end
+
+  swagger_api :history_of_digital_hello do
+    summary "History of all digital hello"
+    param :form, :authentication_token, :string, :required, "Authentication token"
   end
 
   private

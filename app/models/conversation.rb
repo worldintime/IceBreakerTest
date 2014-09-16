@@ -1,10 +1,12 @@
 class Conversation < ActiveRecord::Base
   belongs_to :sender, class_name: User, foreign_key: :sender_id
   belongs_to :receiver, class_name: User, foreign_key: :receiver_id
-  belongs_to :mute
+  has_one :mute, foreign_key: :conversation_id
   before_create :attr_by_default
   before_update :mute_users
   validates_presence_of :sender_id, :receiver_id
+
+  include ActionView::Helpers::DateHelper
 
   def attr_by_default
     self.initial_viewed = false
@@ -15,7 +17,7 @@ class Conversation < ActiveRecord::Base
 
   def mute_users
     if self.finished_changed?
-      mute = self.mutes.new(sender_id: self.sender_id, receiver_id: self.receiver_id, conversation_id: self.id)
+      mute = Mute.new(sender_id: self.sender_id, receiver_id: self.receiver_id, conversation_id: self.id, status: 'Muted')
       mute.save
       scheduler = Rufus::Scheduler.new
       scheduler.at Time.now + 1.hours do
@@ -25,7 +27,7 @@ class Conversation < ActiveRecord::Base
   end
 
   def ignore_user sender_id, receiver_id
-    ignore = self.mutes.new(sender_id: sender_id, receiver_id: receiver_id, conversation_id: self.id)
+    ignore = Mute.new(sender_id: sender_id, receiver_id: receiver_id, conversation_id: self.id, status: 'Ignored')
     ignore.save
     scheduler = Rufus::Scheduler.new
     scheduler.at Time.now + 4.hours do
@@ -34,9 +36,8 @@ class Conversation < ActiveRecord::Base
   end
 
   def to_json(current_user)
-    {
-        sender: sender_for_json(current_user),
-        last_message: last_message_for_json
+    { sender: sender_for_json(current_user),
+      last_message: last_message_for_json
     }.merge(conversation_status_for_json(current_user))
   end
 
@@ -79,10 +80,13 @@ class Conversation < ActiveRecord::Base
 
   def blocked_to(current_user)
     if self.mute
-      if current_user != self.mute.sender_id
-        self.mute.receiver_id
-      elsif current_user != self.mute.receiver_id
-        self.mute.sender_id
+      if self.mute.status == 'Muted'
+        start_time = self.mute.created_at
+        distance_of_time_in_words(start_time, Time.now)
+      elsif self.mute.status == 'Ignored'
+        start_time = self.mute.created_at
+        start_time = start_time + 4.hours
+        distance_of_time_in_words(start_time, Time.now)
       end
     else
       'No'
@@ -102,6 +106,14 @@ class Conversation < ActiveRecord::Base
       @companion ||= User.find(self.receiver_id)
     else
       @companion ||= User.find(self.sender_id)
+    end
+  end
+
+  def check_if_sender(current_user)
+    if self.sender_id != current_user
+      User.find_by_id(self.receiver_id).avatar.url
+    else
+      User.find_by_id(self.sender_id).avatar.url
     end
   end
 

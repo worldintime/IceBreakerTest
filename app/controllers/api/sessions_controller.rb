@@ -8,7 +8,7 @@ class Api::SessionsController < ApplicationController
       session = create_session user, params[:auth]
       render json: { success: true,
                         info: 'Logged in',
-                        data: {authentication_token: session[:auth_token], user: user},
+                        data: {authentication_token: session[:auth_token], user: user, user_avatar: user.avatar.url},
                       status: 200
                    }
       else
@@ -62,9 +62,9 @@ class Api::SessionsController < ApplicationController
   def create_session user, auth
     range = [*'0'..'9', *'a'..'z', *'A'..'Z']
     session = {user_id: user.id, auth_token: Array.new(30){range.sample}.join, updated_at: Time.now}
-    if auth.present? && params[:device_token].present?
-      session[:device] = auth
-      session[:device_token] = auth
+    if auth['device'].present? && auth['device_token'].present?
+      session[:device] = auth['device']
+      session[:device_token] = auth['device_token']
     end
     new_session = Session.create(session)
     session
