@@ -5,17 +5,16 @@ class Api::SessionsController < ApplicationController
     if user
       if user.valid_password?(params[:password])
       session = create_session user, params[:auth]
-      render json: {success: true,
-                       info: 'Logged in',
-                       data: {authentication_token: session[:auth_token], user: user},
-                     status: 200
-      }
+      render json: { success: true,
+                        info: 'Logged in',
+                        data: {authentication_token: session[:auth_token], user: user},
+                      status: 200
+                   }
       else
-        render json: {errors: 'Email or password is incorrect!'} , status: 200
+        render json: { errors: 'Email or password is incorrect!' } , status: 200
       end
     else
-      render json: {errors: 'User not found!'}, status: 200
-
+      render json: { errors: 'User not found!' }, status: 200
     end
   end
 
@@ -29,24 +28,12 @@ class Api::SessionsController < ApplicationController
     end
   end
 
-  def reset_password
-    @user = User.find_by_email(params[:email])
-    if @user.present?
-      @user.send_reset_password_instructions
-      render json: {
-          message: 'Confirmation instructions sent. Please check your email.'
-      }
-    else
-      bad_request ['Cant find user with that email.'], 406
-    end
-  end
-
   private
 
   def create_session user, auth
     range = [*'0'..'9', *'a'..'z', *'A'..'Z']
     session = {user_id: user.id, auth_token: Array.new(30){range.sample}.join, updated_at: Time.now}
-    if auth.present? && params[:auth_token].present?
+    if auth.present? && params[:device_token].present?
       session[:device] = auth
       session[:device_token] = auth
     end
