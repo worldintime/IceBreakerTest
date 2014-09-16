@@ -58,6 +58,42 @@ class Api::UsersController < ApplicationController
     param :form, :avatar, :string, :optional, "User's avatar"
   end
 
+
+  def custom_canned_statement
+    new_statement = CannedStatement.new(body: params[:statement], user_id: @current_user.id)
+
+    if new_statement.save
+      render json: { success: true,
+                        info: 'Canned statement was saved successfully',
+                      status: 200
+      }
+    else
+      render json: { success: false,
+                        info: 'Canned statement was not saved',
+                      status: 200
+      }
+    end  
+
+  end
+
+  def destroy_canned_statement
+    destroy_statement = CannedStatement.where(id: params[:statement_id], user_id: @current_user.id).first
+
+    if destroy_statement.destroy
+      render json: { success: true,
+                        info: 'Canned statement was deleted successfully',
+                      status: 200
+      }
+    else
+      render json: { success: true,
+                        info: 'Canned statement was not deleted',
+                      status: 200
+      }
+    end
+
+  end
+    
+
   def forgot_password
     user = User.find_by_email(params[:email])
     if user
