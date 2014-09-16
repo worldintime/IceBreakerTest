@@ -62,9 +62,9 @@ class Api::SessionsController < ApplicationController
   def create_session user, auth
     range = [*'0'..'9', *'a'..'z', *'A'..'Z']
     session = {user_id: user.id, auth_token: Array.new(30){range.sample}.join, updated_at: Time.now}
-    if auth.present? && params[:device_token].present?
-      session[:device] = auth
-      session[:device_token] = auth
+    if auth['device'].present? && auth['device_token'].present?
+      session[:device] = auth['device']
+      session[:device_token] = auth['device_token']
     end
     new_session = Session.create(session)
     session
