@@ -36,5 +36,5 @@ test:
 production:
   <<: *default
   database: IceBr8kr_production
-  username: root
-  password: ""
+  username: postgres
+  password: L71NK96SZj
