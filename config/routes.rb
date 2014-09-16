@@ -5,6 +5,9 @@ Rails.application.routes.draw do
     resources :users
     post 'sessions', to: 'sessions#create', as: :login
     post 'destroy_sessions', to: "sessions#destroy_sessions"
+    post 'search', to: 'users#search'
+    post 'location', to: 'users#set_location'
+    post 'send_push_notification', to: 'users#send_push_notification'
     post 'forgot_password', to: 'users#forgot_password'
     post 'edit_profile', to: 'users#edit_profile'
     match 'upload_avatar', to: 'users#upload_avatar', via: [:get, :post, :options]
@@ -20,7 +23,4 @@ Rails.application.routes.draw do
   scope module: 'omniauth' do
     get '/auth/:provider/callback' => 'sessions#create'
   end
-
-  get '/signout' => 'sessions#destroy', as: :signout
-  get '/signin' => 'sessions#new', as: :signin
 end

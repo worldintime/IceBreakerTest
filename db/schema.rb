@@ -13,6 +13,9 @@
 
 ActiveRecord::Schema.define(version: 20140911152816) do
 
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+
   create_table "conversations", force: true do |t|
     t.integer  "sender_id"
     t.integer  "receiver_id"
@@ -73,9 +76,14 @@ ActiveRecord::Schema.define(version: 20140911152816) do
     t.string   "avatar_content_type"
     t.integer  "avatar_file_size"
     t.datetime "avatar_updated_at"
+    t.string   "address"
+    t.float    "latitude"
+    t.float    "longitude"
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
+  add_index "users", ["latitude"], name: "index_users_on_latitude", using: :btree
+  add_index "users", ["longitude"], name: "index_users_on_longitude", using: :btree
   add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true, using: :btree
 
 end
