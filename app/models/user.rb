@@ -30,4 +30,5 @@ class User < ActiveRecord::Base
       user.save(validate: false)
     end
   end
+
 end

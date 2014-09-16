@@ -9,8 +9,10 @@ Rails.application.routes.draw do
     post 'edit_profile', to: 'users#edit_profile'
     match 'upload_avatar', to: 'users#upload_avatar', via: [:get, :post, :options]
     post 'unread_messages', to: 'conversations#unread_messages'
+    post 'history_of_digital_hello', to: 'conversations#history_of_digital_hello'
     post 'create_message', to: 'conversations#create_message'
     post 'messaging', to: 'conversations#messaging'
+    post 'conversation_detail', to: 'conversations#conversation_detail'
   end
 
   # match 'upload_avatar', :controller => 'web_hits', :action => 'options', :constraints => {:method => 'OPTIONS'}
