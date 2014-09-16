@@ -4,7 +4,7 @@ Rails.application.routes.draw do
   namespace :api, defaults: {format: 'json'} do
     resources :users
     post 'custom_canned_statement', to: 'users#custom_canned_statement'
-    post 'destroy_canned_statement', to: 'users#destroy_canned_statement'
+    delete 'destroy_canned_statement', to: 'users#destroy_canned_statement'
     post 'search', to: 'users#search'
     post 'location', to: 'users#set_location'
 

@@ -13,7 +13,7 @@
 
 ActiveRecord::Schema.define(version: 20140912125603) do
 
-  create_table "canneds", force: true do |t|
+  create_table "canned_statements", force: true do |t|
     t.text     "body"
     t.integer  "user_id"
     t.datetime "created_at"
