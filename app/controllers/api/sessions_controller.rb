@@ -21,8 +21,8 @@ class Api::SessionsController < ApplicationController
 
   swagger_api :create do
     summary "Login User"
-    param :form, :email, :string, :required, "Email address"
-    param :form, :password, :string, :required, "Password"
+    param :query, :email, :string, :required, "Email address"
+    param :query, :password, :string, :required, "Password"
   end
 
   def destroy
@@ -37,7 +37,7 @@ class Api::SessionsController < ApplicationController
 
   swagger_api :destroy do
     summary "Logout current User"
-    param :form, :authentication_token, :string, :required, "Authentication token"
+    param :query, :authentication_token, :string, :required, "Authentication token"
   end
 
   def reset_password
@@ -54,7 +54,7 @@ class Api::SessionsController < ApplicationController
 
   swagger_api :reset_password do
     summary "Reset forgotten password"
-    param :form, :email, :string, :required, "Email address"
+    param :query, :email, :string, :required, "Email address"
   end
 
   private

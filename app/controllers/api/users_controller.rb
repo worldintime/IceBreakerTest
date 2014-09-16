@@ -20,14 +20,14 @@ class Api::UsersController < ApplicationController
 
   swagger_api :create do
     summary "Creates a new User"
-    param :form, :first_name, :string, :required, "First name"
-    param :form, :last_name, :string, :required, "Last name"
-    param :form, :gender, :string, :required, "Gender"
-    param :form, :date_of_birth, :date, :optional, "Date of birth"
-    param :form, :user_name, :string, :required, "User name"
-    param :form, :email, :string, :required, "Email address"
-    param :form, :password, :string, :required, "Password"
-    param :form, :avatar, :string, :optional, "User's avatar"
+    param :query, :first_name, :string, :required, "First name"
+    param :query, :last_name, :string, :required, "Last name"
+    param :query, :gender, :string, :required, "Gender"
+    param :query, :date_of_birth, :date, :optional, "Date of birth"
+    param :query, :user_name, :string, :required, "User name"
+    param :query, :email, :string, :required, "Email address"
+    param :query, :password, :string, :required, "Password"
+    param :query, :avatar, :string, :optional, "User's avatar"
   end
 
   def edit_profile
@@ -47,15 +47,15 @@ class Api::UsersController < ApplicationController
 
   swagger_api :edit_profile do
     summary "Edit profile of existing User"
-    param :form, :authentication_token, :string, :required, "Authentication token"
-    param :form, :first_name, :string, :required, "First name"
-    param :form, :last_name, :string, :required, "Last name"
-    param :form, :gender, :string, :required, "Gender"
-    param :form, :date_of_birth, :date, :optional, "Date of birth"
-    param :form, :user_name, :string, :required, "User name"
-    param :form, :email, :string, :required, "Email address"
-    param :form, :password, :string, :required, "Password"
-    param :form, :avatar, :string, :optional, "User's avatar"
+    param :query, :authentication_token, :string, :required, "Authentication token"
+    param :query, :first_name, :string, :required, "First name"
+    param :query, :last_name, :string, :required, "Last name"
+    param :query, :gender, :string, :required, "Gender"
+    param :query, :date_of_birth, :date, :optional, "Date of birth"
+    param :query, :user_name, :string, :required, "User name"
+    param :query, :email, :string, :required, "Email address"
+    param :query, :password, :string, :required, "Password"
+    param :query, :avatar, :string, :optional, "User's avatar"
   end
 
   def forgot_password
@@ -76,7 +76,7 @@ class Api::UsersController < ApplicationController
 
   swagger_api :forgot_password do
     summary "Restore forgotten password"
-    param :form, :email, :string, :required, "Email address"
+    param :query, :email, :string, :required, "Email address"
   end
 
   def search
@@ -94,7 +94,7 @@ class Api::UsersController < ApplicationController
 
   swagger_api :search do
     summary "Search designated Users"
-    param :form, :authentication_token, :string, :required, "Authentication token"
+    param :query, :authentication_token, :string, :required, "Authentication token"
   end
 
   def set_location
@@ -143,7 +143,7 @@ class Api::UsersController < ApplicationController
 
   swagger_api :set_location do
     summary "Set location of current User"
-    param :form, :authentication_token, :string, :required, "Authentication token"
+    param :query, :authentication_token, :string, :required, "Authentication token"
     # TODO: location: { :latitude, :longitude }
   end
 
