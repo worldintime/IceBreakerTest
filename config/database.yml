@@ -35,6 +35,4 @@ test:
 #
 production:
   <<: *default
-  database: IceBr8kr_production
-  username: root
-  password: ""
+  database: icebr8kr_production
