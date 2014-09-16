@@ -4,6 +4,14 @@ Once you have fired up your rails server for this application point your browser
 
 [localhost:3000/api](http://localhost:3000/api)
 
+You might need to generate Swagger documentation using:
+
+`rake swagger:docs`
+
+or on production mode:
+
+`rake assets:precompile`
+
 You should then see the swagger-ui API homepage for this application where you can then see the documentation that has been generated and interact with the controllers.
 
 Or use these API requests at your own discretion (list might be not full):
