@@ -33,4 +33,11 @@ class User < ActiveRecord::Base
     end
   end
 
+  def self.rating_update(user_ids)
+    sender   = self.find user_ids[:sender]
+    receiver = self.find user_ids[:receiver]
+    sender.update_attributes(rating: sender.rating + 1)
+    receiver.update_attributes(rating: receiver.rating + 1)
+  end
+
 end
