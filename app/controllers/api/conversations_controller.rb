@@ -9,15 +9,12 @@ class Api::ConversationsController < ApplicationController
                         info: 'You have been muted with this user'
                    }
     else
-      sender = User.find(params[:sender_id])
-      receiver = User.find(params[:receiver_id])
       case params[:type]
         when 'initial'
           conversation = Conversation.new(sender_id: params[:sender_id], receiver_id: params[:receiver_id],
                                             initial: params[:msg])
           if conversation.save
-            sender.update_attributes(rating: sender.rating + 1)
-            receiver.update_attributes(rating: receiver.rating + 1)
+            User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id]})
             render json: { success: true,
                               info: 'Message sent',
                               data: { conversation_id: conversation.id },
@@ -29,8 +26,7 @@ class Api::ConversationsController < ApplicationController
         when 'reply'
           conversation = Conversation.find_by_id(params[:conversation_id])
           if conversation.update_attributes(reply: params[:msg])
-            sender.update_attributes(rating: sender.rating + 1)
-            receiver.update_attributes(rating: receiver.rating + 1)
+            User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id]})
             render json: { success: true,
                               info: 'Message sent',
                               data: { conversation_id: conversation.id },
@@ -42,8 +38,7 @@ class Api::ConversationsController < ApplicationController
         when 'finished'
           conversation = Conversation.find_by_id(params[:conversation_id])
           if conversation.update_attributes(finished: params[:msg])
-            sender.update_attributes(rating: sender.rating + 1)
-            receiver.update_attributes(rating: receiver.rating + 1)
+            User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id]})
             render json: { success: true,
                               info: 'Message sent',
                               data: { conversation_id: conversation.id },
