@@ -1,5 +1,13 @@
 class Api::SessionsController < ApplicationController
 
+  swagger_controller :sessions, "Session Management"
+
+  swagger_api :create do
+    summary "Login User"
+    param :query, :email, :string, :required, "Email address"
+    param :query, :password, :string, :required, "Password"
+  end
+
   def create
     user = User.find_for_authentication(email: params[:email])
     if user
@@ -15,8 +23,12 @@ class Api::SessionsController < ApplicationController
       end
     else
       render json: {errors: 'User not found!'}, status: 200
-
     end
+  end
+
+  swagger_api :destroy do
+    summary "Logout current User"
+    param :query, :authentication_token, :string, :required, "Authentication token"
   end
 
   def destroy
@@ -27,6 +39,11 @@ class Api::SessionsController < ApplicationController
     else
       render json: { success: false, info: 'Not found', status: 200 }
     end
+  end
+
+  swagger_api :reset_password do
+    summary "Reset forgotten password"
+    param :query, :email, :string, :required, "Email address"
   end
 
   def reset_password

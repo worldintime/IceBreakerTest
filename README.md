@@ -1,3 +1,7 @@
 # Ice Br8kr API
 
-API comming soon...
+API documentation are on `/api/index.html` path
+
+To generate API docs localy run:
+
+`rake swagger:docs`
