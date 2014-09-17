@@ -1,6 +1,19 @@
 class Api::UsersController < ApplicationController
   before_action :api_authenticate_user, except: [:create, :forgot_password]
+
   swagger_controller :users, "User Management"
+
+  swagger_api :create do
+    summary "Creates a new User"
+    param :query, :first_name, :string, :required, "First name"
+    param :query, :last_name, :string, :required, "Last name"
+    param :query, :gender, :string, :required, "Gender"
+    param :query, :date_of_birth, :date, :optional, "Date of birth"
+    param :query, :user_name, :string, :required, "User name"
+    param :query, :email, :string, :required, "Email address"
+    param :query, :password, :string, :required, "Password"
+    param :query, :avatar, :string, :optional, "User's avatar"
+  end
 
   def create
     user = User.new(first_name: params[:first_name], last_name: params[:last_name], password: params[:password],
@@ -18,8 +31,9 @@ class Api::UsersController < ApplicationController
     end
   end
 
-  swagger_api :create do
-    summary "Creates a new User"
+  swagger_api :edit_profile do
+    summary "Edit profile of existing User"
+    param :query, :authentication_token, :string, :required, "Authentication token"
     param :query, :first_name, :string, :required, "First name"
     param :query, :last_name, :string, :required, "Last name"
     param :query, :gender, :string, :required, "Gender"
@@ -45,17 +59,9 @@ class Api::UsersController < ApplicationController
     end
   end
 
-  swagger_api :edit_profile do
-    summary "Edit profile of existing User"
-    param :query, :authentication_token, :string, :required, "Authentication token"
-    param :query, :first_name, :string, :required, "First name"
-    param :query, :last_name, :string, :required, "Last name"
-    param :query, :gender, :string, :required, "Gender"
-    param :query, :date_of_birth, :date, :optional, "Date of birth"
-    param :query, :user_name, :string, :required, "User name"
+  swagger_api :forgot_password do
+    summary "Restore forgotten password"
     param :query, :email, :string, :required, "Email address"
-    param :query, :password, :string, :required, "Password"
-    param :query, :avatar, :string, :optional, "User's avatar"
   end
 
   def forgot_password
@@ -74,9 +80,9 @@ class Api::UsersController < ApplicationController
     end
   end
 
-  swagger_api :forgot_password do
-    summary "Restore forgotten password"
-    param :query, :email, :string, :required, "Email address"
+  swagger_api :search do
+    summary "Search designated Users"
+    param :query, :authentication_token, :string, :required, "Authentication token"
   end
 
   def search
@@ -92,8 +98,8 @@ class Api::UsersController < ApplicationController
     @designated_users = User.near([lat, lng], 0.1).where.not(id: @current_user.id)
   end
 
-  swagger_api :search do
-    summary "Search designated Users"
+  swagger_api :set_location do
+    summary "Set location of current User"
     param :query, :authentication_token, :string, :required, "Authentication token"
   end
 
@@ -139,12 +145,6 @@ class Api::UsersController < ApplicationController
     else
       render json: { success: 'false', message: message }, status: 200
     end
-  end
-
-  swagger_api :set_location do
-    summary "Set location of current User"
-    param :query, :authentication_token, :string, :required, "Authentication token"
-    # TODO: location: { :latitude, :longitude }
   end
 
 

@@ -1,5 +1,12 @@
 class Api::SessionsController < ApplicationController
-  swagger_controller :users, "Session Management"
+
+  swagger_controller :sessions, "Session Management"
+
+  swagger_api :create do
+    summary "Login User"
+    param :query, :email, :string, :required, "Email address"
+    param :query, :password, :string, :required, "Password"
+  end
 
   def create
     user = User.find_for_authentication(email: params[:email])
@@ -19,10 +26,9 @@ class Api::SessionsController < ApplicationController
     end
   end
 
-  swagger_api :create do
-    summary "Login User"
-    param :query, :email, :string, :required, "Email address"
-    param :query, :password, :string, :required, "Password"
+  swagger_api :destroy do
+    summary "Logout current User"
+    param :query, :authentication_token, :string, :required, "Authentication token"
   end
 
   def destroy
@@ -35,9 +41,9 @@ class Api::SessionsController < ApplicationController
     end
   end
 
-  swagger_api :destroy do
-    summary "Logout current User"
-    param :query, :authentication_token, :string, :required, "Authentication token"
+  swagger_api :reset_password do
+    summary "Reset forgotten password"
+    param :query, :email, :string, :required, "Email address"
   end
 
   def reset_password
@@ -50,11 +56,6 @@ class Api::SessionsController < ApplicationController
     else
       bad_request ['Cant find user with that email.'], 406
     end
-  end
-
-  swagger_api :reset_password do
-    summary "Reset forgotten password"
-    param :query, :email, :string, :required, "Email address"
   end
 
   private
