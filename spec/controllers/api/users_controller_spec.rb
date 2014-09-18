@@ -5,11 +5,9 @@ describe Api::UsersController do
     let(:users_params) {attributes_for :user }
 
     it 'success' do
-      expect{
-        post :create, user: users_params
-        puts response
-      }.to change{User.count}.by(1)
-
+      expect {
+        post :create, users_params
+      }.to change{ User.count }.by(1)
 
       expect(response.status).to eq(200)
     end

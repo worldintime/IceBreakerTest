@@ -98,12 +98,12 @@ class Api::UsersController < ApplicationController
     @designated_users = User.near([lat, lng], 0.1).where.not(id: @current_user.id)
   end
 
-  swagger_api :set_location do
+  swagger_api :location do
     summary "Set location of current User"
     param :query, :authentication_token, :string, :required, "Authentication token"
   end
 
-  def set_location
+  def location
     lat = params[:location][:latitude]
     lng = params[:location][:longitude]
 

@@ -3,15 +3,18 @@ Rails.application.routes.draw do
   root 'application#home'
 
   namespace :api, defaults: {format: 'json'} do
-    resources :users
-    post 'search', to: 'users#search'
-    post 'location', to: 'users#set_location'
-    post 'send_push_notification', to: 'users#send_push_notification'
+    resources :users, only: [], path: '/' do
+      collection do
+        post :users, action: :create
+        post :search, :location, :send_push_notification, :forgot_password, :edit_profile
+      end
+    end
 
-    post 'sessions', to: 'sessions#create', as: 'login'
-    delete 'sessions', to: 'sessions#destroy', as: 'logout'
-    post 'forgot_password', to: 'users#forgot_password'
-    post 'edit_profile', to: 'users#edit_profile'
+    resources :sessions, only: [:create] do
+      collection do
+        delete :destroy
+      end
+    end
   end
 
   scope module: 'omniauth' do
