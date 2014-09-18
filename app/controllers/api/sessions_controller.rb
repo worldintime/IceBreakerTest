@@ -4,13 +4,15 @@ class Api::SessionsController < ApplicationController
   def create
     user = User.find_for_authentication(email: params[:email])
     if user
-      if user.valid_password?(params[:password])
-      session = create_session user, params[:auth]
-      render json: {success: true,
-                       info: 'Logged in',
-                       data: {authentication_token: session[:auth_token], user: user},
-                     status: 200
-      }
+      if user.valid_password?(params[:password]) && user.confirmed_at != nil
+        session = create_session user, params[:auth]
+        render json: { success: true,
+                          info: 'Logged in',
+                          data: {authentication_token: session[:auth_token], user: user, avatar: user.avatar.url},
+                        status: 200
+                     }
+      elsif user.confirmed_at == nil
+         render json: { errors: 'Please confirm your email first'}, status: 200
       else
         render json: {errors: 'Email or password is incorrect!'} , status: 200
       end
@@ -21,8 +23,8 @@ class Api::SessionsController < ApplicationController
 
   swagger_api :create do
     summary "Login User"
-    param :form, :email, :string, :required, "Email address"
-    param :form, :password, :string, :required, "Password"
+    param :query, :email, :string, :required, "Email address"
+    param :query, :password, :string, :required, "Password"
   end
 
   def destroy_sessions
@@ -37,24 +39,22 @@ class Api::SessionsController < ApplicationController
 
   swagger_api :destroy_sessions do
     summary "Logout current User"
-    param :form, :authentication_token, :string, :required, "Authentication token"
+    param :query, :authentication_token, :string, :required, "Authentication token"
   end
 
   def reset_password
     @user = User.find_by_email(params[:email])
     if @user.present?
       @user.send_reset_password_instructions
-      render json: {
-          message: 'Confirmation instructions sent. Please check your email.'
-      }
+      render json: { message: 'Confirmation instructions sent. Please check your email.' }
     else
-      bad_request ['Cant find user with that email.'], 406
+      render json: { message: 'No such email' }
     end
   end
 
   swagger_api :reset_password do
     summary "Reset forgotten password"
-    param :form, :email, :string, :required, "Email address"
+    param :query, :email, :string, :required, "Email address"
   end
 
   private
@@ -62,9 +62,11 @@ class Api::SessionsController < ApplicationController
   def create_session user, auth
     range = [*'0'..'9', *'a'..'z', *'A'..'Z']
     session = {user_id: user.id, auth_token: Array.new(30){range.sample}.join, updated_at: Time.now}
-    if auth['device'].present? && auth['device_token'].present?
-      session[:device] = auth['device']
-      session[:device_token] = auth['device_token']
+    if auth.present?
+      if auth[:device].present? && auth[:device_token].present?
+        session[:device] = auth['device']
+        session[:device_token] = auth['device_token']
+      end
     end
     new_session = Session.create(session)
     session

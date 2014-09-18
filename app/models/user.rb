@@ -14,7 +14,7 @@ class User < ActiveRecord::Base
   validates_attachment :avatar, content_type: { content_type: ['image/jpg', 'image/jpeg', 'image/png', 'image/gif'] }
   validates_presence_of :first_name, :last_name, :gender, :email, :user_name
   validates_confirmation_of :password
-
+  validates_uniqueness_of :user_name
   reverse_geocoded_by :latitude, :longitude
   after_validation :reverse_geocode
 

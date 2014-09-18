@@ -22,7 +22,7 @@ class ApplicationController < ActionController::Base
       @session[:updated_at] = Time.now
       @current_user = @session.user
       unless @current_user
-        render json: {success: true,
+        render json: {success: false,
                          info: 'Session expired. Please login',
                        status: 200}
         session = Session.find_by_user_id(@session.user_id)
