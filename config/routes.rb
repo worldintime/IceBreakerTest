@@ -11,6 +11,7 @@ Rails.application.routes.draw do
     post 'location', to: 'users#set_location'
     post 'send_push_notification', to: 'users#send_push_notification'
     post 'forgot_password', to: 'users#forgot_password'
+    post 'reset_password', to: 'sessions#reset_password'
     post 'edit_profile', to: 'users#edit_profile'
     match 'upload_avatar', to: 'users#upload_avatar', via: [:get, :post, :options]
     post 'unread_messages', to: 'conversations#unread_messages'

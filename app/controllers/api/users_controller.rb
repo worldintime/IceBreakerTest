@@ -4,41 +4,71 @@ class Api::UsersController < ApplicationController
   swagger_controller :users, "User Management"
 
   def create
-    user = User.new(first_name: params[:first_name], last_name: params[:last_name], password: params[:password],
-                    gender: params[:gender], date_of_birth: params[:date_of_birth], user_name: params[:user_name],
-                    password_confirmation: params[:password_confirmation], email: params[:email], avatar: params[:avatar])
-
-    if user.save
-      render json: { success: true,
-                        info: 'Message sent on your email, please check it',
-                        data: {user: user},
-                      status: 200
-                   }
+    if params[:facebook_uid]
+      exist = User.find_by_facebook_uid(params[:facebook_uid])
+      if exist
+        session = create_session exist, params[:auth]
+        render json: { success: true,
+                       info: 'Logged in',
+                       data: {authentication_token: session[:auth_token], user: exist, avatar: exist.avatar.url},
+                       status: 200
+        }
+      else
+        password = SecureRandom.hex(8)
+        user = User.new(first_name: params[:first_name], last_name: params[:last_name], password: password,
+                        gender: params[:gender], date_of_birth: params[:date_of_birth], user_name: params[:user_name],
+                        password_confirmation: password, email: params[:email], facebook_uid: params[:facebook_uid],
+                        facebook_avatar: params[:facebook_avatar])
+        user.skip_confirmation!
+        if user.save
+          render json: { success: true,
+                         info: 'Message sent on your email, please check it',
+                         data: {user: user},
+                         status: 200
+                       }
+        else
+          render json: { errors: user.errors.full_messages, success: false }, status: 200
+        end
+      end
     else
-      render json: { errors: user.errors.full_messages, success: false }, status: 200
-    end
+      @user = User.new(first_name: params[:first_name], last_name: params[:last_name], password: params[:password],
+                      gender: params[:gender], date_of_birth: params[:date_of_birth], user_name: params[:user_name],
+                      password_confirmation: params[:password_confirmation], email: params[:email], avatar: params[:avatar])
 
+      if @user.save
+        render json: { success: true,
+                          info: 'Message sent on your email, please check it',
+                          data: {user: @user},
+                        status: 200
+                     }
+
+      else
+        render json: { errors: @user.errors.full_messages, success: false }, status: 200
+      end
+    end
   end
 
   swagger_api :create do
     summary "Creates a new User"
-    param :form, :first_name, :string, :required, "First name"
-    param :form, :last_name, :string, :required, "Last name"
-    param :form, :gender, :string, :required, "Gender"
-    param :form, :date_of_birth, :date, :optional, "Date of birth"
-    param :form, :user_name, :string, :required, "User name"
-    param :form, :email, :string, :required, "Email address"
-    param :form, :password, :string, :required, "Password"
-    param :form, :avatar, :string, :optional, "User's avatar"
+    param :query, :first_name, :string, :required, "First name"
+    param :query, :last_name, :string, :required, "Last name"
+    param :query, :gender, :string, :required, "Gender"
+    param :query, :date_of_birth, :date, :optional, "Date of birth"
+    param :query, :user_name, :string, :required, "User name"
+    param :query, :email, :string, :required, "Email address"
+    param :query, :password, :string, :required, "Password"
+    param :query, :password_confirmation, :string, :required, "Confirmation Password"
+    param :query, :avatar, :string, :optional, "User's avatar"
+    param :query, :facebook_avatar, :string, :optional, "Facebook avatar"
+    param :query, :facebook_uid, :string, :optional, " Facebook user id"
   end
 
   def upload_avatar
-    if @current_user
-      @current_user.update_attribute(:avatar, params[:avatar])
-      render json: { success: true,
-                        info: 'Image successfully uploaded.',
-                      status: 200
-                   }
+    if @current_user.update_attribute(:avatar, params[:avatar])
+        render json: { success: true,
+                          info: 'Image successfully uploaded.',
+                        status: 200
+                     }
     else
       render json: { success: false,
                         info: 'Failed to upload image.',
@@ -49,17 +79,17 @@ class Api::UsersController < ApplicationController
 
   swagger_api :upload_avatar do
     summary "Upload user's avatar"
-    param :form, :avatar, :string, :optional, "User's avatar"
-    param :form, :authentication_token, :string, :required, "Authentication token"
+    param :query, :avatar, :string, :optional, "User's avatar"
+    param :query, :authentication_token, :string, :required, "Authentication token"
   end
 
   def edit_profile
-    if @current_user
-      @current_user.update_attributes(user_params)
-      render json: { success: true,
-                        info: 'Profile successfully updated.',
-                      status: 200
-                   }
+
+    if @current_user.update_attributes!(user_params)
+        render json: { success: true,
+                          info: 'Profile successfully updated.',
+                        status: 200
+                     }
     else
       render json: {success: false,
                        info: 'Session expired. Please login.',
@@ -70,15 +100,15 @@ class Api::UsersController < ApplicationController
 
   swagger_api :edit_profile do
     summary "Edit profile of existing User"
-    param :form, :authentication_token, :string, :required, "Authentication token"
-    param :form, :first_name, :string, :required, "First name"
-    param :form, :last_name, :string, :required, "Last name"
-    param :form, :gender, :string, :required, "Gender"
-    param :form, :date_of_birth, :date, :optional, "Date of birth"
-    param :form, :user_name, :string, :required, "User name"
-    param :form, :email, :string, :required, "Email address"
-    param :form, :password, :string, :required, "Password"
-    param :form, :avatar, :string, :optional, "User's avatar"
+    param :query, :authentication_token, :string, :required, "Authentication token"
+    param :query, :first_name, :string, :required, "First name"
+    param :query, :last_name, :string, :required, "Last name"
+    param :query, :gender, :string, :required, "Gender"
+    param :query, :date_of_birth, :date, :optional, "Date of birth"
+    param :query, :user_name, :string, :required, "User name"
+    param :query, :email, :string, :required, "Email address"
+    param :query, :password, :string, :required, "Password"
+    param :query, :avatar, :string, :optional, "User's avatar"
   end
 
   def custom_canned_statement
@@ -100,8 +130,8 @@ class Api::UsersController < ApplicationController
 
   swagger_api :custom_canned_statement do
     summary "Create user's canned statement"
-    param :form, :authentication_token, :string, :required, "Authentication token"
-    param :form, :statement, :text, :required, "Canned statement text"
+    param :query, :authentication_token, :string, :required, "Authentication token"
+    param :query, :statement, :text, :required, "Canned statement text"
   end
 
   def destroy_canned_statement
@@ -123,15 +153,15 @@ class Api::UsersController < ApplicationController
 
   swagger_api :destroy_canned_statement do
     summary "Destroy user's canned statement"
-    param :form, :authentication_token, :string, :required, "Authentication token"
-    param :form, :statement_id, :integer, :required, "Canned statement id"
+    param :query, :authentication_token, :string, :required, "Authentication token"
+    param :query, :statement_id, :integer, :required, "Canned statement id"
   end
 
   def forgot_password
     @user = User.find_by_email(params[:email])
     if @user
       password = SecureRandom.hex(8)
-      @user.update_attributes(password: password, password_confirmation: password)
+      @user.update_attributes!(password: password, password_confirmation: password)
       @user.send_reset_password_instructions
       render json: { success: true,
                         info: 'New password was sent on your email',
@@ -147,7 +177,7 @@ class Api::UsersController < ApplicationController
 
   swagger_api :forgot_password do
     summary "Restore forgotten password"
-    param :form, :email, :string, :required, "Email address"
+    param :query, :email, :string, :required, "Email address"
   end
 
   def search
@@ -165,7 +195,7 @@ class Api::UsersController < ApplicationController
 
   swagger_api :search do
     summary "Search designated Users"
-    param :form, :authentication_token, :string, :required, "Authentication token"
+    param :query, :authentication_token, :string, :required, "Authentication token"
   end
 
   def set_location
@@ -224,6 +254,20 @@ class Api::UsersController < ApplicationController
 
 
   private
+
+  def create_session user, auth
+    range = [*'0'..'9', *'a'..'z', *'A'..'Z']
+    session = {user_id: user.id, auth_token: Array.new(30){range.sample}.join, updated_at: Time.now}
+    if auth.present?
+      if auth[:device].present? && auth[:device_token].present?
+        session[:device] = auth['device']
+        session[:device_token] = auth['device_token']
+      end
+    end
+    new_session = Session.create(session)
+    session
+  end
+
 
   def set_user
     @user = User.find(params[:id])
