@@ -1,11 +1,11 @@
 class Api::SessionsController < ApplicationController
-  swagger_controller :sessions, "Session Management"
+  #swagger_controller :sessions, "Session Management"
 
   def create
     user = User.find_for_authentication(email: params[:email])
     if user
       if user.valid_password?(params[:password])
-      session = create_session user
+      session = create_session user, params[:auth]
       render json: {success: true,
                        info: 'Logged in',
                        data: {authentication_token: session[:auth_token], user: user},
@@ -44,12 +44,12 @@ class Api::SessionsController < ApplicationController
 
   private
 
-  def create_session user
+  def create_session user, auth
     range = [*'0'..'9', *'a'..'z', *'A'..'Z']
     session = {user_id: user.id, auth_token: Array.new(30){range.sample}.join, updated_at: Time.now}
-    if params[:device].present? && params[:device_token].present?
-      session[:device] = params[:device]
-      session[:device_token] = params[:device_token]
+    if auth['device'].present? && auth['device_token'].present?
+      session[:device] = auth['device']
+      session[:device_token] = auth['device_token']
     end
     new_session = Session.create(session)
     session

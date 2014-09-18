@@ -1,6 +1,6 @@
 class Api::UsersController < ApplicationController
   before_action :api_authenticate_user, except: [:create, :forgot_password]
-  swagger_controller :users, "User Management"
+  #swagger_controller :users, "User Management"
 
   def create
 
@@ -100,11 +100,11 @@ class Api::UsersController < ApplicationController
     end
   end
 
-  swagger_api :set_location do
-    summary "Set location of current User"
-    param :form, :authentication_token, :string, :required, "Authentication token"
-    # TODO: location: { :latitude, :longitude }
-  end
+  #swagger_api :set_location do
+  #  summary "Set location of current User"
+  #  param :form, :authentication_token, :string, :required, "Authentication token"
+  #  # TODO: location: { :latitude, :longitude }
+  #end
 
   # Temporarily action (for front-end testing)
   def send_push_notification
