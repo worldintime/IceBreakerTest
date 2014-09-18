@@ -19,6 +19,23 @@ class Api::UsersController < ApplicationController
 
   end
 
+  def upload_avatar
+    user = User.first
+    if user
+      user.update_attribute(:avatar, params[:avatar])
+      render json: {success: true,
+                    info: 'Image successfully uploaded.',
+                    status: 200
+      }
+    else
+      render json: {success: false,
+                    info: 'Failed to upload image',
+                    status: 200
+      }
+    end
+
+  end
+
   def edit_profile
 
     if @current_user
