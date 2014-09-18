@@ -2,6 +2,7 @@ Rails.application.routes.draw do
   devise_for :users
 
   namespace :api, defaults: {format: 'json'} do
+<<<<<<< HEAD
     resources :users
     post 'custom_canned_statement', to: 'users#custom_canned_statement'
     delete 'destroy_canned_statement', to: 'users#destroy_canned_statement'
@@ -18,6 +19,22 @@ Rails.application.routes.draw do
     post 'create_message', to: 'conversations#create_message'
     post 'messaging', to: 'conversations#messaging'
     post 'conversation_detail', to: 'conversations#conversation_detail'
+=======
+    resources :users do
+      collection do 
+        post 'canned_statements'
+        # post 'custom_canned_statement'
+        # delete 'destroy_canned_statement'
+        post 'search'
+        post 'set_location'
+        post 'forgot_password'
+        post 'edit_profile'
+      end
+    end
+
+    post 'sessions', to: 'sessions#create', as: 'login'
+    delete 'sessions', to: 'sessions#destroy', as: 'logout'
+>>>>>>> canned_statement
   end
 
   # match 'upload_avatar', :controller => 'web_hits', :action => 'options', :constraints => {:method => 'OPTIONS'}

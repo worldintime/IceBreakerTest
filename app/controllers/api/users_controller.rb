@@ -61,53 +61,46 @@ class Api::UsersController < ApplicationController
                    }
     end
   end
+  
 
-  swagger_api :edit_profile do
-    summary "Edit profile of existing User"
-    param :form, :authentication_token, :string, :required, "Authentication token"
-    param :form, :first_name, :string, :required, "First name"
-    param :form, :last_name, :string, :required, "Last name"
-    param :form, :gender, :string, :required, "Gender"
-    param :form, :date_of_birth, :date, :optional, "Date of birth"
-    param :form, :user_name, :string, :required, "User name"
-    param :form, :email, :string, :required, "Email address"
-    param :form, :password, :string, :required, "Password"
-    param :form, :avatar, :string, :optional, "User's avatar"
+  def canned_statements
+    @canned_statements = CannedStatement.all
   end
 
-  def custom_canned_statement
-    new_statement = CannedStatement.new(body: params[:statement], user_id: @current_user.id)
 
-    if new_statement.save
-      render json: { success: true,
-                        info: 'Canned statement was saved successfully',
-                      status: 200
-      }
-    else
-      render json: { success: false,
-                        info: 'Canned statement was not saved',
-                      status: 200
-      }
-    end  
+  # def custom_canned_statement
+  #   new_statement = CannedStatement.new(body: params[:statement], user_id: @current_user.id)
 
-  end
+  #   if new_statement.save
+  #     render json: { success: true,
+  #                       info: 'Canned statement was saved successfully',
+  #                     status: 200
+  #     }
+  #   else
+  #     render json: { success: false,
+  #                     errors: new_statement.errors.full_messages,
+  #                     status: 200
+  #     }
+  #   end  
 
-  def destroy_canned_statement
-    destroy_statement = CannedStatement.where(id: params[:statement_id], user_id: @current_user.id).first
+  # end
 
-    if destroy_statement.destroy
-      render json: { success: true,
-                        info: 'Canned statement was deleted successfully',
-                      status: 200
-      }
-    else
-      render json: { success: true,
-                        info: 'Canned statement was not deleted',
-                      status: 200
-      }
-    end
+  # def destroy_canned_statement
+  #   destroy_statement = CannedStatement.where(id: params[:statement_id], user_id: @current_user.id).first
 
-  end
+  #   if destroy_statement && destroy_statement.destroy
+  #     render json: { success: true,
+  #                       info: 'Canned statement was deleted successfully',
+  #                     status: 200
+  #     }
+  #   else
+  #     render json: { success: true,
+  #                     errors: destroy_statement.errors.full_messages,
+  #                     status: 200
+  #     }
+  #   end
+
+  # end
     
 
   def forgot_password
