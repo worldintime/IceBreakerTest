@@ -18,6 +18,8 @@ gem 'rabl-rails', '~> 0.3.4'
 
 gem 'geocoder', '~> 1.2.4'
 
+gem 'rest-client', '~> 1.7.2'
+
 gem 'paperclip', '~> 4.2.0'
 gem 'grocer'
 

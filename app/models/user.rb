@@ -31,4 +31,44 @@ class User < ActiveRecord::Base
       user.save(validate: false)
     end
   end
+
+  def self.send_push_notification(options = {})
+    user         = User.find options[:user_id]
+    device       = user.device_type
+    device_token = user.device_token
+    message      = options[:message]
+    result       = false
+    info         = 'Something went wrong'
+
+    if device == 'IOS'
+      notification = Grocer::Notification.new(
+        device_token: device_token,
+        alert:        message
+      )
+      IceBr8kr::Application::IOS_PUSHER.push(notification)
+      result = true
+      info = 'Pushed to IOS'
+    elsif device_type == 'Android'
+      require 'rest_client'
+      url = 'https://android.googleapis.com/gcm/send'
+      headers = {
+        'Authorization' => 'key=AIzaSyBCK9NX8gRY51g9UwtY1znEirJuZqTNmAU',
+        'Content-Type' => "application/json"
+      }
+      request = {
+        'registration_ids' => [device_token],
+        data: {
+          'message' => message
+        }
+      }
+
+      response = RestClient.post(url, request.to_json, headers)
+      response_hash = YAML.load(response)
+      result = true
+      info = 'Pushed to Android'
+    end
+
+    render json: { success: result.to_s, info: info }, status: 200
+  end
+
 end

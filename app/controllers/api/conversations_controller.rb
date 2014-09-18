@@ -3,6 +3,7 @@ class Api::ConversationsController < ApplicationController
   before_action :api_authenticate_user
 
   def messaging
+<<<<<<< HEAD
     case params[:type]
       when 'initial'
         conversation = Conversation.new(sender_id: params[:sender_id], receiver_id: params[:receiver_id],
@@ -38,6 +39,66 @@ class Api::ConversationsController < ApplicationController
         else
           render json: {errors: message.errors.full_messages, success: false}, status: 200
         end
+=======
+    if Mute.where(sender_id: [params[:sender_id],params[:receiver_id]],
+                  receiver_id: [params[:receiver_id],params[:sender_id]]).any?
+      render json: { success: false,
+                        info: 'You have been muted with this user'
+                   }
+    else
+      case params[:type]
+        when 'initial'
+          conversation = Conversation.new(sender_id: params[:sender_id], receiver_id: params[:receiver_id],
+                                            initial: params[:msg])
+          if conversation.save
+            User.send_push_notification({user_id: params[:receiver_id], message: params[:msg]})
+            render json: { success: true,
+                              info: 'Message sent',
+                              data: { conversation_id: conversation.id },
+                            status: 200
+                         }
+          else
+            render json: { errors: conversation.errors.full_messages, success: false }, status: 200
+          end
+        when 'reply'
+          conversation = Conversation.find_by_id(params[:conversation_id])
+          if conversation.update_attributes(reply: params[:msg])
+            User.send_push_notification({user_id: params[:sender_id], message: params[:msg]})
+            render json: { success: true,
+                              info: 'Message sent',
+                              data: { conversation_id: conversation.id },
+                            status: 200
+                         }
+          else
+            render json: { errors: conversation.errors.full_messages, success: false }, status: 200
+          end
+        when 'finished'
+          conversation = Conversation.find_by_id(params[:conversation_id])
+          if conversation.update_attributes(finished: params[:msg])
+            User.send_push_notification({user_id: params[:receiver_id], message: params[:msg]})
+            render json: { success: true,
+                              info: 'Message sent',
+                              data: { conversation_id: conversation.id },
+                            status: 200
+                         }
+          else
+            render json: { errors: conversation.errors.full_messages, success: false }, status: 200
+          end
+        when 'ignore'
+          conversation = Conversation.find_by_id(params[:conversation_id])
+          if conversation
+            # TODO: send push notification on ignore
+            conversation.ignore_user(params[:sender_id], params[:receiver_id])
+            render json: { success: true,
+                              info: 'You now ignore this user for 4 hours'
+                         }
+          else
+            render json: { success: false,
+                              info: 'Bad request'
+                         }
+          end
+      end
+>>>>>>> 9fd1804... Basic push notifications
     end
 
   end
@@ -76,4 +137,7 @@ class Api::ConversationsController < ApplicationController
   end
 
 end
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9fd1804... Basic push notifications

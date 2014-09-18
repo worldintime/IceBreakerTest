@@ -1,5 +1,6 @@
 class Api::UsersController < ApplicationController
-  before_action :api_authenticate_user, except: [:create, :forgot_password, :send_push_notification]
+  before_action :api_authenticate_user, except: [:create, :forgot_password]
+  swagger_controller :users, "User Management"
 
   def create
 
@@ -99,35 +100,49 @@ class Api::UsersController < ApplicationController
     end
   end
 
-  def send_push_notification
-    devise = params[:devise_type]
+  swagger_api :set_location do
+    summary "Set location of current User"
+    param :form, :authentication_token, :string, :required, "Authentication token"
+    # TODO: location: { :latitude, :longitude }
+  end
 
+  # Temporarily action (for front-end testing)
+  def send_push_notification
+    device = params[:device_type]
     result = false
-    message = 'Something wrong'
-    if devise == 'IOS'
+    message = 'Hi IceBr8kr team!'
+    info = 'Something went wrong'
+
+    if device == 'IOS'
       notification = Grocer::Notification.new(
-          device_token:      params[:devise_token],
-          alert:             'message'
-          #  badge:             42
-          # expiry:            0,#,Time.now + 60*60, # optional; 0 is default, meaning the message is not stored
-          # identifier:        1234,                 # optional
-          # content_available: true                  # optional; any truthy value will set 'content-available' to 1
+        device_token: params[:device_token],
+        alert:        message
       )
       IceBr8kr::Application::IOS_PUSHER.push(notification)
       result = true
-      message = 'push sended to IOS'
-    elsif devise == 'Android'
+      info = 'Pushed to IOS'
+    elsif device == 'Android'
+      require 'rest_client'
+      url = 'https://android.googleapis.com/gcm/send'
+      headers = {
+        'Authorization' => 'key=AIzaSyBCK9NX8gRY51g9UwtY1znEirJuZqTNmAU',
+        'Content-Type' => "application/json"
+      }
+      request = {
+        'registration_ids' => [params[:device_token]],
+        data: {
+          'message' => message
+        }
+      }
+
+      response = RestClient.post(url, request.to_json, headers)
+      response_hash = YAML.load(response)
       result = true
-      message = 'push sended to Android'
+      info = 'Pushed to Android'
     end
 
-    if result == true
-      render json: { success: 'true', message: message }, status: 200
-    else
-      render json: { success: 'false', message: message }, status: 200
-    end
+    render json: { success: result.to_s, info: info }, status: 200
   end
-
 
   private
 

@@ -1,4 +1,5 @@
 class Api::SessionsController < ApplicationController
+  swagger_controller :sessions, "Session Management"
 
   def create
     user = User.find_for_authentication(email: params[:email])
