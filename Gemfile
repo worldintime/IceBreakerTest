@@ -1,8 +1,6 @@
 source 'https://rubygems.org'
 
 gem 'rails', '4.1.4'
-gem 'jquery-rails', '~> 3.1.2'
-gem 'turbolinks', '~> 2.3.0'
 gem 'pg'
 gem 'devise', '~> 3.3.0'
 gem 'rabl-rails', '~> 0.3.4'
