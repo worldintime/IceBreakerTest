@@ -33,10 +33,10 @@ class User < ActiveRecord::Base
   end
 
   def self.send_push_notification(user_id, auth_token, message, options = {})
-    user         = User.find user_id
-    session      = Session.find_by(auth_token: auth_token)
-    result       = false
-    info         = 'Something went wrong'
+    user    = User.find options[:user_id]
+    message = options[:message] ? options[:message] : "You have been ignored!"
+    result  = false
+    info    = 'Something went wrong'
 
     user.sessions.each do |session|
       if session.device && session.device_token
