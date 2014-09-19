@@ -1,5 +1,4 @@
 require 'rails_helper'
-require 'support/omniauth_mock'
 
 describe User do
   it 'should validate' do
@@ -17,16 +16,21 @@ describe User do
     expect(user.save).to be true
   end
 
+  it 'should add address by location data' do
+    user = create(:user, latitude: 40.7127, longitude: -74.0059)
+    expect( user.address ).to match /NY/
+  end
+
   describe 'oauth' do
     describe 'facebook' do
       it 'should create user' do
         expect{
-          described_class.from_omniauth OmniauthMock.facebook
+          described_class.from_omniauth omniauth_facebook
         }.to change(User, :count).by(1)
       end
 
       it 'should update user' do
-        auth = OmniauthMock.facebook
+        auth = omniauth_facebook
         user = create(:user, facebook_id: auth.extra.raw_info.id)
         described_class.from_omniauth auth
         user.reload
