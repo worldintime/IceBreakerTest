@@ -1,4 +1,5 @@
 class Api::SessionsController < ApplicationController
+  #swagger_controller :sessions, "Session Management"
 
   swagger_controller :sessions, "Session Management"
 

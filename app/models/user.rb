@@ -2,6 +2,10 @@ class User < ActiveRecord::Base
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
   has_many :sessions
+  has_many :mutes
+  has_many :conversations_my, class_name: Conversation, foreign_key: :sender_id
+  has_many :conversations_his, class_name: Conversation, foreign_key: :receiver_id
+
   devise :database_authenticatable, :registerable, :confirmable,
          :recoverable, :rememberable, :trackable, :validatable
 
@@ -27,4 +31,45 @@ class User < ActiveRecord::Base
       user.save(validate: false)
     end
   end
+
+  def self.send_push_notification(options = {})
+    user         = User.find options[:user_id]
+    session      = Session.find_by_auth_token(options[:auth_token])
+    message      = options[:message]
+    result       = false
+    info         = 'Something went wrong'
+
+    user.sessions.each do |session|
+      if session.device && session.device_token
+
+        if session.device == 'IOS'
+          notification = Grocer::Notification.new(
+            device_token: session.device_token,
+            alert:        message
+          )
+          IceBr8kr::Application::IOS_PUSHER.push(notification)
+          result = true
+          info = 'Pushed to IOS'
+        elsif session.device == 'Android'
+          require 'rest_client'
+          url = 'https://android.googleapis.com/gcm/send'
+          headers = {
+            'Authorization' => 'key=AIzaSyBCK9NX8gRY51g9UwtY1znEirJuZqTNmAU',
+            'Content-Type'  => 'application/json'
+          }
+          request = {
+            'registration_ids' => [session.device_token],
+            data: {
+              'message' => message
+            }
+          }
+
+          response = RestClient.post(url, request.to_json, headers)
+          result = true
+          info = 'Pushed to Android'
+        end
+      end
+    end
+  end
+
 end
