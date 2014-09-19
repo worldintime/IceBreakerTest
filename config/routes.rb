@@ -18,8 +18,6 @@ Rails.application.routes.draw do
     post 'messaging', to: 'conversations#messaging'
   end
 
-  # match 'upload_avatar', :controller => 'web_hits', :action => 'options', :constraints => {:method => 'OPTIONS'}
-
   scope module: 'omniauth' do
     get '/auth/:provider/callback' => 'sessions#create'
   end

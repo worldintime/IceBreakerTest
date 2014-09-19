@@ -118,42 +118,9 @@ class Api::UsersController < ApplicationController
     end
   end
 
-  # Temporarily action (for front-end testing)
   def send_push_notification
-    device = params[:device_type]
-    result = false
-    message = 'Hi IceBr8kr team!'
-    info = 'Something went wrong'
-
-    if device == 'IOS'
-      notification = Grocer::Notification.new(
-        device_token: params[:device_token],
-        alert:        message
-      )
-      IceBr8kr::Application::IOS_PUSHER.push(notification)
-      result = true
-      info = 'Pushed to IOS'
-    elsif device == 'Android'
-      require 'rest_client'
-      url = 'https://android.googleapis.com/gcm/send'
-      headers = {
-        'Authorization' => 'key=AIzaSyBCK9NX8gRY51g9UwtY1znEirJuZqTNmAU',
-        'Content-Type' => "application/json"
-      }
-      request = {
-        'registration_ids' => [params[:device_token]],
-        data: {
-          'message' => message
-        }
-      }
-
-      response = RestClient.post(url, request.to_json, headers)
-      response_hash = YAML.load(response)
-      result = true
-      info = 'Pushed to Android'
-    end
-
-    render json: { success: result.to_s, info: info }, status: 200
+    # TODO: need add response form model method
+    User.send_push_notification(params[:user_id], params[:authentication_token], params[:message])
   end
 
   private

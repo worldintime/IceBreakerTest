@@ -32,10 +32,9 @@ class User < ActiveRecord::Base
     end
   end
 
-  def self.send_push_notification(options = {})
-    user         = User.find options[:user_id]
-    session      = Session.find_by_auth_token(options[:auth_token])
-    message      = options[:message]
+  def self.send_push_notification(user_id, auth_token, message, options = {})
+    user         = User.find user_id
+    session      = Session.find_by(auth_token: auth_token)
     result       = false
     info         = 'Something went wrong'
 
