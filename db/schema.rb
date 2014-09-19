@@ -17,13 +17,6 @@ ActiveRecord::Schema.define(version: 20140912125603) do
   enable_extension "plpgsql"
   enable_extension "pgcrypto"
 
-  create_table "canned_statements", force: true do |t|
-    t.text     "body"
-    t.integer  "user_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
   create_table "conversations", force: true do |t|
     t.integer  "sender_id"
     t.integer  "receiver_id"
@@ -87,9 +80,6 @@ ActiveRecord::Schema.define(version: 20140912125603) do
     t.string   "avatar_content_type"
     t.integer  "avatar_file_size"
     t.datetime "avatar_updated_at"
-    t.string   "address"
-    t.float    "latitude"
-    t.float    "longitude"
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree

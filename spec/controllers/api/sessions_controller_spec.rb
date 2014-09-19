@@ -3,10 +3,24 @@ require 'rails_helper'
 describe Api::SessionsController do
 
   describe 'session' do
-    it '#create' do
-      user = create(:user)
-      post :create, email: user.email, password: '123456789'
-      expect( Oj.load(response.body)['success'] ).to eq true
+
+    describe '#create' do
+      it 'should create session' do
+        user = create(:user)
+        post :create, email: user.email, password: '123456789'
+        expect( Oj.load(response.body)['success'] ).to eq true
+      end
+
+      it 'should create session and add device info' do
+        user = create(:user)
+        auth = {device: "iOS", device_token: '3n12j3khss'}
+        post :create, email: user.email, password: '123456789', auth: auth
+        user.reload
+        session = user.sessions.first
+        expect(session.device).to eq auth[:device]
+        expect(session.device_token).to eq auth[:device_token]
+        expect( Oj.load(response.body)['success'] ).to eq true
+      end
     end
 
     describe '#destroy' do
@@ -19,7 +33,7 @@ describe Api::SessionsController do
 
       it 'should return "Not Found" for invalid token' do
         delete :destroy, authentication_token: '12'
-        expect( Oj.load(response.body)['info'] ).to match /Not found/
+        expect( Oj.load(response.body)['info'] ).to match /Session expired. Please login/
       end
     end
   end

@@ -34,14 +34,14 @@ class Api::UsersController < ApplicationController
   swagger_api :edit_profile do
     summary "Edit profile of existing User"
     param :query, :authentication_token, :string, :required, "Authentication token"
-    param :query, :first_name, :string, :required, "First name"
-    param :query, :last_name, :string, :required, "Last name"
-    param :query, :gender, :string, :required, "Gender"
-    param :query, :date_of_birth, :date, :optional, "Date of birth"
-    param :query, :user_name, :string, :required, "User name"
-    param :query, :email, :string, :required, "Email address"
-    param :query, :password, :string, :required, "Password"
-    param :query, :avatar, :string, :optional, "User's avatar"
+    param :query, 'user[first_name]', :string, :required, "First name"
+    param :query, 'user[last_name]', :string, :required, "Last name"
+    param :query, 'user[gender]', :string, :required, "Gender"
+    param :query, 'user[date_of_birth]', :date, :optional, "Date of birth"
+    param :query, 'user[user_name]', :string, :required, "User name"
+    param :query, 'user[email]', :string, :required, "Email address"
+    param :query, 'user[password]', :string, :required, "Password"
+    param :query, 'user[avatar]', :string, :optional, "User's avatar"
   end
 
   def edit_profile
@@ -101,6 +101,8 @@ class Api::UsersController < ApplicationController
   swagger_api :location do
     summary "Set location of current User"
     param :query, :authentication_token, :string, :required, "Authentication token"
+    param :query, 'location[latitude]', :string, :required, "Latitude"
+    param :query, 'location[longitude]', :string, :required, "Longitude"
   end
 
   def location
@@ -111,7 +113,7 @@ class Api::UsersController < ApplicationController
       render json: { success: false,
                         info: 'Latitude or Longitude are missed',
                       status: 200 }
-    elsif @current_user.update_attributes(latitude: lat, longitude: lng)
+    elsif @current_user.update_attributes(latitude: lat.gsub(',', '.'), longitude: lng.gsub(',', '.'))
       render json: { success: true,
                         info: 'New location was set successfully',
                       status: 200 }

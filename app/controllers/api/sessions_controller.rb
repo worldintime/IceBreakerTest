@@ -1,5 +1,5 @@
 class Api::SessionsController < ApplicationController
-  #swagger_controller :sessions, "Session Management"
+  before_action :api_authenticate_user, only: [:destroy]
 
   swagger_controller :sessions, "Session Management"
 
@@ -7,6 +7,8 @@ class Api::SessionsController < ApplicationController
     summary "Login User"
     param :query, :email, :string, :required, "Email address"
     param :query, :password, :string, :required, "Password"
+    param :query, 'auth[device]', :string, :optional, "Device"
+    param :query, 'auth[device_token]', :string, :optional, "Device token"
   end
 
   def create
@@ -64,7 +66,7 @@ class Api::SessionsController < ApplicationController
   def create_session user, auth
     range = [*'0'..'9', *'a'..'z', *'A'..'Z']
     session = {user_id: user.id, auth_token: Array.new(30){range.sample}.join, updated_at: Time.now}
-    if auth['device'].present? && auth['device_token'].present?
+    if auth && auth['device'].present? && auth['device_token'].present?
       session[:device] = auth['device']
       session[:device_token] = auth['device_token']
     end
