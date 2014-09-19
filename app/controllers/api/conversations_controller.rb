@@ -1,7 +1,16 @@
 class Api::ConversationsController < ApplicationController
-
   before_action :api_authenticate_user
   swagger_controller :conversations, "Conversation Management"
+
+  swagger_api :messaging do
+    summary "Messaging between users"
+    param :query, :authentication_token, :string, :required, "Authentication token"
+    param :query, :sender_id, :integer, :required, "Sender id"
+    param :query, :receiver_id, :integer, :required, "Receiver id"
+    param :query, :type, :string, :required, "Message type: initial/reply/finished/ignore"
+    param :query, :msg, :string, :required, "Message"
+    param :query, :conversation_id, :integer, :required, "Conversation id. Receives after type:initial, and required for other types"
+  end
 
   def messaging
     if Mute.where(sender_id: [params[:sender_id],params[:receiver_id]],
@@ -16,6 +25,8 @@ class Api::ConversationsController < ApplicationController
                                             initial: params[:msg])
           if conversation.save
             User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id]})
+            User.send_push_notification({user_id: params[:receiver_id], message: params[:msg]})
+
             render json: { success: true,
                               info: 'Message sent',
                               data: { conversation_id: conversation.id },
@@ -27,6 +38,9 @@ class Api::ConversationsController < ApplicationController
         when 'reply'
           conversation = Conversation.find(params[:conversation_id])
           if conversation.update_attributes!(reply: params[:msg])
+            User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id]})
+            User.send_push_notification({user_id: params[:sender_id], message: params[:msg]})
+
             render json: { success: true,
                               info: 'Message sent',
                               data: { conversation_id: conversation.id },
@@ -39,6 +53,7 @@ class Api::ConversationsController < ApplicationController
           conversation = Conversation.find(params[:conversation_id])
           if conversation.update_attributes!(finished: params[:msg])
             User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id]})
+            User.send_push_notification({user_id: params[:receiver_id], message: params[:msg]})
 
             render json: { success: true,
                               info: 'Message sent',
@@ -51,6 +66,7 @@ class Api::ConversationsController < ApplicationController
         when 'ignore'
           conversation = Conversation.find(params[:conversation_id])
           if conversation
+            User.send_push_notification({receiver_id: params[:receiver_id]})
             conversation.ignore_user(params[:sender_id], params[:receiver_id])
             render json: { success: true,
                               info: 'You now ignore this user for 4 hours'
@@ -64,14 +80,10 @@ class Api::ConversationsController < ApplicationController
     end
   end
 
-  swagger_api :messaging do
-    summary "Messaging between users"
+  swagger_api :conversation_detail do
+    summary "Conversation detail"
     param :query, :authentication_token, :string, :required, "Authentication token"
-    param :query, :sender_id, :integer, :required, "Sender id"
-    param :query, :receiver_id, :integer, :required, "Receiver id"
-    param :query, :type, :string, :required, "Message type: initial/reply/finished/ignore"
-    param :query, :msg, :string, :required, "Message"
-    param :query, :conversation_id, :integer, :required, "Conversation id. Receives after type:initial, and required for other types"
+    param :query, :conversation_id, :integer, :required, "Conversation id"
   end
 
   def conversation_detail
@@ -94,10 +106,9 @@ class Api::ConversationsController < ApplicationController
 
   end
 
-  swagger_api :conversation_detail do
-    summary "Conversation detail"
+  swagger_api :unread_messages do
+    summary "Number of unread messages"
     param :query, :authentication_token, :string, :required, "Authentication token"
-    param :query, :conversation_id, :integer, :required, "Conversation id"
   end
 
   def unread_messages
@@ -123,8 +134,8 @@ class Api::ConversationsController < ApplicationController
 
   end
 
-  swagger_api :unread_messages do
-    summary "Number of unread messages"
+  swagger_api :history_of_digital_hello do
+    summary "History of all digital hello"
     param :query, :authentication_token, :string, :required, "Authentication token"
   end
 
@@ -146,11 +157,6 @@ class Api::ConversationsController < ApplicationController
                    }
     end
 
-  end
-
-  swagger_api :history_of_digital_hello do
-    summary "History of all digital hello"
-    param :query, :authentication_token, :string, :required, "Authentication token"
   end
 
   private

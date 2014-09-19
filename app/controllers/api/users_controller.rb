@@ -1,7 +1,18 @@
 class Api::UsersController < ApplicationController
-
   before_action :api_authenticate_user, except: [:create, :forgot_password, :send_push_notification]
   swagger_controller :users, "User Management"
+
+  swagger_api :create do
+    summary "Creates a new User"
+    param :query, :first_name, :string, :required, "First name"
+    param :query, :last_name, :string, :required, "Last name"
+    param :query, :gender, :string, :required, "Gender"
+    param :query, :date_of_birth, :date, :optional, "Date of birth"
+    param :query, :user_name, :string, :required, "User name"
+    param :query, :email, :string, :required, "Email address"
+    param :query, :password, :string, :required, "Password"
+    param :query, :avatar, :string, :optional, "User's avatar"
+  end
 
   def create
     if params[:facebook_uid]
@@ -48,19 +59,10 @@ class Api::UsersController < ApplicationController
     end
   end
 
-  swagger_api :create do
-    summary "Creates a new User"
-    param :query, :first_name, :string, :required, "First name"
-    param :query, :last_name, :string, :required, "Last name"
-    param :query, :gender, :string, :required, "Gender"
-    param :query, :date_of_birth, :date, :optional, "Date of birth"
-    param :query, :user_name, :string, :required, "User name"
-    param :query, :email, :string, :required, "Email address"
-    param :query, :password, :string, :required, "Password"
-    param :query, :password_confirmation, :string, :required, "Confirmation Password"
+  swagger_api :upload_avatar do
+    summary "Upload user's avatar"
     param :query, :avatar, :string, :optional, "User's avatar"
-    param :query, :facebook_avatar, :string, :optional, "Facebook avatar"
-    param :query, :facebook_uid, :string, :optional, " Facebook user id"
+    param :query, :authentication_token, :string, :required, "Authentication token"
   end
 
   def upload_avatar
@@ -77,10 +79,17 @@ class Api::UsersController < ApplicationController
     end
   end
 
-  swagger_api :upload_avatar do
-    summary "Upload user's avatar"
-    param :query, :avatar, :string, :optional, "User's avatar"
+  swagger_api :edit_profile do
+    summary "Edit profile of existing User"
     param :query, :authentication_token, :string, :required, "Authentication token"
+    param :query, 'user[first_name]', :string, :required, "First name"
+    param :query, 'user[last_name]', :string, :required, "Last name"
+    param :query, 'user[gender]', :string, :required, "Gender"
+    param :query, 'user[date_of_birth]', :date, :optional, "Date of birth"
+    param :query, 'user[user_name]', :string, :required, "User name"
+    param :query, 'user[email]', :string, :required, "Email address"
+    param :query, 'user[password]', :string, :required, "Password"
+    param :query, 'user[avatar]', :string, :optional, "User's avatar"
   end
 
   def edit_profile
@@ -98,12 +107,14 @@ class Api::UsersController < ApplicationController
     end
   end
 
-  
+  swagger_api :canned_statements do
+    summary "Return list of predefined canned statements"
+    param :query, :authentication_token, :string, :required, "Authentication token"
+  end
 
   def canned_statements
     @canned_statements = CannedStatement.all
   end
-
 
   # def custom_canned_statement
   #   new_statement = CannedStatement.new(body: params[:statement], user_id: @current_user.id)
@@ -118,7 +129,7 @@ class Api::UsersController < ApplicationController
   #                     errors: new_statement.errors.full_messages,
   #                     status: 200
   #     }
-  #   end  
+  #   end
 
   # end
 
@@ -139,18 +150,9 @@ class Api::UsersController < ApplicationController
 
   # end
 
-
-  swagger_api :edit_profile do
-    summary "Edit profile of existing User"
-    param :query, :authentication_token, :string, :required, "Authentication token"
-    param :query, :first_name, :string, :required, "First name"
-    param :query, :last_name, :string, :required, "Last name"
-    param :query, :gender, :string, :required, "Gender"
-    param :query, :date_of_birth, :date, :optional, "Date of birth"
-    param :query, :user_name, :string, :required, "User name"
+  swagger_api :forgot_password do
+    summary "Restore forgotten password"
     param :query, :email, :string, :required, "Email address"
-    param :query, :password, :string, :required, "Password"
-    param :query, :avatar, :string, :optional, "User's avatar"
   end
 
   def forgot_password
@@ -171,9 +173,9 @@ class Api::UsersController < ApplicationController
     end
   end
 
-  swagger_api :forgot_password do
-    summary "Restore forgotten password"
-    param :query, :email, :string, :required, "Email address"
+  swagger_api :search do
+    summary "Search designated Users"
+    param :query, :authentication_token, :string, :required, "Authentication token"
   end
 
   def search
@@ -189,12 +191,14 @@ class Api::UsersController < ApplicationController
     @designated_users = User.near([lat, lng], 0.1).where.not(id: @current_user.id)
   end
 
-  swagger_api :search do
-    summary "Search designated Users"
+  swagger_api :location do
+    summary "Set location of current User"
     param :query, :authentication_token, :string, :required, "Authentication token"
+    param :query, 'location[latitude]', :string, :required, "Latitude"
+    param :query, 'location[longitude]', :string, :required, "Longitude"
   end
 
-  def set_location
+  def location
     lat = params[:location][:latitude]
     lng = params[:location][:longitude]
 
@@ -202,68 +206,25 @@ class Api::UsersController < ApplicationController
       render json: { success: false,
                         info: 'Latitude or Longitude are missed',
                       status: 200 }
-    elsif @current_user.update_attributes(latitude: lat, longitude: lng)
+    elsif @current_user.update_attributes(latitude: lat.gsub(',', '.'), longitude: lng.gsub(',', '.'))
       render json: { success: true,
                         info: 'New location was set successfully',
                       status: 200 }
     end
   end
 
-  swagger_api :set_location do
-    summary "Set location of current User"
-    param :form, :authentication_token, :string, :required, "Authentication token"
-    # TODO: location: { :latitude, :longitude }
-  end
-
-  def send_push_notification
-    device = params[:device]
-
-    result = false
-    message = 'Something wrong'
-    if device == 'IOS'
-      notification = Grocer::Notification.new(
-          device_token:      params[:device_token],
-          alert:             'message'
-          #  badge:             42
-          # expiry:            0,#,Time.now + 60*60, # optional; 0 is default, meaning the message is not stored
-          # identifier:        1234,                 # optional
-          # content_available: true                  # optional; any truthy value will set 'content-available' to 1
-      )
-      IceBr8kr::Application::IOS_PUSHER.push(notification)
-      result = true
-      message = 'push sended to IOS'
-    elsif device == 'Android'
-      result = true
-      message = 'push sended to Android'
-    end
-
-    if result == true
-      render json: { success: 'true', message: message }, status: 200
-    else
-      render json: { success: 'false', message: message }, status: 200
-    end
-  end
-
-  swagger_api :send_push_notification do
-    # TODO
-  end
-
-
   private
 
   def create_session user, auth
     range = [*'0'..'9', *'a'..'z', *'A'..'Z']
     session = {user_id: user.id, auth_token: Array.new(30){range.sample}.join, updated_at: Time.now}
-    if auth.present?
-      if auth[:device].present? && auth[:device_token].present?
-        session[:device] = auth['device']
-        session[:device_token] = auth['device_token']
-      end
+    if auth.present? && auth[:device].present? && auth[:device_token].present?
+      session[:device] = auth['device']
+      session[:device_token] = auth['device_token']
     end
-    new_session = Session.create(session)
+    Session.create(session)
     session
   end
-
 
   def set_user
     @user = User.find(params[:id])

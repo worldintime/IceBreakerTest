@@ -16,6 +16,7 @@
 /tmp
 /.idea
 /vendor/cache
-/config/database.yml
-/public/api
-/public/api-docs.json
+.DS_Store
+public/assets
+public/api-spec
+coverage
