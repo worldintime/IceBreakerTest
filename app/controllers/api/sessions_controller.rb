@@ -1,6 +1,16 @@
 class Api::SessionsController < ApplicationController
+  before_action :api_authenticate_user, only: [:destroy]
+  
   swagger_controller :users, "Session Management"
 
+  swagger_api :create do
+    summary "Login User"
+    param :query, :email, :string, :required, "Email address"
+    param :query, :password, :string, :required, "Password"
+    param :query, 'auth[device]', :string, :optional, "Device"
+    param :query, 'auth[device_token]', :string, :optional, "Device token"
+  end
+  
   def create
     user = User.find_for_authentication(email: params[:email])
     if user
@@ -9,25 +19,23 @@ class Api::SessionsController < ApplicationController
         render json: { success: true,
                        info: 'Logged in',
                        data: {authentication_token: session[:auth_token], user: user, avatar: user.avatar.url},
-                       status: 200
-        }
+                       status: 200 }
       elsif user.confirmed_at == nil
-        render json: { errors: 'Please confirm your email first'}, status: 200
+        render json: { errors: 'Please confirm your email first' }, status: 200
       else
-        render json: {errors: 'Email or password is incorrect!'} , status: 200
+        render json: { errors: 'Email or password is incorrect!' } , status: 200
       end
     else
-      render json: {errors: 'User not found!'}, status: 200
+      render json: { errors: 'User not found!' }, status: 200
     end
   end
 
-  swagger_api :create do
-    summary "Login User"
-    param :query, :email, :string, :required, "Email address"
-    param :query, :password, :string, :required, "Password"
+  swagger_api :destroy do
+    summary "Logout current User"
+    param :query, :authentication_token, :string, :required, "Authentication token"
   end
 
-  def destroy_sessions
+  def destroy
     session = Session.where(auth_token: params[:authentication_token]).first
     if session
       destroy_session session
@@ -37,9 +45,9 @@ class Api::SessionsController < ApplicationController
     end
   end
 
-  swagger_api :destroy_sessions do
-    summary "Logout current User"
-    param :query, :authentication_token, :string, :required, "Authentication token"
+  swagger_api :reset_password do
+    summary "Reset forgotten password"
+    param :query, :email, :string, :required, "Email address"
   end
 
   def reset_password
@@ -54,17 +62,12 @@ class Api::SessionsController < ApplicationController
     end
   end
 
-  swagger_api :reset_password do
-    summary "Reset forgotten password"
-    param :query, :email, :string, :required, "Email address"
-  end
-
   private
 
   def create_session user, auth
     range = [*'0'..'9', *'a'..'z', *'A'..'Z']
     session = {user_id: user.id, auth_token: Array.new(30){range.sample}.join, updated_at: Time.now}
-    if auth.present? && auth[:device].present? && auth[:device_token].present?
+    if auth && auth['device'].present? && auth['device_token'].present?
       session[:device] = auth['device']
       session[:device_token] = auth['device_token']
     end

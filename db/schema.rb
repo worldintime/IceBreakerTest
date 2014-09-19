@@ -15,6 +15,7 @@ ActiveRecord::Schema.define(version: 20140919083302) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+  enable_extension "pgcrypto"
 
   create_table "conversations", force: true do |t|
     t.integer  "sender_id"
@@ -70,6 +71,9 @@ ActiveRecord::Schema.define(version: 20140919083302) do
     t.datetime "confirmed_at"
     t.datetime "confirmation_sent_at"
     t.string   "unconfirmed_email"
+    t.string   "address"
+    t.float    "latitude",               limit: 24
+    t.float    "longitude",              limit: 24
     t.string   "facebook_id"
     t.string   "oauth_token"
     t.datetime "oauth_expires_at"
@@ -82,6 +86,8 @@ ActiveRecord::Schema.define(version: 20140919083302) do
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
+  add_index "users", ["latitude"], name: "index_users_on_latitude", using: :btree
+  add_index "users", ["longitude"], name: "index_users_on_longitude", using: :btree
   add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true, using: :btree
 
 end
