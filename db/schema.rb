@@ -77,6 +77,9 @@ ActiveRecord::Schema.define(version: 20140912125603) do
     t.datetime "confirmed_at"
     t.datetime "confirmation_sent_at"
     t.string   "unconfirmed_email"
+    t.string   "address"
+    t.float    "latitude",               limit: 24
+    t.float    "longitude",              limit: 24
     t.string   "facebook_id"
     t.string   "oauth_token"
     t.datetime "oauth_expires_at"
