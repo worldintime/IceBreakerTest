@@ -1,25 +1,33 @@
 class Api::SessionsController < ApplicationController
+  swagger_controller :users, "Session Management"
 
   def create
     user = User.find_for_authentication(email: params[:email])
     if user
-      if user.valid_password?(params[:password])
-      session = create_session user, params[:auth]
-      render json: {success: true,
+      if user.valid_password?(params[:password]) && user.confirmed_at != nil
+        session = create_session user, params[:auth]
+        render json: { success: true,
                        info: 'Logged in',
-                       data: {authentication_token: session[:auth_token], user: user},
-                     status: 200
-      }
+                       data: {authentication_token: session[:auth_token], user: user, avatar: user.avatar.url},
+                       status: 200
+        }
+      elsif user.confirmed_at == nil
+        render json: { errors: 'Please confirm your email first'}, status: 200
       else
         render json: {errors: 'Email or password is incorrect!'} , status: 200
       end
     else
       render json: {errors: 'User not found!'}, status: 200
-
     end
   end
 
-  def destroy
+  swagger_api :create do
+    summary "Login User"
+    param :query, :email, :string, :required, "Email address"
+    param :query, :password, :string, :required, "Password"
+  end
+
+  def destroy_sessions
     session = Session.where(auth_token: params[:authentication_token]).first
     if session
       destroy_session session
@@ -27,6 +35,11 @@ class Api::SessionsController < ApplicationController
     else
       render json: { success: false, info: 'Not found', status: 200 }
     end
+  end
+
+  swagger_api :destroy_sessions do
+    summary "Logout current User"
+    param :query, :authentication_token, :string, :required, "Authentication token"
   end
 
   def reset_password
@@ -41,16 +54,21 @@ class Api::SessionsController < ApplicationController
     end
   end
 
+  swagger_api :reset_password do
+    summary "Reset forgotten password"
+    param :query, :email, :string, :required, "Email address"
+  end
+
   private
 
   def create_session user, auth
     range = [*'0'..'9', *'a'..'z', *'A'..'Z']
     session = {user_id: user.id, auth_token: Array.new(30){range.sample}.join, updated_at: Time.now}
-    if auth['device'].present? && auth['device_token'].present?
+    if auth.present? && auth[:device].present? && auth[:device_token].present?
       session[:device] = auth['device']
       session[:device_token] = auth['device_token']
     end
-    new_session = Session.create(session)
+    Session.create(session)
     session
   end
 

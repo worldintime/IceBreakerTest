@@ -24,6 +24,10 @@ gem 'grocer'
 gem 'omniauth'
 gem 'omniauth-facebook'
 
+gem 'swagger-docs', '~> 0.1.9'
+
+gem 'rufus-scheduler', '~> 3.0.9'
+
 group :test do
   gem 'shoulda', '~> 3.5.0'
 end

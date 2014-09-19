@@ -8,9 +8,13 @@ Rails.application.routes.draw do
     post 'send_push_notification', to: 'users#send_push_notification'
 
     post 'sessions', to: 'sessions#create', as: 'login'
-    delete 'sessions', to: 'sessions#destroy', as: 'logout'
+    post 'destroy_sessions', to: "sessions#destroy_sessions", as: 'logout'
     post 'forgot_password', to: 'users#forgot_password'
     post 'edit_profile', to: 'users#edit_profile'
+    post 'unread_messages', to: 'conversations#unread_messages'
+    post 'history_of_digital_hello', to: 'conversations#history_of_digital_hello'
+    post 'messaging', to: 'conversations#messaging'
+    post 'conversation_detail', to: 'conversations#conversation_detail'
   end
 
   scope module: 'omniauth' do
