@@ -55,16 +55,6 @@ class Conversation < ActiveRecord::Base
     end
   end
 
-  def status
-    if self.reply.nil? && self.finished.nil?
-      'initial'
-    elsif self.finished.nil?
-      'reply'
-    else
-      'finished'
-    end
-  end
-
   def blocked_to(current_user_id)
     if self.mute
       if self.mute.status == 'Muted'
@@ -80,33 +70,25 @@ class Conversation < ActiveRecord::Base
     end
   end
 
-  def ignored
-    if Mute.find_by_conversation_id(self.id)
-      true
-    else
-      false
-    end
-  end
-
   def opponent_identity(current_user_id)
     if self.sender_id != current_user_id
       opponent = User.find(self.sender_id)
       { opponent: { opponent_id: opponent.id,
-                     first_name: opponent.first_name,
-                      last_name: opponent.last_name,
+                    first_name: opponent.first_name,
+                    last_name: opponent.last_name,
                     user_avatar: receiver_avatar(current_user_id)
                   },
-      last_message: last_message_from_sender
+        last_message: last_message_from_sender
       }
     else
       opponent = User.find(self.receiver_id)
       { opponent:  { opponent_id: opponent.id,
-                      first_name: opponent.first_name,
-                       last_name: opponent.last_name,
+                     first_name: opponent.first_name,
+                     last_name: opponent.last_name,
                      user_avatar: receiver_avatar(current_user_id)
                    },
         last_message: {  text: self.reply,
-                       status: 'reply'
+                         status: 'reply'
                       }
       }
     end
@@ -121,12 +103,12 @@ class Conversation < ActiveRecord::Base
                     avatar: sender.avatar.url,
                     reply: self.reply,
                     email: sender.email},
-          sender:  {id: receiver.id,
-                    first_name: receiver.first_name,
-                    last_name: receiver.last_name,
-                    avatar: receiver.avatar.url,
-                    initial: self.initial,
-                    finished: self.finished}
+        sender:  {id: receiver.id,
+                  first_name: receiver.first_name,
+                  last_name: receiver.last_name,
+                  avatar: receiver.avatar.url,
+                  initial: self.initial,
+                  finished: self.finished}
       }
     elsif self.receiver_id != current_user_id
       { receiver: {id: sender.id,
@@ -136,9 +118,9 @@ class Conversation < ActiveRecord::Base
                    initial: self.initial,
                    finished: self.finished,
                    email: sender.email},
-          sender:  {id: receiver.id,
-                    avatar: receiver.avatar.url,
-                    reply: self.reply}
+        sender:  {id: receiver.id,
+                  avatar: receiver.avatar.url,
+                  reply: self.reply}
       }
     end
   end
@@ -149,3 +131,4 @@ class Conversation < ActiveRecord::Base
   end
 
 end
+

@@ -6,6 +6,8 @@ Rails.application.routes.draw do
 
     post 'sessions', to: 'sessions#create', as: 'login'
     post 'destroy_sessions', to: 'sessions#destroy_sessions', as: 'logout'
+    post 'forgot_password', to: 'users#forgot_password'
+    post 'edit_profile', to: 'users#edit_profile'
     post 'unread_messages', to: 'conversations#unread_messages'
     post 'history_of_digital_hello', to: 'conversations#history_of_digital_hello'
     post 'messaging', to: 'conversations#messaging'

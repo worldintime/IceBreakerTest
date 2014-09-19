@@ -1,5 +1,5 @@
 class Api::UsersController < ApplicationController
-  before_action :api_authenticate_user, except: [:create, :forgot_password, :send_push_notification]
+  before_action :api_authenticate_user, except: [:create, :forgot_password]
   swagger_controller :users, "User Management"
 
   swagger_api :create do
@@ -67,10 +67,10 @@ class Api::UsersController < ApplicationController
 
   def upload_avatar
     if @current_user.update_attribute(:avatar, params[:avatar])
-        render json: { success: true,
-                          info: 'Image successfully uploaded.',
-                        status: 200
-                     }
+      render json: { success: true,
+                        info: 'Image successfully uploaded.',
+                      status: 200
+                   }
     else
       render json: { success: false,
                         info: 'Failed to upload image.',
@@ -95,14 +95,15 @@ class Api::UsersController < ApplicationController
   def edit_profile
 
     if @current_user.update_attributes!(user_params)
-        render json: { success: true,
-                          info: 'Profile successfully updated.',
-                        status: 200
-                     }
+      render json: { success: true,
+                        info: 'Profile successfully updated.',
+                      status: 200
+                   }
+
     else
-      render json: {success: false,
-                       info: 'Session expired. Please login.',
-                     status: 200
+      render json: { success: false,
+                        info: 'Session expired. Please login.',
+                      status: 200
                    }
     end
   end
@@ -111,7 +112,6 @@ class Api::UsersController < ApplicationController
     summary "Return list of predefined canned statements"
     param :query, :authentication_token, :string, :required, "Authentication token"
   end
-
   def canned_statements
     @canned_statements = CannedStatement.all
   end
@@ -212,6 +212,33 @@ class Api::UsersController < ApplicationController
                       status: 200 }
     end
   end
+
+  private
+
+  def send_push_notification
+    device = params[:device]
+
+    result = false
+    message = 'Something wrong'
+    if device == 'IOS'
+      notification = Grocer::Notification.new(
+          device_token:      params[:device_token],
+          alert:             'message'
+      #  badge:             42
+      # expiry:            0,#,Time.now + 60*60, # optional; 0 is default, meaning the message is not stored
+      # identifier:        1234,                 # optional
+      # content_available: true                  # optional; any truthy value will set 'content-available' to 1
+      )
+      IceBr8kr::Application::IOS_PUSHER.push(notification)
+      result = true
+      message = 'push sended to IOS'
+    elsif device == 'Android'
+      result = true
+      message = 'push sended to Android'
+    end
+  end
+
+
 
   private
 

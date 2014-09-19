@@ -1,6 +1,8 @@
 source 'https://rubygems.org'
 
 gem 'rails', '4.1.4'
+gem 'jquery-rails', '~> 3.1.2'
+gem 'turbolinks', '~> 2.3.0'
 gem 'pg'
 gem 'devise', '~> 3.3.0'
 gem 'rabl-rails', '~> 0.3.4'
@@ -25,8 +27,6 @@ group :development do
   gem "letter_opener"
   gem 'spring'
 end
-
-gem 'rufus-scheduler', '~> 3.0.9'
 
 group :test do
   gem 'factory_girl_rails', '~> 4.4.1'

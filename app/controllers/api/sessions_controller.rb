@@ -1,5 +1,6 @@
 class Api::SessionsController < ApplicationController
-  before_action :api_authenticate_user, only: [:destroy]
+
+  before_action :api_authenticate_user, only: [:destroy_sessions]
   swagger_controller :sessions, "Session Management"
 
   swagger_api :create do
@@ -13,15 +14,15 @@ class Api::SessionsController < ApplicationController
   def create
     user = User.find_for_authentication(email: params[:email])
     if user
-      if user.valid_password?(params[:password])# && user.confirmed_at != nil
+      if user.valid_password?(params[:password]) && user.confirmed_at != nil
         session = create_session user, params[:auth]
         render json: { success: true,
-                          info: 'Logged in',
-                          data: {authentication_token: session[:auth_token], user: user, avatar: user.avatar.url},
-                        status: 200
-                     }
-      #elsif user.confirmed_at == nil
-      #   render json: { errors: 'Please confirm your email first'}, status: 200
+                       info: 'Logged in',
+                       data: {authentication_token: session[:auth_token], user: user, avatar: user.avatar.url},
+                       status: 200
+        }
+      elsif user.confirmed_at == nil
+        render json: { errors: 'Please confirm your email first'}, status: 200
       else
         render json: {errors: 'Email or password is incorrect!'} , status: 200
       end
@@ -59,7 +60,6 @@ class Api::SessionsController < ApplicationController
       render json: { message: 'No such email' }
     end
   end
-
 
   private
 

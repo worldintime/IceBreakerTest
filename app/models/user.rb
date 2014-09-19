@@ -6,8 +6,6 @@ class User < ActiveRecord::Base
   has_many :muted, class_name: Mute, foreign_key: :sender_id
   has_many :sent_messages, class_name: Conversation, foreign_key: :sender_id
   has_many :received_messages, class_name: Conversation, foreign_key: :receiver_id
-  has_many :send_messages, class_name: Conversation, foreign_key: :sender_id
-  has_many :receive_messages, class_name: Conversation, foreign_key: :receiver_id
 
   devise :database_authenticatable, :registerable, :confirmable,
          :recoverable, :rememberable, :trackable, :validatable
@@ -17,8 +15,10 @@ class User < ActiveRecord::Base
   validates_presence_of :first_name, :last_name, :gender, :email, :user_name
   validates_confirmation_of :password
   validates_uniqueness_of :user_name
+
   reverse_geocoded_by :latitude, :longitude
   after_validation :reverse_geocode
+
 
   def self.from_omniauth(auth)
     where(auth.slice(:facebook_id)).first_or_initialize.tap do |user|

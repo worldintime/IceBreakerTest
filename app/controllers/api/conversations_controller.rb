@@ -12,6 +12,9 @@ class Api::ConversationsController < ApplicationController
     param :query, :conversation_id, :integer, :required, "Conversation id. Receives after type:initial, and required for other types"
   end
 
+  before_action :api_authenticate_user
+  swagger_controller :conversations, "Conversation Management"
+
   def messaging
     if Mute.where(sender_id: [params[:sender_id],params[:receiver_id]],
                   receiver_id: [params[:receiver_id],params[:sender_id]]).any?
@@ -136,7 +139,6 @@ class Api::ConversationsController < ApplicationController
 
   swagger_api :history_of_digital_hello do
     summary "History of all digital hello"
-    param :query, :authentication_token, :string, :required, "Authentication token"
   end
 
   def history_of_digital_hello
@@ -147,14 +149,14 @@ class Api::ConversationsController < ApplicationController
 
     if history
       render json: { success: true,
-                        data: Hash[history.each_with_index.map{|h,i| ["conversation#{i}", h.to_json(@current_user.id)]}],
-                      status: 200
-                   }
+                     data: Hash[history.each_with_index.map{|h,i| ["conversation#{i}", h.to_json(@current_user.id)]}],
+                     status: 200
+      }
     else
       render json: { success: false,
-                        info: 'Failed',
-                      status: 200
-                   }
+                     info: 'Failed',
+                     status: 200
+      }
     end
 
   end
@@ -171,3 +173,4 @@ class Api::ConversationsController < ApplicationController
   end
 
 end
+

@@ -15,7 +15,6 @@ ActiveRecord::Schema.define(version: 20140917180252) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
-  enable_extension "pgcrypto"
 
   create_table "canned_statements", force: true do |t|
     t.text     "body"
@@ -85,12 +84,12 @@ ActiveRecord::Schema.define(version: 20140917180252) do
     t.string   "avatar_content_type"
     t.integer  "avatar_file_size"
     t.datetime "avatar_updated_at"
-    t.string   "address"
-    t.float    "latitude"
-    t.float    "longitude"
     t.integer  "rating",                 default: 0
     t.string   "facebook_uid"
     t.string   "facebook_avatar"
+    t.string   "address"
+    t.float    "latitude"
+    t.float    "longitude"
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
