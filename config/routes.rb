@@ -4,6 +4,7 @@ Rails.application.routes.draw do
 
   namespace :api, defaults: {format: 'json'} do
     resources :users
+    post 'canned_statements', to: 'users#canned_statements'
     post 'search', to: 'users#search'
     post 'location', to: 'users#location'
     post 'send_push_notification', to: 'users#send_push_notification'

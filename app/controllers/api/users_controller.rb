@@ -15,6 +15,10 @@ class Api::UsersController < ApplicationController
     param :query, :avatar, :string, :optional, "User's avatar"
   end
 
+  def canned_statements
+    @canned_statements = CannedStatement.all
+  end
+
   def create
     user = User.new(first_name: params[:first_name], last_name: params[:last_name], password: params[:password],
                     gender: params[:gender], date_of_birth: params[:date_of_birth], user_name: params[:user_name],
