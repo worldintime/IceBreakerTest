@@ -14,6 +14,8 @@ gem 'omniauth-facebook'
 gem 'swagger-docs'
 gem 'rest-client', '~> 1.7.2'
 gem 'rufus-scheduler', '~> 3.0.9'
+# We use it in our db:seed
+gem 'factory_girl_rails', '~> 4.4.1'
 
 group :assets do
   gem 'sass-rails', '~> 4.0.3'
@@ -27,7 +29,6 @@ group :development do
 end
 
 group :test do
-  gem 'factory_girl_rails', '~> 4.4.1'
   gem 'shoulda', '~> 3.5.0'
   gem 'rspec-rails', '~> 3.1.0'
   gem 'simplecov', '~> 0.9.0', :require => false
