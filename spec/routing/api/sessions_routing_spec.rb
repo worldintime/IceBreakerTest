@@ -8,7 +8,7 @@ describe Api::SessionsController do
     end
 
     it "routes to #destroy" do
-      expect( delete("api/sessions") ).to route_to("api/sessions#destroy", format: 'json')
+      expect( post("api/destroy_sessions") ).to route_to("api/sessions#destroy", format: 'json')
     end
 
   end

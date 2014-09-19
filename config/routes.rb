@@ -5,7 +5,7 @@ Rails.application.routes.draw do
   namespace :api, defaults: {format: 'json'} do
     resources :users
     post 'search', to: 'users#search'
-    post 'location', to: 'users#set_location'
+    post 'location', to: 'users#location'
     post 'send_push_notification', to: 'users#send_push_notification'
 
     post 'sessions', to: 'sessions#create', as: 'login'
