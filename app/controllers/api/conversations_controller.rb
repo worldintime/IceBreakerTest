@@ -99,7 +99,7 @@ class Api::ConversationsController < ApplicationController
 
   def unread_messages
     sent = Conversation.select('COUNT(reply_viewed) AS reply').where("reply_viewed = false AND sender_id = #{@current_user.id}")
-    received = Conversation.select("COUNT(initial_viewed) AS initial,COUNT(finished_viewed) AS finished").where("initial_viewed = false OR finished_viewed = false AND receiver_id = #{@current_user.id}")   
+    received = Conversation.select("COUNT(initial_viewed) AS initial,COUNT(finished_viewed) AS finished").where("initial_viewed = false OR finished_viewed = false AND receiver_id = #{@current_user.id}")
     data = sent.first[:reply] + received.first[:initial] + received.first[:finished]
     if data > 0
       render json: { success: true,

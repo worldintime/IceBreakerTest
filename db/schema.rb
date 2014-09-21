@@ -76,9 +76,6 @@ ActiveRecord::Schema.define(version: 20140919161001) do
     t.datetime "confirmed_at"
     t.datetime "confirmation_sent_at"
     t.string   "unconfirmed_email"
-    t.string   "address"
-    t.float    "latitude",               limit: 24
-    t.float    "longitude",              limit: 24
     t.string   "facebook_id"
     t.string   "oauth_token"
     t.datetime "oauth_expires_at"
@@ -86,8 +83,12 @@ ActiveRecord::Schema.define(version: 20140919161001) do
     t.string   "avatar_content_type"
     t.integer  "avatar_file_size"
     t.datetime "avatar_updated_at"
+    t.string   "address"
+    t.float    "latitude"
+    t.float    "longitude"
     t.string   "facebook_uid"
     t.string   "facebook_avatar"
+    t.integer  "rating",                 default: 0
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree

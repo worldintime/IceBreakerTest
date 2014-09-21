@@ -1,5 +1,5 @@
 class Api::UsersController < ApplicationController
-  before_action :api_authenticate_user, except: [:create, :forgot_password, :send_push_notification]
+  before_action :api_authenticate_user, except: [:create, :forgot_password, :canned_statements]
   
   swagger_controller :users, "User Management"
 
