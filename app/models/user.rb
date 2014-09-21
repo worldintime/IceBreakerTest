@@ -30,43 +30,51 @@ class User < ActiveRecord::Base
     end
   end
 
-  def self.send_push_notification(user_id, auth_token, message, options = {})
-    user         = User.find user_id
-    session      = Session.find_by(auth_token: auth_token)
-    result       = false
-    info         = 'Something went wrong'
+  def self.send_push_notification(options = {})
+     user         = User.find options[:user_id]
+     session      = Session.find_by_auth_token(options[:auth_token])
+     message      = options[:message]
+     result       = false
+     info         = 'Something went wrong'
+ 
+     user.sessions.each do |session|
+       if session.device && session.device_token
+ 
+         if session.device == 'IOS'
+           notification = Grocer::Notification.new(
+             device_token: session.device_token,
+             alert:        message
+           )
+           IceBr8kr::Application::IOS_PUSHER.push(notification)
+           result = true
+           info = 'Pushed to IOS'
+         elsif session.device == 'Android'
+           require 'rest_client'
+           url = 'https://android.googleapis.com/gcm/send'
+           headers = {
+             'Authorization' => 'key=AIzaSyBCK9NX8gRY51g9UwtY1znEirJuZqTNmAU',
+             'Content-Type'  => 'application/json'
+           }
+           request = {
+             'registration_ids' => [session.device_token],
+             data: {
+               'message' => message
+             }
+           }
+ 
+           response = RestClient.post(url, request.to_json, headers)
+           result = true
+           info = 'Pushed to Android'
+         end
+       end
+     end
+   end
 
-    user.sessions.each do |session|
-      if session.device && session.device_token
-
-        if session.device == 'IOS'
-          notification = Grocer::Notification.new(
-            device_token: session.device_token,
-            alert:        message
-          )
-          IceBr8kr::Application::IOS_PUSHER.push(notification)
-          result = true
-          info = 'Pushed to IOS'
-        elsif session.device == 'Android'
-          require 'rest_client'
-          url = 'https://android.googleapis.com/gcm/send'
-          headers = {
-            'Authorization' => 'key=AIzaSyBCK9NX8gRY51g9UwtY1znEirJuZqTNmAU',
-            'Content-Type'  => 'application/json'
-          }
-          request = {
-            'registration_ids' => [session.device_token],
-            data: {
-              'message' => message
-            }
-          }
-
-          response = RestClient.post(url, request.to_json, headers)
-          result = true
-          info = 'Pushed to Android'
-        end
-      end
-    end
+  def self.rating_update(user_ids)
+    sender   = self.find user_ids[:sender]
+    receiver = self.find user_ids[:receiver]
+    sender.update_attributes(rating: sender.rating + 1)
+    receiver.update_attributes(rating: receiver.rating + 1)
   end
 
 end
