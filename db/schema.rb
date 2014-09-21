@@ -11,11 +11,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140919083302) do
+ActiveRecord::Schema.define(version: 20140919161001) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "pgcrypto"
+
+  create_table "canned_statements", force: true do |t|
+    t.text    "body"
+    t.integer "user_id"
+  end
 
   create_table "conversations", force: true do |t|
     t.integer  "sender_id"

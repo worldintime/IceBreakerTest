@@ -17,7 +17,7 @@ class Api::UsersController < ApplicationController
     param :query, :facebook_avatar, :string, :optional, "Facebook avatar"
     param :query, :facebook_uid, :string, :optional, "Facebook user id"
   end
-  
+
   def create
     if params[:facebook_uid]
       exist = User.find_by_facebook_uid(params[:facebook_uid])
@@ -57,6 +57,14 @@ class Api::UsersController < ApplicationController
         render json: { errors: @user.errors.full_messages, success: false }, status: 200
       end
     end
+  end
+
+  swagger_api :canned_statements do
+    summary "Return all canned statement"
+  end
+
+  def canned_statements
+    @canned_statements = CannedStatement.all
   end
 
   swagger_api :upload_avatar do
