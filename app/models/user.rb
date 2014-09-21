@@ -15,6 +15,9 @@ class User < ActiveRecord::Base
   validates_confirmation_of :password
   validates_uniqueness_of :user_name
 
+  reverse_geocoded_by :latitude, :longitude
+  after_validation :reverse_geocode
+
   def self.from_omniauth(auth)
     where(auth.slice(:facebook_id)).first_or_initialize.tap do |user|
       user.facebook_id = auth.extra.raw_info.id if auth.extra.raw_info.id
@@ -31,11 +34,10 @@ class User < ActiveRecord::Base
   end
 
   def self.send_push_notification(options = {})
-     user         = User.find options[:user_id]
-     session      = Session.find_by_auth_token(options[:auth_token])
-     message      = options[:message]
-     result       = false
-     info         = 'Something went wrong'
+    user    = User.find options[:user_id]
+    message = options[:message] ? options[:message] : "You have been ignored!"
+    result  = false
+    info    = 'Something went wrong'
  
      user.sessions.each do |session|
        if session.device && session.device_token
