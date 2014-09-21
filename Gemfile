@@ -26,8 +26,11 @@ group :development do
   gem 'spring'
 end
 
-group :test do
+group :development, :test do
   gem 'factory_girl_rails', '~> 4.4.1'
+end
+
+group :test do
   gem 'shoulda', '~> 3.5.0'
   gem 'rspec-rails', '~> 3.1.0'
   gem 'simplecov', '~> 0.9.0', :require => false
