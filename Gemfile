@@ -26,10 +26,6 @@ group :development do
   gem 'spring'
 end
 
-gem 'swagger-docs', '~> 0.1.9'
-
-gem 'rufus-scheduler', '~> 3.0.9'
-
 group :test do
   gem 'factory_girl_rails', '~> 4.4.1'
   gem 'shoulda', '~> 3.5.0'
