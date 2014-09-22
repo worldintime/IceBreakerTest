@@ -1,5 +1,7 @@
 class Api::UsersController < ApplicationController
-  before_action :api_authenticate_user, except: [:create, :forgot_password]
+
+  before_action :api_authenticate_user, except: [:create, :forgot_password, :canned_statements]
+
   swagger_controller :users, "User Management"
 
   swagger_api :create do
@@ -11,7 +13,10 @@ class Api::UsersController < ApplicationController
     param :query, :user_name, :string, :required, "User name"
     param :query, :email, :string, :required, "Email address"
     param :query, :password, :string, :required, "Password"
+    param :query, :password_confirmation, :string, :required, "Confirmation Password"
     param :query, :avatar, :string, :optional, "User's avatar"
+    param :query, :facebook_avatar, :string, :optional, "Facebook avatar"
+    param :query, :facebook_uid, :string, :optional, "Facebook user id"
   end
 
   def create
@@ -22,8 +27,7 @@ class Api::UsersController < ApplicationController
         render json: { success: true,
                        info: 'Logged in',
                        data: {authentication_token: session[:auth_token], user: exist, avatar: exist.avatar.url},
-                       status: 200
-        }
+                       status: 200 }
       else
         password = SecureRandom.hex(8)
         user = User.new(first_name: params[:first_name], last_name: params[:last_name], password: password,
@@ -52,7 +56,6 @@ class Api::UsersController < ApplicationController
                           data: {user: @user},
                         status: 200
                      }
-
       else
         render json: { errors: @user.errors.full_messages, success: false }, status: 200
       end
@@ -93,18 +96,31 @@ class Api::UsersController < ApplicationController
   end
 
   def edit_profile
-
-    if @current_user.update_attributes!(user_params)
-      render json: { success: true,
-                        info: 'Profile successfully updated.',
-                      status: 200
-                   }
-
+    if params[:password_confirmation].nil?
+      if @current_user.update_attribute(:password, params[:password])
+        render json: { success: true,
+                       info: 'Password successfully updated.',
+                       status: 200
+        }
+      else
+        render json: { success: false,
+                       info: 'Session expired. Please login.',
+                       status: 200
+        }
+      end
     else
-      render json: { success: false,
-                        info: 'Session expired. Please login.',
-                      status: 200
-                   }
+      if @current_user.update_attributes!(user_params)
+        render json: { success: true,
+                       info: 'Profile successfully updated.',
+                       status: 200
+        }
+
+      else
+        render json: { success: false,
+                       info: 'Session expired. Please login.',
+                       status: 200
+        }
+      end
     end
   end
 
@@ -112,6 +128,7 @@ class Api::UsersController < ApplicationController
     summary "Return list of predefined canned statements"
     param :query, :authentication_token, :string, :required, "Authentication token"
   end
+
   def canned_statements
     @canned_statements = CannedStatement.all
   end
@@ -184,8 +201,8 @@ class Api::UsersController < ApplicationController
 
     if lat.nil? || lng.nil?
       render json: { success: false,
-                        info: 'Latitude or Longitude are missed',
-                      status: 200 }
+                     info: 'Latitude or Longitude are missed',
+                     status: 200 }
     end
 
     @designated_users = User.near([lat, lng], 0.1).where.not(id: @current_user.id)
@@ -206,39 +223,13 @@ class Api::UsersController < ApplicationController
       render json: { success: false,
                         info: 'Latitude or Longitude are missed',
                       status: 200 }
+
     elsif @current_user.update_attributes(latitude: lat.gsub(',', '.'), longitude: lng.gsub(',', '.'))
       render json: { success: true,
-                        info: 'New location was set successfully',
-                      status: 200 }
+                     info: 'New location was set successfully',
+                     status: 200 }
     end
   end
-
-  private
-
-  def send_push_notification
-    device = params[:device]
-
-    result = false
-    message = 'Something wrong'
-    if device == 'IOS'
-      notification = Grocer::Notification.new(
-          device_token:      params[:device_token],
-          alert:             'message'
-      #  badge:             42
-      # expiry:            0,#,Time.now + 60*60, # optional; 0 is default, meaning the message is not stored
-      # identifier:        1234,                 # optional
-      # content_available: true                  # optional; any truthy value will set 'content-available' to 1
-      )
-      IceBr8kr::Application::IOS_PUSHER.push(notification)
-      result = true
-      message = 'push sended to IOS'
-    elsif device == 'Android'
-      result = true
-      message = 'push sended to Android'
-    end
-  end
-
-
 
   private
 
