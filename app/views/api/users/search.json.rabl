@@ -1,2 +1,2 @@
-collection :@designated_users
-attributes :id, :first_name, :last_name, :address, :avatar, :rating
+collection :@designated_users => :users
+attributes :id, :first_name, :last_name, :address, :latitude, :longitude, :avatar, :rating
