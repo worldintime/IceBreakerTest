@@ -46,10 +46,14 @@ class Conversation < ActiveRecord::Base
   end
 
   def last_message_from_sender
-    if self.finished.nil?
+    if self.finished.nil? && self.reply.nil?
       {sender_id: self.sender_id,
        text: self.initial,
        status: 'initial'}
+    elsif self.finished.nil? && self.initial != nil
+      {sender_id: self.receiver_id,
+       text: self.reply,
+       status: 'reply'}
     else
       {sender_id: self.sender_id,
        text: self.finished,
@@ -107,10 +111,8 @@ class Conversation < ActiveRecord::Base
                      last_name: opponent.last_name,
                      user_avatar: receiver_avatar(current_user_id)
       },
-        last_message: {  sender_id: self.receiver_id,
-                         text: self.reply,
-                         status: 'reply'
-        }
+        last_message: last_message_from_sender
+
       }
     end
   end
