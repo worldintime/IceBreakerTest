@@ -13,6 +13,9 @@ class Api::SessionsController < ApplicationController
   
   def create
     user = User.find_for_authentication(email: params[:email])
+    if user.nil?
+      user = User.find_for_authentication(user_name: params[:email])
+    end
     if user
       if user.valid_password?(params[:password]) && user.confirmed_at != nil
         session = create_session user, params[:auth]
