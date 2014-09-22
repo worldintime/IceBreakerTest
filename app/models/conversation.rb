@@ -47,10 +47,12 @@ class Conversation < ActiveRecord::Base
 
   def last_message_from_sender
     if self.finished.nil?
-      {text: self.initial,
+      {sender_id: self.sender_id,
+       text: self.initial,
        status: 'initial'}
     else
-      {text: self.finished,
+      {sender_id: self.sender_id,
+       text: self.finished,
        status: 'finished'}
     end
   end
@@ -105,7 +107,8 @@ class Conversation < ActiveRecord::Base
                      last_name: opponent.last_name,
                      user_avatar: receiver_avatar(current_user_id)
       },
-        last_message: {  text: self.reply,
+        last_message: {  sender_id: self.receiver_id,
+                         text: self.reply,
                          status: 'reply'
         }
       }
