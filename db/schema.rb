@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140919161001) do
+ActiveRecord::Schema.define(version: 20140922154529) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -88,7 +88,8 @@ ActiveRecord::Schema.define(version: 20140919161001) do
     t.float    "longitude"
     t.string   "facebook_uid"
     t.string   "facebook_avatar"
-    t.integer  "rating",                 default: 0
+    t.integer  "sent_rating",            default: 0
+    t.integer  "received_rating",        default: 0
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
