@@ -147,7 +147,8 @@ class Api::UsersController < ApplicationController
                      status: 200 }
     end
 
-    @designated_users = User.near([lat, lng], 0.1).where.not(id: @current_user.id)
+    @users_in_radius     = User.near([lat, lng], 0.1).where.not(id: @current_user.id)
+    @users_out_of_radius = User.near([lat, lng], 8).where.not(id: [@current_user.id] + @users_in_radius)
   end
 
   swagger_api :location do
