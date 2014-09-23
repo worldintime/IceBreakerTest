@@ -33,13 +33,13 @@ describe Api::UsersController do
       expect(user.avatar.url).to match /photo\.jpg/
     end
 
-    describe '#forgot_password' do
+    describe '#user_mailer' do
       before :each do
         ActionMailer::Base.deliveries.clear
       end
 
       it 'should send email wit instructions' do
-        post :forgot_password, email: user.email
+        post :user_mailer, email: user.email
         mail = ActionMailer::Base.deliveries.first
         expect(mail.to).to include(user.email)
       end

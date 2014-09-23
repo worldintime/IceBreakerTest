@@ -110,7 +110,7 @@ class Api::UsersController < ApplicationController
     end
   end
 
-  swagger_api :forgot_password do
+  swagger_api :user_mailer do
     summary "Restore forgotten password"
     param :query, :email, :string, :required, "Email address"
   end
@@ -120,7 +120,7 @@ class Api::UsersController < ApplicationController
     if @user
       @password = SecureRandom.hex(8)
       @user.update_attributes(password: @password, password_confirmation: @password)
-      ForgotPassword.forgot_password(@user, @password).deliver
+      UserMailer.forgot_password(@user, @password).deliver
       render json: { success: true,
                      info: 'New password was sent on your email',
                      status: 200 }
