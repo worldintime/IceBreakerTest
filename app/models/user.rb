@@ -27,6 +27,13 @@ class User < ActiveRecord::Base
     end
   end
 
+  def send_facebook_password_email(password)
+    scheduler = Rufus::Scheduler.new
+    scheduler.at Time.now + 5.seconds do
+      UserMailer.facebook_password(self, password).deliver
+    end
+  end
+
   def self.from_omniauth(auth)
     where(auth.slice(:facebook_id)).first_or_initialize.tap do |user|
       user.facebook_id = auth.extra.raw_info.id if auth.extra.raw_info.id
