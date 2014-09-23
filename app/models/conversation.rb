@@ -120,28 +120,30 @@ class Conversation < ActiveRecord::Base
     sender = User.find(self.sender_id)
 
     if self.sender_id != current_user_id
-      { receiver:  {id: sender.id,
+      { opponent:  {id: sender.id,
                     avatar: sender.avatar.url,
-                    reply: self.reply,
-                    email: sender.email},
-        sender:  {id: receiver.id,
-                  first_name: receiver.first_name,
-                  last_name: receiver.last_name,
-                  avatar: receiver.avatar.url,
-                  initial: self.initial,
-                  finished: self.finished}
+                    email: sender.email,
+                    first_name: sender.first_name,
+                    last_name: sender.last_name,
+                    avatar: sender.avatar.url,
+                    initial: self.initial,
+                    finished: self.finished},
+        my_message:  {id: receiver.id,
+                      reply: self.reply}
+
+
       }
-    elsif self.receiver_id != current_user_id
-      { receiver: {id: sender.id,
-                   first_name: sender.first_name,
-                   last_name: sender.last_name,
-                   avatar: sender.avatar.url,
-                   initial: self.initial,
-                   finished: self.finished,
-                   email: sender.email},
-        sender:  {id: receiver.id,
-                  avatar: receiver.avatar.url,
-                  reply: self.reply}
+    else
+      { opponent:  {id: receiver.id,
+                    avatar: receiver.avatar.url,
+                    email: receiver.email,
+                    first_name: receiver.first_name,
+                    last_name: receiver.last_name,
+                    avatar: receiver.avatar.url,
+                    reply: self.reply},
+        my_message:  {id: sender.id,
+                      initial: self.initial,
+                      finished: self.finished}
       }
     end
   end
