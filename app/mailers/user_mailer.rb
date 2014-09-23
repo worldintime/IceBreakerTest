@@ -1,4 +1,4 @@
-class ForgotPassword < ActionMailer::Base
+class UserMailer < ActionMailer::Base
   default from: "from@example.com"
 
   def forgot_password(user, password)
@@ -7,3 +7,4 @@ class ForgotPassword < ActionMailer::Base
     mail(to: @user.email, subject: 'New password for IceBr8kr account')
   end
 end
+ 

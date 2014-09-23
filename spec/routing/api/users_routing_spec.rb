@@ -15,8 +15,8 @@ describe Api::UsersController do
       expect( post("api/location") ).to route_to("api/users#location", format: 'json')
     end
 
-    it "routes to #forgot_password" do
-      expect( post("api/forgot_password") ).to route_to("api/users#forgot_password", format: 'json')
+    it "routes to #user_mailer" do
+      expect( post("api/user_mailer") ).to route_to("api/users#user_mailer", format: 'json')
     end
 
     it "routes to #edit_profile" do
