@@ -7,3 +7,4 @@ class UserMailer < ActionMailer::Base
     mail(to: @user.email, subject: 'New password for IceBr8kr account')
   end
 end
+ 
