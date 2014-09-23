@@ -118,12 +118,7 @@ class Api::UsersController < ApplicationController
   def forgot_password
     @user = User.find_by_email(params[:email])
     if @user
-      @password = SecureRandom.hex(8)
-      @user.update_attributes(password: @password, password_confirmation: @password)
-      scheduler = Rufus::Scheduler.new
-      scheduler.at Time.now + 5.seconds do
-        UserMailer.forgot_password(@user, @password).deliver
-      end
+      @user.send_forgot_password_email!
       render json: { success: true,
                      info: 'New password was sent on your email',
                      status: 200 }
