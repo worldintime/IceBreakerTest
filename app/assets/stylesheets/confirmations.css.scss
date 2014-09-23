@@ -1,0 +1,164 @@
+/*body {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 15px;
+  text-align: center;
+
+  .success {
+    border: 1px solid #00529B;
+    margin: 10px 0px;
+    padding: 10px 10px 10px 10px;
+    background-repeat: no-repeat;
+    background-position: 10px center;
+    
+    color: #00529B;
+    background-size: 31px;
+    color: #000000;
+    background-color: #BDE5F8;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    margin-top: -50px;
+    margin-left: -163px;
+    padding-left: 15px;
+    padding-right: 15px;  
+    background-image: url('blue-tick-md.png');
+    padding-left: 50px;
+    border-radius: 3px;                          
+  }
+}*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.confirmation-dialog {
+  width: 40%;
+  display: block;
+  font-weight: bold;
+  margin: auto;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  height: 150px;
+  border-radius: 5px;
+  padding: 0 5%;
+  text-align: center;
+  color: #F0F0F0 ;
+  font-size: 20px;
+
+
+  // cold baby
+  /*background-repeat: no-repeat;*/
+  background-position: 10px center;
+  background-image: url('ice_baby.png');
+
+  .confirmed-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    
+    p {
+      position: absolute;
+      width: 100%;
+
+      &:first-child {
+        top: 0;
+      }
+
+      &:nth-child(2) {
+        bottom: 57px;
+      }
+
+      &:nth-child(3) {
+        bottom: 0;
+        margin-bottom: 10px;
+      }
+    }
+
+    span {
+      bottom: 10px;
+      width: 48px;
+      height: 48px;
+      display: block;
+      background-size: contain;
+      position: absolute;
+      
+    }
+
+    #play-store {
+      background-image: url('play-store.png');
+      left: 20%;
+    }
+
+    #apple-store {
+      background-image: url('apple-store.png');
+      right: 20%;
+    }
+  }
+}
+
+/* Large desktop */
+@media (min-width: 1200px) {
+  .confirmation-dialog {
+    width: 30%;
+    font-size: 20px;
+  }
+}
+ 
+/* Portrait tablet to landscape and desktop */
+@media (min-width: 768px) and (max-width: 979px) {
+  .confirmation-dialog {
+    width: 50%;
+    font-size: 20px;
+  }
+}
+ 
+/* Landscape phone to portrait tablet */
+@media (max-width: 767px) {
+  .confirmation-dialog {
+    width: 50%;
+    font-size: 14px;
+    height: 20%;
+  }
+}
+ 
+/* Landscape phones and down */
+@media (max-width: 480px) {
+  .confirmation-dialog {
+    width: 80%;
+    font-size: 14px;
+    height: 20%;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
