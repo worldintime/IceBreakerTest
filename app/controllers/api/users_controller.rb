@@ -117,11 +117,11 @@ class Api::UsersController < ApplicationController
   end
 
   def forgot_password
-    user = User.find_by_email(params[:email])
-    if user
-      password = SecureRandom.hex(8)
-      user.update_attributes(password: password, password_confirmation: password)
-      user.send_reset_password_instructions
+    @user = User.find_by_email(params[:email])
+    if @user
+      @password = SecureRandom.hex(8)
+      @user.update_attributes(password: @password, password_confirmation: @password)
+      ForgotPassword.forgot_password(@user, @password).deliver
       render json: { success: true,
                      info: 'New password was sent on your email',
                      status: 200 }
