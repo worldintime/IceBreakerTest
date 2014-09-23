@@ -102,6 +102,7 @@ class Api::UsersController < ApplicationController
     if @current_user.update_attributes!(user_params)
       render json: { success: true,
                      info: 'Profile successfully updated.',
+                     user: @current_user,
                      status: 200 }
     else
       render json: { success: false,
