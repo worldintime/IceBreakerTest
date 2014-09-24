@@ -98,13 +98,11 @@ class Api::ConversationsController < ApplicationController
   end
 
   def unread_messages
-    reply = Conversation.connection.execute(Conversation.unread_reply(@current_user.id)).to_a.first['reply_sum'].to_i
-    initial = Conversation.connection.execute(Conversation.unread_initial(@current_user.id)).to_a.first['total_sum'].to_i
-    total = reply + initial
-    if total > 0
+    messages = Conversation.unread_messages(@current_user.id)
+    if messages > 0
       render json: { success: true,
                      info: 'Number of unread messages',
-                     data: total,
+                     data: messages,
                      status: 200 }
     else
       render json: { success: true,

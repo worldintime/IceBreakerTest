@@ -81,6 +81,12 @@ class Conversation < ActiveRecord::Base
     end
   end
 
+  def self.unread_messages(current_user_id)
+    initial = connection.execute(self.unread_initial(current_user_id),).to_a.first['total_sum'].to_i
+    reply = connection.execute(self.unread_reply(current_user_id),).to_a.first['reply_sum'].to_i
+    sum = initial + reply
+  end
+
   def self.unread_reply(current_user_id)
     query = "SELECT SUM((CASE WHEN reply_viewed = false THEN 1 ELSE 0 END)) AS reply_sum FROM conversations WHERE (conversations.sender_id = #{current_user_id})"
   end
