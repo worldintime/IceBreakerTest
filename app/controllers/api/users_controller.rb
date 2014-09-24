@@ -112,11 +112,6 @@ class Api::UsersController < ApplicationController
     end
   end
 
-  swagger_api :user_mailer do
-    summary "Restore forgotten password"
-    param :query, :email, :string, :required, "Email address"
-  end
-
   def forgot_password
     @user = User.find_by_email(params[:email])
     if @user
