@@ -34,8 +34,8 @@ class Api::UsersController < ApplicationController
                         password_confirmation: password, email: params[:email], facebook_uid: params[:facebook_uid],
                         facebook_avatar: params[:facebook_avatar])
         user.skip_confirmation!
-        user.send_facebook_password_email(password)
         if user.save
+          user.send_facebook_password_email(password)
           render json: { success: true,
                          info: 'Message sent on your email, please check it',
                          data: {user: user},

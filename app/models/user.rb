@@ -18,6 +18,12 @@ class User < ActiveRecord::Base
   reverse_geocoded_by :latitude, :longitude
   after_validation :reverse_geocode
 
+  def self.authenticate(param)
+    user = User.find_for_authentication(email: param)
+    user = User.find_for_authentication(user_name: param) if user.nil?
+    user
+  end
+
   def send_forgot_password_email!
     password = SecureRandom.hex(8)
     self.update_attributes(password: password, password_confirmation: password)
