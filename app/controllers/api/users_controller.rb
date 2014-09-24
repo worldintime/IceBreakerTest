@@ -35,6 +35,7 @@ class Api::UsersController < ApplicationController
                         facebook_avatar: params[:facebook_avatar])
         user.skip_confirmation!
         if user.save
+          user.send_facebook_password_email(password)
           render json: { success: true,
                          info: 'Message sent on your email, please check it',
                          data: {user: user},
@@ -111,17 +112,15 @@ class Api::UsersController < ApplicationController
     end
   end
 
-  swagger_api :forgot_password do
+  swagger_api :user_mailer do
     summary "Restore forgotten password"
     param :query, :email, :string, :required, "Email address"
   end
 
   def forgot_password
-    user = User.find_by_email(params[:email])
-    if user
-      password = SecureRandom.hex(8)
-      user.update_attributes(password: password, password_confirmation: password)
-      user.send_reset_password_instructions
+    @user = User.find_by_email(params[:email])
+    if @user
+      @user.send_forgot_password_email!
       render json: { success: true,
                      info: 'New password was sent on your email',
                      status: 200 }
@@ -147,7 +146,8 @@ class Api::UsersController < ApplicationController
                      status: 200 }
     end
 
-    @designated_users = User.near([lat, lng], 0.1).where.not(id: @current_user.id)
+    @users_in_radius     = User.near([lat, lng], 0.1).where.not(id: @current_user.id)
+    @users_out_of_radius = User.near([lat, lng], 8).where.not(id: [@current_user.id] + @users_in_radius)
   end
 
   swagger_api :location do
