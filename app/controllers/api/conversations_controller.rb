@@ -35,7 +35,7 @@ class Api::ConversationsController < ApplicationController
           end
         when 'reply'
           conversation = Conversation.find(params[:conversation_id])
-          if conversation.update_attributes!(reply: params[:msg])
+          if conversation.update_attributes!(reply: params[:msg], reply_viewed: false)
             User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id]})
             User.send_push_notification({user_id: params[:sender_id], message: params[:msg]})
             render json: { success: true,
@@ -47,7 +47,7 @@ class Api::ConversationsController < ApplicationController
           end
         when 'finished'
           conversation = Conversation.find(params[:conversation_id])
-          if conversation.update_attributes!(finished: params[:msg])
+          if conversation.update_attributes!(finished: params[:msg], finished_viewed: false)
             User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id]})
             User.send_push_notification({user_id: params[:receiver_id], message: params[:msg]})
             render json: { success: true,
@@ -82,7 +82,7 @@ class Api::ConversationsController < ApplicationController
     conversation = Conversation.find(params[:conversation_id])
 
     if conversation
-      conversation.update_attributes!(initial_viewed: true, reply_viewed: true, finished_viewed: true)
+      conversation.update_attributes!(conversation.existing_messages)
       render json: { success: true,
                      data:  conversation.check_if_sender(@current_user.id),
                      conversation_id: params[:conversation_id] }
@@ -98,13 +98,13 @@ class Api::ConversationsController < ApplicationController
   end
 
   def unread_messages
-    sent = Conversation.select('COUNT(reply_viewed) AS reply').where("reply_viewed = false AND sender_id = #{@current_user.id}")
-    received = Conversation.select("COUNT(initial_viewed) AS initial,COUNT(finished_viewed) AS finished").where("initial_viewed = false OR finished_viewed = false AND receiver_id = #{@current_user.id}")
-    data = sent.first[:reply] + received.first[:initial] + received.first[:finished]
-    if data > 0
+    reply = Conversation.connection.execute(Conversation.unread_reply(@current_user.id)).to_a.first['reply_sum'].to_i
+    initial = Conversation.connection.execute(Conversation.unread_initial(@current_user.id)).to_a.first['total_sum'].to_i
+    total = reply + initial
+    if total > 0
       render json: { success: true,
                      info: 'Number of unread messages',
-                     data: data,
+                     data: total,
                      status: 200 }
     else
       render json: { success: true,
