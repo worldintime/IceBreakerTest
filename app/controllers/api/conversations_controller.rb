@@ -60,7 +60,7 @@ class Api::ConversationsController < ApplicationController
         when 'ignore'
           conversation = Conversation.find(params[:conversation_id])
           if conversation
-            conversation.update_attribute(:status, 'Open')
+            conversation.update_attributes!(status: 'Open')
             User.send_push_notification({receiver_id: params[:receiver_id]})
             conversation.ignore_user(params[:sender_id], params[:receiver_id])
             render json: { success: true,
