@@ -22,7 +22,7 @@ class Api::ConversationsController < ApplicationController
       case params[:type]
         when 'initial'
           conversation = Conversation.new(sender_id: params[:sender_id], receiver_id: params[:receiver_id],
-                                          initial: params[:msg])
+                                          initial: params[:msg], status: 'Closed')
           if conversation.save
             User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id]})
             User.send_push_notification({user_id: params[:receiver_id], message: params[:msg]})
@@ -47,7 +47,7 @@ class Api::ConversationsController < ApplicationController
           end
         when 'finished'
           conversation = Conversation.find(params[:conversation_id])
-          if conversation.update_attributes!(finished: params[:msg], finished_viewed: false)
+          if conversation.update_attributes!(finished: params[:msg], finished_viewed: false, status: 'Open')
             User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id]})
             User.send_push_notification({user_id: params[:receiver_id], message: params[:msg]})
             render json: { success: true,
@@ -60,6 +60,7 @@ class Api::ConversationsController < ApplicationController
         when 'ignore'
           conversation = Conversation.find(params[:conversation_id])
           if conversation
+            conversation.update_attribute(:status, 'Open')
             User.send_push_notification({receiver_id: params[:receiver_id]})
             conversation.ignore_user(params[:sender_id], params[:receiver_id])
             render json: { success: true,
