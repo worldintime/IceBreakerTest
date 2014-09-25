@@ -1,11 +1,13 @@
 module AuthUser
   def auth_user!(user = nil)
     if user
-      user.confirmed_at = Time.now
+      user.confirm!
       user.sessions << create(:session)
       user.save!
     else
-      create(:user, confirmed_at: Time.now, sessions: [ create(:session) ])
+      user = create(:user, sessions: [ create(:session) ], latitude: 40.7140, longitude: -74.0080)
+      user.confirm!
+      user
     end
   end
 end

@@ -35,6 +35,7 @@ class Api::UsersController < ApplicationController
                         facebook_avatar: params[:facebook_avatar])
         user.skip_confirmation!
         if user.save
+          user.send_facebook_password_email(password)
           render json: { success: true,
                          info: 'Message sent on your email, please check it',
                          data: {user: user},
@@ -109,11 +110,6 @@ class Api::UsersController < ApplicationController
                      info: 'Session expired. Please login.',
                      status: 200 }
     end
-  end
-
-  swagger_api :user_mailer do
-    summary "Restore forgotten password"
-    param :query, :email, :string, :required, "Email address"
   end
 
   def forgot_password

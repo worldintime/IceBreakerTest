@@ -12,24 +12,18 @@ class Api::SessionsController < ApplicationController
   end
   
   def create
-    user = User.find_for_authentication(email: params[:email])
-    if user.nil?
-      user = User.find_for_authentication(user_name: params[:email])
-    end
-    if user
-      if user.valid_password?(params[:password]) && user.confirmed_at != nil
-        session = create_session user, params[:auth]
-        render json: { success: true,
-                       info: 'Logged in',
-                       data: {authentication_token: session[:auth_token], user: user, avatar: user.avatar.url},
-                       status: 200 }
-      elsif user.confirmed_at == nil
-        render json: { errors: 'Please confirm your email first' }, status: 200
-      else
-        render json: { errors: 'Email or password is incorrect!' } , status: 200
-      end
+    user = User.authenticate(params[:email])
+    render json: { errors: 'User not found!' }, status: 200 and return unless user
+    if user.valid_password?(params[:password]) && user.confirmed?
+      session = create_session user, params[:auth]
+      render json: { success: true,
+                     info: 'Logged in',
+                     data: {authentication_token: session[:auth_token], user: user, avatar: user.avatar.url},
+                     status: 200 }
+    elsif user.confirmed_at == nil
+      render json: { errors: 'Please confirm your email first' }, status: 200
     else
-      render json: { errors: 'User not found!' }, status: 200
+      render json: { errors: 'Email or password is incorrect!' } , status: 200
     end
   end
 
@@ -58,7 +52,7 @@ class Api::SessionsController < ApplicationController
     if @user.present?
       @user.send_reset_password_instructions
       render json: {
-          message: 'Confirmation instructions sent. Please check your email.'
+        message: 'Confirmation instructions sent. Please check your email.'
       }
     else
       bad_request ['Cant find user with that email.'], 406

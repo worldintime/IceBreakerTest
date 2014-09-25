@@ -6,13 +6,13 @@ describe Api::SessionsController do
 
     describe '#create' do
       it 'should create session' do
-        user = create(:user)
+        user = create(:user_confirmed)
         post :create, email: user.email, password: '123456789'
         expect( Oj.load(response.body)['success'] ).to eq true
       end
 
       it 'should create session and add device info' do
-        user = create(:user)
+        user = create(:user_confirmed)
         auth = {device: "iOS", device_token: '3n12j3khss'}
         post :create, email: user.email, password: '123456789', auth: auth
         user.reload
@@ -44,10 +44,10 @@ describe Api::SessionsController do
     end
 
     it 'should send reset password instructions' do
-      user = create(:user)
+      user = create(:user_confirmed)
       post :reset_password, email: user.email
       mail = ActionMailer::Base.deliveries.first
-      expect(mail.subject).to match /Confirmation instructions/
+      expect(mail.subject).to match /Reset password instructions/
       expect(mail.to).to include(user.email)
     end
   end
