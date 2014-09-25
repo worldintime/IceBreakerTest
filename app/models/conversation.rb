@@ -10,8 +10,8 @@ class Conversation < ActiveRecord::Base
 
   def attr_by_default
     self.initial_viewed = false
-    self.reply_viewed = false
-    self.finished_viewed = false
+    self.reply_viewed = true
+    self.finished_viewed = true
     nil
   end
 
@@ -69,6 +69,24 @@ class Conversation < ActiveRecord::Base
     else
       'finished'
     end
+  end
+
+  def existing_messages
+    if self.reply.nil? && self.finished.nil?
+      {initial_viewed: true}
+    elsif self.finished.nil?
+      {reply_viewed: true}
+    else
+      {finished_viewed: true}
+    end
+  end
+
+  def self.unread_messages(current_user_id)
+    query1 = "SELECT SUM((CASE WHEN reply_viewed = false THEN 1 ELSE 0 END)) AS reply_sum FROM conversations WHERE (conversations.sender_id = #{current_user_id})"
+    query2 = "SELECT SUM((CASE WHEN initial_viewed = false THEN 1 ELSE 0 END) + (CASE WHEN finished_viewed = false THEN 1 ELSE 0 END)) AS total_sum FROM conversations WHERE (conversations.receiver_id = #{current_user_id})"
+    reply = connection.execute(query1).to_a.first['reply_sum'].to_i
+    initial = connection.execute(query2).to_a.first['total_sum'].to_i
+    sum = initial + reply
   end
 
   def blocked_to(current_user_id)
