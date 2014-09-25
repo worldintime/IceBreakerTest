@@ -17,7 +17,7 @@ describe Api::UsersController do
                last_name: 'Z',
                email: 'xz@mail.com',
                gender: 'Male',
-               date_of_birth: 20.years.ago.to_s,
+               date_of_birth: 20.years.ago.strftime("%F"),
                user_name: 'x_Z',
                avatar: fixture_file_upload('files/photo.jpg', 'image/jpg') }
 
@@ -33,28 +33,18 @@ describe Api::UsersController do
       expect(user.avatar.url).to match /photo\.jpg/
     end
 
-    describe '#user_mailer' do
-      before :each do
-        ActionMailer::Base.deliveries.clear
-      end
-
-      it 'should send email wit instructions' do
-        post :user_mailer, email: user.email
-        mail = ActionMailer::Base.deliveries.first
-        expect(mail.to).to include(user.email)
-      end
-    end
-
     describe '#search' do
       render_views
 
       it 'should render json with data match location' do
-        create(:user, latitude: 40.7140, longitude: -74.0080)
-        expected_user = create(:user, latitude: 40.7130, longitude: -74.0070)
-        user.update_attributes!(latitude: 40.7127, longitude: -74.0059)
+        user_in_radius     = create(:user_confirmed, latitude: 40.7140, longitude: -74.0080)
+        user_out_of_radius = create(:user_confirmed, latitude: 40.7, longitude: -74.1)
         post :search, authentication_token: user.sessions.first.auth_token, format: 'json'
-        expect( assigns(:designated_users) ).to eq [expected_user]
-        expect( Oj.load(response.body)['designated_users'][0]['id'] ).to eq expected_user.id
+
+        expect( assigns(:users_in_radius) ).to eq [user_in_radius]
+        expect( assigns(:users_out_of_radius) ).to eq [user_out_of_radius]
+        expect( Oj.load(response.body)['users_in_radius'][0]['id'] ).to eq user_in_radius.id
+        expect( Oj.load(response.body)['users_out_of_radius'][0]['id'] ).to eq user_out_of_radius.id
       end
     end
 

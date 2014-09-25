@@ -14,7 +14,7 @@ class Api::SessionsController < ApplicationController
   def create
     user = User.authenticate(params[:email])
     render json: { errors: 'User not found!' }, status: 200 and return unless user
-    if user.valid_password?(params[:password]) && user.confirmed_at != nil
+    if user.valid_password?(params[:password]) && user.confirmed?
       session = create_session user, params[:auth]
       render json: { success: true,
                      info: 'Logged in',
@@ -52,7 +52,7 @@ class Api::SessionsController < ApplicationController
     if @user.present?
       @user.send_reset_password_instructions
       render json: {
-          message: 'Confirmation instructions sent. Please check your email.'
+        message: 'Confirmation instructions sent. Please check your email.'
       }
     else
       bad_request ['Cant find user with that email.'], 406

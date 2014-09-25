@@ -31,7 +31,7 @@ describe User do
 
       it 'should update user' do
         auth = omniauth_facebook
-        user = create(:user, facebook_id: auth.extra.raw_info.id)
+        user = create(:user, email: auth.extra.raw_info.email, facebook_id: auth.extra.raw_info.id)
         described_class.from_omniauth auth
         user.reload
         expect(user.first_name).to eq auth.info.first_name
