@@ -42,23 +42,6 @@ class Api::SessionsController < ApplicationController
     end
   end
 
-  swagger_api :reset_password do
-    summary "Reset forgotten password"
-    param :query, :email, :string, :required, "Email address"
-  end
-
-  def reset_password
-    @user = User.find_by_email(params[:email])
-    if @user.present?
-      @user.send_reset_password_instructions
-      render json: {
-        message: 'Confirmation instructions sent. Please check your email.'
-      }
-    else
-      bad_request ['Cant find user with that email.'], 406
-    end
-  end
-
   private
 
   def create_session user, auth
