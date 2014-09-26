@@ -61,7 +61,7 @@ class Api::ConversationsController < ApplicationController
           conversation = Conversation.find(params[:conversation_id])
           if conversation
             conversation.update_attributes!(status: 'Open')
-            User.send_push_notification({receiver_id: params[:receiver_id]})
+            User.send_push_notification({user_id: params[:receiver_id]})
             conversation.ignore_user(params[:sender_id], params[:receiver_id])
             render json: { success: true,
                            info: 'You now ignore this user for 4 hours' }
