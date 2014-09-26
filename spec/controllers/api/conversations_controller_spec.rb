@@ -42,11 +42,19 @@ describe Api::ConversationsController do
     end
 
     it 'should receive conversation detail' do
-
+      conv = FactoryGirl.create(:conversation, sender_id: user.id, receiver_id: '2',
+                                initial: 'initial', reply: 'reply',finished: 'finished')
       post :conversation_detail, authentication_token: user.sessions.first.auth_token,
-                                 conversation_id: conversation.id
-      conversation.reload
-      expect( Oj.load(response.body)['data']['opponent']['id'] ).to eq 1
+                                 conversation_id: conv.id
+      expect( Oj.load(response.body)['data']['opponent']['id'] ).to eq 2
+      expect( Oj.load(response.body)['data']['opponent']['first_name'] ).to eq 'Tom_2'
+      expect( Oj.load(response.body)['data']['opponent']['last_name'] ).to eq 'Hasher_2'
+      expect( Oj.load(response.body)['data']['opponent']['email'] ).to eq 'receiver2@gmail.com'
+      expect( Oj.load(response.body)['data']['opponent']['reply'] ).to eq 'reply'
+
+      expect( Oj.load(response.body)['data']['my_message']['id'] ).to eq user.id
+      expect( Oj.load(response.body)['data']['my_message']['initial'] ).to eq 'initial'
+      expect( Oj.load(response.body)['data']['my_message']['finished'] ).to eq 'finished'
     end
 
     it 'should receive conversation history' do
@@ -57,9 +65,18 @@ describe Api::ConversationsController do
     end
 
     it 'should receive number of unread messages' do
+      conv1 = FactoryGirl.create(:conversation, sender_id: user.id, initial: 'initial', reply: 'reply',
+                                finished: 'finished')
+      conv2 = FactoryGirl.create(:conversation, receiver_id: user.id, initial: 'initial', reply: 'reply',
+                                finished: 'finished')
 
+      conv1.reply_viewed = false
+      conv1.finished_viewed = false
+      conv1.save
+      conv2.reply_viewed = false
+      conv2.finished_viewed = false
+      conv2.save
       post :unread_messages, authentication_token: user.sessions.first.auth_token
-      conversation.reload
       expect( Oj.load(response.body)['success'] ).to eq true
       expect( Oj.load(response.body)['data'] ).to eq 3
     end

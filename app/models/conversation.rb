@@ -72,11 +72,17 @@ class Conversation < ActiveRecord::Base
   end
 
   def self.unread_messages(current_user_id)
+    puts "Conversation.all"
+    puts Conversation.all.inspect
     query1 = "SELECT SUM((CASE WHEN reply_viewed = false THEN 1 ELSE 0 END)) AS reply_sum FROM conversations WHERE (conversations.sender_id = #{current_user_id})"
     query2 = "SELECT SUM((CASE WHEN initial_viewed = false THEN 1 ELSE 0 END) + (CASE WHEN finished_viewed = false THEN 1 ELSE 0 END)) AS total_sum FROM conversations WHERE (conversations.receiver_id = #{current_user_id})"
     reply = connection.execute(query1).to_a.first['reply_sum'].to_i
+    puts reply
     initial = connection.execute(query2).to_a.first['total_sum'].to_i
+    puts initial
     sum = initial + reply
+    sum
+
   end
 
   def blocked_to(current_user_id)
