@@ -1,6 +1,6 @@
 class Api::UsersController < ApplicationController
-  before_action :api_authenticate_user, except: [:create, :forgot_password, :canned_statements]
-  
+  before_action :api_authenticate_user, except: [:create, :forgot_password]
+
   swagger_controller :users, "User Management"
 
   swagger_api :create do
@@ -19,49 +19,65 @@ class Api::UsersController < ApplicationController
   end
 
   def create
-    if params[:facebook_uid]
-      exist = User.find_by_facebook_uid(params[:facebook_uid])
-      if exist
-        session = create_session exist, params[:auth]
-        render json: { success: true,
-                       info: 'Logged in',
-                       data: {authentication_token: session[:auth_token], user: exist, avatar: exist.avatar.url},
-                       status: 200 }
-      else
-        password = SecureRandom.hex(8)
-        user = User.new(first_name: params[:first_name], last_name: params[:last_name], password: password,
-                        gender: params[:gender], date_of_birth: params[:date_of_birth], user_name: params[:user_name],
-                        password_confirmation: password, email: params[:email], facebook_uid: params[:facebook_uid],
-                        facebook_avatar: params[:facebook_avatar])
-        user.skip_confirmation!
-        if user.save
-          user.send_facebook_password_email(password)
-          render json: { success: true,
-                         info: 'Message sent on your email, please check it',
-                         data: {user: user},
-                         status: 200 }
-        else
-          render json: { errors: user.errors.full_messages, success: false }, status: 200
-        end
-      end
-    else
-      @user = User.new(first_name: params[:first_name], last_name: params[:last_name], password: params[:password],
-                       gender: params[:gender], date_of_birth: params[:date_of_birth], user_name: params[:user_name],
-                       password_confirmation: params[:password_confirmation], email: params[:email], avatar: params[:avatar])
+    fb_user_id = params[:facebook_uid]
+    existing_fb_user = fb_user_id ? User.find_by_facebook_uid(fb_user_id) : false
+    if !existing_fb_user && fb_user_id # new facebook user
+      password = SecureRandom.hex(8)
 
-      if @user.save
-        render json: { success: true,
-                       info: 'Message sent on your email, please check it',
-                       data: {user: @user},
-                       status: 200 }
-      else
-        render json: { errors: @user.errors.full_messages, success: false }, status: 200
+      # Check if facebook email is your application email
+      if icebr8kr_user = User.find_by_email(params[:email])
+        password = icebr8kr_user.password
       end
     end
+
+    @user = existing_fb_user || icebr8kr_user ||
+      User.new(first_name: params[:first_name],
+                last_name: params[:last_name],
+                 password: password ||= params[:password],
+    password_confirmation: params[:password_confirmation] || password,
+                   gender: params[:gender],
+            date_of_birth: params[:date_of_birth],
+                user_name: params[:user_name],
+                    email: params[:email],
+                   avatar: params[:avatar],
+             facebook_uid: fb_user_id,
+          facebook_avatar: params[:facebook_avatar])
+
+    if fb_user_id
+      # Check for namesake (the same user_name)
+      if User.find_by_user_name(params[:user_name])
+        @user.user_name += "_#{rand(10)}" until @user.valid?
+      end
+    end
+
+    if !existing_fb_user
+      @user.skip_confirmation! if fb_user_id # new facebook user
+
+      if @user.save
+        unless icebr8kr_user
+          @user.send_facebook_password_email(password)
+          info_mail = 'Message sent on your email, please check it'
+        end
+      else
+        return render json: { errors: @user.errors.full_messages, success: false }, status: 200
+      end
+    end
+
+    data = { user: @user, avatar: @user.avatar.url }
+    if fb_user_id
+      session = create_session @user, params[:auth]
+      data[:authentication_token] = session[:auth_token]
+    end
+
+    render json: { success: true,
+                      info: info_mail || "Logged in",
+                      data: data,
+                    status: 200 }
   end
 
   swagger_api :canned_statements do
     summary "Return all canned statement"
+    param :query, :authentication_token, :string, :required, "Authentication token"
   end
 
   def canned_statements
@@ -172,11 +188,9 @@ class Api::UsersController < ApplicationController
   def create_session user, auth
     range = [*'0'..'9', *'a'..'z', *'A'..'Z']
     session = {user_id: user.id, auth_token: Array.new(30){range.sample}.join, updated_at: Time.now}
-    if auth.present?
-      if auth[:device].present? && auth[:device_token].present?
-        session[:device] = auth['device']
-        session[:device_token] = auth['device_token']
-      end
+    if auth && auth[:device].present? && auth[:device_token].present?
+      session[:device] = auth['device']
+      session[:device_token] = auth['device_token']
     end
     Session.create(session)
     session
