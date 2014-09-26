@@ -101,4 +101,10 @@ class User < ActiveRecord::Base
     receiver.update_attributes(received_rating: receiver.received_rating + 1)
   end
 
+  def search_results(current_user_id)
+    opened_conversation = Conversation.select('id, receiver_id').where("status = 'Closed' AND sender_id = #{current_user_id}")
+    status = opened_conversation.select('id, receiver_id').where("receiver_id = #{self.id}").to_a
+    status.blank? ? 'Open' : 'Closed'
+  end
+
 end
