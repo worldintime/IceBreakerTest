@@ -21,7 +21,7 @@ class Api::UsersController < ApplicationController
   def create
     fb_user_id = params[:facebook_uid]
     existing_fb_user = fb_user_id ? User.find_by_facebook_uid(fb_user_id) : false
-    if !existing_fb_user && fb_user_id # new facebook user
+    if fb_user_id && !existing_fb_user # new facebook user
       password = SecureRandom.hex(8)
 
       # Check if facebook email is your application email
@@ -43,30 +43,33 @@ class Api::UsersController < ApplicationController
              facebook_uid: fb_user_id,
           facebook_avatar: params[:facebook_avatar])
 
+    @user.update_attributes(facebook_uid: fb_user_id,
+                         facebook_avatar: params[:facebook_avatar]) if icebr8kr_user
+
     if fb_user_id
+      @user.skip_confirmation! unless icebr8kr_user
+
       # Check for namesake (the same user_name)
       if User.find_by_user_name(params[:user_name])
         @user.user_name += "_#{rand(10)}" until @user.valid?
       end
     end
 
-    if !existing_fb_user
-      @user.skip_confirmation! if fb_user_id # new facebook user
-
-      if @user.save
-        unless icebr8kr_user
-          @user.send_facebook_password_email(password)
-          info_mail = 'Message sent on your email, please check it'
-        end
-      else
-        return render json: { errors: @user.errors.full_messages, success: false }, status: 200
+    if !existing_fb_user && @user.save
+      if fb_user_id && !icebr8kr_user # new facebook user
+        @user.send_facebook_password_email(password)
       end
+      info_mail = 'Message sent on your email, please check it'
+    else
+      return render json: { errors: @user.errors.full_messages, success: false }, status: 200
     end
 
     data = { user: @user, avatar: @user.avatar.url }
-    if fb_user_id
+    if fb_user_id && @user.confirmed?
       session = create_session @user, params[:auth]
       data[:authentication_token] = session[:auth_token]
+    else
+      info_mail = 'Confirm your email first'
     end
 
     render json: { success: true,
