@@ -111,7 +111,7 @@ class Api::UsersController < ApplicationController
     param :query, 'user[date_of_birth]', :date, :optional, "Date of birth"
     param :query, 'user[user_name]', :string, :required, "User name"
     param :query, 'user[email]', :string, :required, "Email address"
-    param :query, 'user[password]', :string, :required, "Password"
+    param :query, 'user[password]', :string, :optional, "Password"
     param :query, 'user[avatar]', :string, :optional, "User's avatar"
   end
 
@@ -120,6 +120,7 @@ class Api::UsersController < ApplicationController
       render json: { success: true,
                      info: 'Profile successfully updated.',
                      user: @current_user,
+                     avatar: @current_user.avatar.url,
                      status: 200 }
     else
       render json: { success: false,
