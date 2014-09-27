@@ -61,16 +61,6 @@ class Conversation < ActiveRecord::Base
     end
   end
 
-  def status
-    if self.reply.nil? && self.finished.nil?
-      'initial'
-    elsif self.finished.nil?
-      'reply'
-    else
-      'finished'
-    end
-  end
-
   def existing_messages
     if self.reply.nil? && self.finished.nil?
       {initial_viewed: true}
