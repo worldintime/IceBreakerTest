@@ -112,6 +112,11 @@ class Api::UsersController < ApplicationController
     end
   end
 
+  swagger_api :forgot_password do
+    summary "Search designated Users"
+    param :query, :email, :string, :required, "Email"
+  end
+
   def forgot_password
     @user = User.find_by_email(params[:email])
     if @user
