@@ -19,6 +19,62 @@ class User < ActiveRecord::Base
   reverse_geocoded_by :latitude, :longitude
   after_validation :reverse_geocode
 
+  def register_or_login(user_info = {})
+    new_fb_user      = user_info['new_fb_user']
+    existing_fb_user = user_info['existing_fb_user']
+    icebr8kr_user    = user_info['icebr8kr_user']
+    new_regular_user = !new_fb_user && !existing_fb_user && !icebr8kr_user
+
+    if new_fb_user
+      self.skip_confirmation!
+      password = SecureRandom.hex(8)
+      self.update_attributes(password: password,
+                password_confirmation: password)
+
+      # Check for namesake (the same user_name)
+      if User.find_by_user_name(user_info['user_name'])
+        self.user_name += "_#{rand(10)}" until self.valid?
+      end
+
+      if self.save(validate: false)
+        self.send_facebook_password_email password
+        info_mail = 'Message with your new password was sent on your email'
+      else
+        return { success: false, errors: self.errors.full_messages, status: 200 }
+      end
+    elsif new_regular_user
+      if self.save
+        info_mail = 'Message with confirmation link was sent on your email'
+      else
+        return { success: false, errors: self.errors.full_messages, status: 200 }
+      end
+    end
+
+    data = { user: self, avatar: self.avatar.url }
+    if (new_fb_user || existing_fb_user || icebr8kr_user) && self.confirmed?
+      session = self.create_session user_info['auth']
+      data[:authentication_token] = session[:auth_token]
+    elsif icebr8kr_user && !self.confirmed?
+      info_mail = 'Please, confirm your email first'
+    end
+
+    { success: true,
+         info: info_mail || "Logged in",
+         data: data,
+       status: 200 }
+  end
+
+  def create_session auth
+    range = [*'0'..'9', *'a'..'z', *'A'..'Z']
+    session = {user_id: self.id, auth_token: Array.new(30){range.sample}.join, updated_at: Time.now}
+    if auth && auth[:device].present? && auth[:device_token].present?
+      session[:device] = auth['device']
+      session[:device_token] = auth['device_token']
+    end
+    Session.create(session)
+    session
+  end
+
   def self.authenticate(param)
     user = User.find_for_authentication(email: param)
     user = User.find_for_authentication(user_name: param) if user.nil?
