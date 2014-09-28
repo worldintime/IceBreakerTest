@@ -19,67 +19,42 @@ class Api::UsersController < ApplicationController
   end
 
   def create
-    fb_user_id = params[:facebook_uid]
+    user_info = {}
+    fb_user_id       = params[:facebook_uid]
     existing_fb_user = fb_user_id ? User.find_by_facebook_uid(fb_user_id) : false
-    if fb_user_id && !existing_fb_user # new facebook user
-      password = SecureRandom.hex(8)
+    icebr8kr_user    = User.find_by_email(params[:email]) if fb_user_id && !existing_fb_user
 
-      # Check if facebook email is your application email
-      if icebr8kr_user = User.find_by_email(params[:email])
-        password = icebr8kr_user.password
-      end
-    end
-
-    @user = existing_fb_user || icebr8kr_user ||
-      User.new(first_name: params[:first_name],
-                last_name: params[:last_name],
-                 password: password ||= params[:password],
-    password_confirmation: params[:password_confirmation] || password,
-                   gender: params[:gender],
-            date_of_birth: params[:date_of_birth],
-                user_name: params[:user_name],
-                    email: params[:email],
-                   avatar: params[:avatar],
-             facebook_uid: fb_user_id,
-          facebook_avatar: params[:facebook_avatar])
-
-    @user.update_attributes(facebook_uid: fb_user_id,
-                         facebook_avatar: params[:facebook_avatar]) if icebr8kr_user
-
-    if fb_user_id
-      @user.skip_confirmation! unless icebr8kr_user
-
-      # Check for namesake (the same user_name)
-      if User.find_by_user_name(params[:user_name])
-        @user.user_name += "_#{rand(10)}" until @user.valid?
-      end
-    end
-
-    if !existing_fb_user && @user.save
-      if fb_user_id && !icebr8kr_user # new facebook user
-        @user.send_facebook_password_email(password)
-      end
-      info_mail = 'Message sent on your email, please check it'
+    if existing_fb_user
+      @user = existing_fb_user
+      user_info['existing_fb_user'] = true
+    elsif icebr8kr_user
+      @user = icebr8kr_user
+      user_info['icebr8kr_user'] = true
+      @user.update_attributes(facebook_uid: fb_user_id,
+                           facebook_avatar: params[:facebook_avatar])
     else
-      return render json: { errors: @user.errors.full_messages, success: false }, status: 200
+      @user = User.new do |u|
+        u.first_name            = params[:first_name]
+        u.last_name             = params[:last_name]
+        u.password              = params[:password]
+        u.password_confirmation = params[:password_confirmation]
+        u.gender                = params[:gender]
+        u.date_of_birth         = params[:date_of_birth]
+        u.user_name             = params[:user_name]
+        u.email                 = params[:email]
+        u.avatar                = params[:avatar]
+        u.facebook_uid          = params[:facebook_uid]
+        u.facebook_avatar       = params[:facebook_avatar]
+      end
+      user_info['new_fb_user'] = fb_user_id.present?
     end
 
-    data = { user: @user, avatar: @user.avatar.url }
-    if fb_user_id && @user.confirmed?
-      session = create_session @user, params[:auth]
-      data[:authentication_token] = session[:auth_token]
-    else
-      info_mail = 'Confirm your email first'
-    end
-
-    render json: { success: true,
-                      info: info_mail || "Logged in",
-                      data: data,
-                    status: 200 }
+    user_info.merge! params
+    render json: @user.register_or_login(user_info)
   end
 
   swagger_api :canned_statements do
-    summary "Return all canned statement"
+    summary "Return all canned statements"
     param :query, :authentication_token, :string, :required, "Authentication token"
   end
 
@@ -164,14 +139,14 @@ class Api::UsersController < ApplicationController
     @users_out_of_radius = User.near([lat, lng], 8).where.not(id: [@current_user.id] + @users_in_radius)
   end
 
-  swagger_api :location do
+  swagger_api :set_location do
     summary "Set location of current User"
     param :query, :authentication_token, :string, :required, "Authentication token"
     param :query, 'location[latitude]', :string, :required, "Latitude"
     param :query, 'location[longitude]', :string, :required, "Longitude"
   end
 
-  def location
+  def set_location
     lat = params[:location][:latitude]
     lng = params[:location][:longitude]
 
@@ -186,19 +161,20 @@ class Api::UsersController < ApplicationController
     end
   end
 
-  private
-
-  def create_session user, auth
-    range = [*'0'..'9', *'a'..'z', *'A'..'Z']
-    session = {user_id: user.id, auth_token: Array.new(30){range.sample}.join, updated_at: Time.now}
-    if auth && auth[:device].present? && auth[:device_token].present?
-      session[:device] = auth['device']
-      session[:device_token] = auth['device_token']
-    end
-    Session.create(session)
-    session
+  swagger_api :reset_location do
+    summary "Reset location of current User"
+    param :query, :authentication_token, :string, :required, "Authentication token"
   end
 
+  def reset_location
+    if @current_user.update_attributes(latitude: nil, longitude: nil)
+      render json: { success: true,
+                     info: 'Location was reset successfully',
+                     status: 200 }
+    end
+  end
+
+  private
 
   def set_user
     @user = User.find(params[:id])

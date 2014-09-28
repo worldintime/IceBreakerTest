@@ -4,7 +4,7 @@ FactoryGirl.define do
   factory :user do
     sequence(:first_name){|n| "Tom_#{n}"}
     sequence(:last_name){|n| "Hasher_#{n}"}
-    gender "Male"
+    gender "male"
     date_of_birth "2014-09-08"
     user_name {|u| u.first_name.downcase}
     email{|u| "#{u.first_name.downcase}@factory.com"}

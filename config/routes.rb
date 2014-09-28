@@ -10,7 +10,8 @@ Rails.application.routes.draw do
     resources :users
     post 'canned_statements',      to: 'users#canned_statements'
     post 'search',                 to: 'users#search'
-    post 'location',               to: 'users#location'
+    post 'set_location',           to: 'users#set_location'
+    post 'reset_location',         to: 'users#reset_location'
     post 'send_push_notification', to: 'users#send_push_notification'
     post 'forgot_password',        to: 'users#forgot_password'
     post 'edit_profile',           to: 'users#edit_profile'
