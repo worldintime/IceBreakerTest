@@ -19,7 +19,6 @@ Rails.application.routes.draw do
 
     post 'sessions',         to: 'sessions#create', as: 'login'
     post 'destroy_sessions', to: 'sessions#destroy', as: 'logout'
-    post 'reset_password',   to: 'sessions#reset_password', as: 'reset_password'
 
     post 'unread_messages',          to: 'conversations#unread_messages'
     post 'create_message',           to: 'conversations#create_message'

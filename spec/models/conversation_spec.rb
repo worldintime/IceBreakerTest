@@ -1,0 +1,15 @@
+require 'rails_helper'
+
+describe Conversation do
+  it 'should validate' do
+    validates_presence_of :sender_id
+    validates_presence_of :receiver_id
+  end
+
+  it 'should create conversation' do
+    conversation = build :conversation
+    expect(conversation.save).to be true
+    expect(conversation.initial_viewed).to eq false
+  end
+
+end
