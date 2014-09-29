@@ -48,12 +48,19 @@ describe Api::UsersController do
       end
     end
 
-    it '#location' do
+    it '#set_location' do
       loc = {latitude: '20,15', longitude: 24.33}
-      post :location, authentication_token: user.sessions.first.auth_token, location: loc
+      post :set_location, authentication_token: user.sessions.first.auth_token, location: loc
       user.reload
       expect(user.latitude).to eq 20.15
       expect(user.longitude).to eq 24.33
+    end
+
+    it '#reset_location' do
+      post :reset_location, authentication_token: user.sessions.first.auth_token
+      user.reload
+      expect(user.latitude).to eq nil
+      expect(user.longitude).to eq nil
     end
   end
 end
