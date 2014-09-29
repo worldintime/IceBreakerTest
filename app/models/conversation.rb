@@ -108,7 +108,8 @@ class Conversation < ActiveRecord::Base
       { opponent: { opponent_id: opponent.id,
                     first_name: opponent.first_name,
                     last_name: opponent.last_name,
-                    user_avatar: receiver_avatar(current_user_id)
+                    user_avatar: receiver_avatar(current_user_id),
+                    user_name: opponent.user_name
       },
         last_message: last_message_from_sender
       }
@@ -117,7 +118,8 @@ class Conversation < ActiveRecord::Base
       { opponent:  { opponent_id: opponent.id,
                      first_name: opponent.first_name,
                      last_name: opponent.last_name,
-                     user_avatar: receiver_avatar(current_user_id)
+                     user_avatar: receiver_avatar(current_user_id),
+                     user_name: opponent.user_name
       },
         last_message: last_message_from_sender
 
@@ -137,7 +139,8 @@ class Conversation < ActiveRecord::Base
                     last_name: sender.last_name,
                     avatar: sender.avatar.url,
                     initial: self.initial,
-                    finished: self.finished},
+                    finished: self.finished,
+                    user_name: sender.user_name},
         my_message:  {id: receiver.id,
                       reply: self.reply}
 
@@ -150,7 +153,8 @@ class Conversation < ActiveRecord::Base
                     first_name: receiver.first_name,
                     last_name: receiver.last_name,
                     avatar: receiver.avatar.url,
-                    reply: self.reply},
+                    reply: self.reply,
+                    user_name: receiver.user_name},
         my_message:  {id: sender.id,
                       initial: self.initial,
                       finished: self.finished}
