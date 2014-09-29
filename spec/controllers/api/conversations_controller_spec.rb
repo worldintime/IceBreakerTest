@@ -2,11 +2,12 @@ require 'rails_helper'
 
 describe Api::ConversationsController do
   let(:user){ auth_user! }
+  let(:user2){ auth_user! }
 
   it '#messaging initial' do
     expect{
-      post :messaging, authentication_token: user.sessions.first.auth_token, sender_id: '1',
-                       receiver_id: '2',type: 'initial', msg: 'initial'
+      post :messaging, authentication_token: user.sessions.first.auth_token, sender_id: user.id,
+                       receiver_id: user2.id, type: 'initial', msg: 'initial'
     }.to change(Conversation, :count).by(1)
     expect( Oj.load(response.body)['success'] ).to eq true
   end
