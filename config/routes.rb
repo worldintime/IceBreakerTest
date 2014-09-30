@@ -10,8 +10,6 @@ Rails.application.routes.draw do
     resources :users
     post 'canned_statements',      to: 'users#canned_statements'
     post 'search',                 to: 'users#search'
-    post 'set_location',           to: 'users#set_location'
-    post 'reset_location',         to: 'users#reset_location'
     post 'send_push_notification', to: 'users#send_push_notification'
     post 'forgot_password',        to: 'users#forgot_password'
     post 'edit_profile',           to: 'users#edit_profile'
@@ -19,6 +17,8 @@ Rails.application.routes.draw do
 
     post 'sessions',         to: 'sessions#create', as: 'login'
     post 'destroy_sessions', to: 'sessions#destroy', as: 'logout'
+    post 'set_location',     to: 'sessions#set_location'
+    post 'reset_location',   to: 'sessions#reset_location'
 
     post 'unread_messages',          to: 'conversations#unread_messages'
     post 'create_message',           to: 'conversations#create_message'

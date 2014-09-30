@@ -132,52 +132,18 @@ class Api::UsersController < ApplicationController
   end
 
   def search
-    lat = @current_user.latitude
-    lng = @current_user.longitude
+    lat = @current_user.sessions.first.latitude
+    lng = @current_user.sessions.first.longitude
 
     if lat.nil? || lng.nil?
       render json: { success: false,
                      info: 'Latitude or Longitude are missed',
                      status: 200 }
     end
-
-    @users_in_radius     = User.near([lat, lng], 0.1).where.not(id: @current_user.id)
-    @users_out_of_radius = User.near([lat, lng], 8).where.not(id: [@current_user.id] + @users_in_radius)
-  end
-
-  swagger_api :set_location do
-    summary "Set location of current User"
-    param :query, :authentication_token, :string, :required, "Authentication token"
-    param :query, 'location[latitude]', :string, :required, "Latitude"
-    param :query, 'location[longitude]', :string, :required, "Longitude"
-  end
-
-  def set_location
-    lat = params[:location][:latitude]
-    lng = params[:location][:longitude]
-
-    if lat.nil? || lng.nil?
-      render json: { success: false,
-                     info: 'Latitude or Longitude are missed',
-                     status: 200 }
-    elsif @current_user.update_attributes(latitude: lat.gsub(',', '.'), longitude: lng.gsub(',', '.'))
-      render json: { success: true,
-                     info: 'New location was set successfully',
-                     status: 200 }
-    end
-  end
-
-  swagger_api :reset_location do
-    summary "Reset location of current User"
-    param :query, :authentication_token, :string, :required, "Authentication token"
-  end
-
-  def reset_location
-    if @current_user.update_attributes(latitude: nil, longitude: nil)
-      render json: { success: true,
-                     info: 'Location was reset successfully',
-                     status: 200 }
-    end
+    ids_in_radius     = Session.near([lat, lng], 0.1).where.not(user_id: @current_user.id).reorder(:user_id).pluck(:user_id)
+    @users_in_radius = User.find(ids_in_radius)
+    ids_out_of_radius    = Session.near([lat, lng], 8).where.not(user_id: [@current_user.id] + ids_in_radius).reorder(:user_id).pluck(:user_id)
+    @users_out_of_radius = User.find(ids_out_of_radius)
   end
 
   private

@@ -16,9 +16,6 @@ class User < ActiveRecord::Base
   validates_confirmation_of :password
   validates_uniqueness_of :user_name
 
-  reverse_geocoded_by :latitude, :longitude
-  after_validation :reverse_geocode
-
   def register_or_login(user_info = {})
     new_fb_user      = user_info['new_fb_user']
     existing_fb_user = user_info['existing_fb_user']
@@ -147,6 +144,14 @@ class User < ActiveRecord::Base
     opened_conversation = Conversation.select('id, receiver_id').where("status = 'Closed' AND sender_id = #{current_user_id}")
     status = opened_conversation.select('id, receiver_id').where("receiver_id = #{self.id}").to_a
     status.blank? ? 'Open' : 'Closed'
+  end
+
+  def location_info
+    location_info = Session.where(user_id: self.id)
+    { address: location_info.pluck(:address).first,
+      latitude: location_info.pluck(:latitude).first,
+      longitude: location_info.pluck(:longitude).first
+    }
   end
 
 end

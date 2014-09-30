@@ -1,5 +1,5 @@
 class Api::SessionsController < ApplicationController
-  before_action :api_authenticate_user, only: [:destroy]
+  before_action :api_authenticate_user, only: [:destroy, :set_location, :reset_location]
   
   swagger_controller :users, "Session Management"
 
@@ -25,6 +25,41 @@ class Api::SessionsController < ApplicationController
     else
       render json: { errors: 'Email or password is incorrect!' } , status: 200
     end
+  end
+
+  swagger_api :set_location do
+    summary "Set location of current User"
+    param :query, :authentication_token, :string, :required, "Authentication token"
+    param :query, 'location[latitude]', :string, :required, "Latitude"
+    param :query, 'location[longitude]', :string, :required, "Longitude"
+  end
+
+  def set_location
+    lat = params[:location][:latitude]
+    lng = params[:location][:longitude]
+    session = Session.where(auth_token: params[:authentication_token]).first
+    if lat.nil? || lng.nil?
+      render json: { success: false,
+                     info: 'Latitude or Longitude are missed',
+                     status: 200 }
+    elsif session.update_attributes(latitude: lat.gsub(',', '.'), longitude: lng.gsub(',', '.'))
+      render json: { success: true,
+                     info: 'New location was set successfully',
+                     status: 200 }
+    end
+  end
+
+  swagger_api :reset_location do
+    summary "Reset location of current User"
+    param :query, :authentication_token, :string, :required, "Authentication token"
+  end
+
+  def reset_location
+    session = Session.where(auth_token: params[:authentication_token]).first
+    session.update_attributes(latitude: nil, longitude: nil)
+      render json: { success: true,
+                     info: 'Location was reset successfully',
+                     status: 200 }
   end
 
   swagger_api :destroy do
