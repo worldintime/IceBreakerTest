@@ -5,7 +5,6 @@ node :status do
   @status
 end
 
-node do
-  @location
-end
+node @location
+
 

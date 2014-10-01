@@ -10,7 +10,7 @@ describe Api::UsersController do
   end
 
   describe 'with user' do
-    let(:user){ auth_user! }
+
 
     it '#edit_profile' do
       attr = { first_name: 'X',
@@ -33,36 +33,6 @@ describe Api::UsersController do
       expect(user.avatar.url).to match /photo\.jpg/
     end
 
-    describe '#search' do
-      render_views
-
-      it 'should render json with data match location' do
-        user_in_radius     = create(:user_confirmed, latitude: 40.7140, longitude: -74.0080)
-        user_out_of_radius = create(:user_confirmed, latitude: 40.7, longitude: -74.1)
-        post :search, authentication_token: user.sessions.first.auth_token, format: 'json'
-
-        expect( assigns(:users_in_radius) ).to eq [user_in_radius]
-        expect( assigns(:users_out_of_radius) ).to eq [user_out_of_radius]
-        expect( Oj.load(response.body)['users_in_radius'][0]['id'] ).to eq user_in_radius.id
-        expect( Oj.load(response.body)['users_out_of_radius'][0]['id'] ).to eq user_out_of_radius.id
-      end
-    end
-
-    it '#set_location' do
-      loc = {latitude: '20,15', longitude: 24.33}
-      post :set_location, authentication_token: user.sessions.first.auth_token, location: loc
-      user.reload
-      expect(user.latitude).to eq 20.15
-      expect(user.longitude).to eq 24.33
-    end
-
-    it '#reset_location' do
-      post :reset_location, authentication_token: user.sessions.first.auth_token
-      user.reload
-      expect(user.latitude).to eq nil
-      expect(user.longitude).to eq nil
-    end
-
     describe '#forgot_password' do
       before :each do
         ActionMailer::Base.deliveries.clear
@@ -77,6 +47,34 @@ describe Api::UsersController do
       end
     end
 
+    let(:user){ auth_user! }
+    describe '#search' do
+      render_views
+
+      it 'should render json with data match location' do
+
+        token1 = SecureRandom.hex(8)
+        token2 = SecureRandom.hex(8)
+        token3 = SecureRandom.hex(8)
+
+        user_in_radius     = create(:user_confirmed)
+        user_out_of_radius = create(:user_confirmed)
+        user_in_radius2 = create(:user_confirmed)
+
+        session1 = create(:session, user_id: user_in_radius.id, auth_token: token1, latitude: 40.7140, longitude: -74.0080)
+        session2 = create(:session, user_id: user_out_of_radius.id, auth_token: token2, latitude: 40.7, longitude: -74.1)
+        session3 = create(:session, user_id: user_in_radius2.id, auth_token: token3, latitude: 40.7140, longitude: -74.0080)
+
+        post :search, authentication_token: token1, format: 'json'
+
+        expect( assigns(:users_in_radius) ).to eq [user_in_radius2]
+        expect( assigns(:users_out_of_radius) ).to eq [user_out_of_radius]
+
+        expect( Oj.load(response.body)['users_in_radius'][0]['id'] ).to eq user_in_radius2.id
+        expect( Oj.load(response.body)['users_out_of_radius'][0]['id'] ).to eq user_out_of_radius.id
+
+      end
+    end
   end
 
 end

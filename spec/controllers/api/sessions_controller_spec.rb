@@ -36,6 +36,29 @@ describe Api::SessionsController do
         expect( Oj.load(response.body)['info'] ).to match /Session expired. Please login/
       end
     end
+
+    let(:user){ auth_user! }
+    let(:session){ create( :session, latitude: '20,15', longitude: 24.33 )}
+    describe '#location' do
+      it '#set_location' do
+        loc = { latitude: '20,15', longitude: 24.33 }
+
+        post :set_location, authentication_token: user.sessions.first.auth_token, location: loc
+        session.reload
+        expect(session.latitude).to eq loc[:latitude].to_f
+        expect(session.longitude).to eq loc[:longitude]
+      end
+
+      it '#reset_location' do
+        token = SecureRandom.hex(8)
+        session2 = create( :session, user_id: user.id, latitude: '12.12', longitude: '12.43',
+                           auth_token: token )
+        post :reset_location, authentication_token: token
+        session2.reload
+        expect(session2.latitude).to eq nil
+        expect(session2.longitude).to eq nil
+      end
+    end
   end
 
 end

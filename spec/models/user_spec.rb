@@ -16,8 +16,4 @@ describe User do
     expect(user.save).to be true
   end
 
-  it 'should add address by location data' do
-    user = create(:user, latitude: 40.7127, longitude: -74.0059)
-    expect( user.address ).to match /NY/
-  end
 end
