@@ -38,17 +38,4 @@ describe Api::SessionsController do
     end
   end
 
-  describe '#reset_password' do
-    before :each do
-      ActionMailer::Base.deliveries.clear
-    end
-
-    it 'should send reset password instructions' do
-      user = create(:user_confirmed)
-      post :reset_password, email: user.email
-      mail = ActionMailer::Base.deliveries.first
-      expect(mail.subject).to match /Reset password instructions/
-      expect(mail.to).to include(user.email)
-    end
-  end
 end

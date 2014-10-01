@@ -2,21 +2,23 @@ require 'rails_helper'
 
 describe Api::ConversationsController do
   let(:user){ auth_user! }
+  let(:user2){ auth_user! }
 
   it '#messaging initial' do
     expect{
-      post :messaging, authentication_token: user.sessions.first.auth_token, sender_id: '1',
-                       receiver_id: '2',type: 'initial', msg: 'initial'
+      post :messaging, authentication_token: user.sessions.first.auth_token, sender_id: user.id,
+                       receiver_id: user2.id, type: 'initial', msg: 'initial'
     }.to change(Conversation, :count).by(1)
     expect( Oj.load(response.body)['success'] ).to eq true
   end
 
   describe 'conversation' do
     let(:user){ auth_user! }
+    let(:user2){ auth_user! }
     let(:conversation){ create(:conversation, id: id = rand(100))}
 
     it 'should receive reply' do
-      post :messaging, authentication_token: user.sessions.first.auth_token, sender_id: '1',
+      post :messaging, authentication_token: user.sessions.first.auth_token, sender_id: user2.id,
                        receiver_id: user.id, type: 'reply', msg: 'reply', conversation_id: conversation.id
         expect(conversation.reload.reply).to eq 'reply'
         expect(conversation.reload.status).to eq 'Closed'
@@ -25,7 +27,7 @@ describe Api::ConversationsController do
     it 'should receive last message' do
       expect{
         post :messaging, authentication_token: user.sessions.first.auth_token, sender_id: user.id,
-                         receiver_id: '1', type: 'finished', msg: 'finished', conversation_id: conversation.id
+                         receiver_id: user2.id, type: 'finished', msg: 'finished', conversation_id: conversation.id
       }.to change(Mute, :count).by(1)
 
       conversation.reload
@@ -35,21 +37,21 @@ describe Api::ConversationsController do
 
     it 'should ignore user' do
       expect{
-        post :messaging, authentication_token: user.sessions.first.auth_token, sender_id: '1',
-                         receiver_id: '2', type: 'ignore', conversation_id: conversation.id
+        post :messaging, authentication_token: user.sessions.first.auth_token, sender_id: user.id,
+                         receiver_id: user2.id, type: 'ignore', conversation_id: conversation.id
       }.to change(Mute, :count).by(1)
 
     end
 
     it 'should receive conversation detail' do
-      conv = FactoryGirl.create(:conversation, sender_id: user.id, receiver_id: '2',
+      conv = FactoryGirl.create(:conversation, sender_id: user.id, receiver_id: user2.id,
                                 initial: 'initial', reply: 'reply',finished: 'finished')
       post :conversation_detail, authentication_token: user.sessions.first.auth_token,
                                  conversation_id: conv.id
-      expect( Oj.load(response.body)['data']['opponent']['id'] ).to eq 2
-      expect( Oj.load(response.body)['data']['opponent']['first_name'] ).to eq 'Tom_2'
-      expect( Oj.load(response.body)['data']['opponent']['last_name'] ).to eq 'Hasher_2'
-      expect( Oj.load(response.body)['data']['opponent']['email'] ).to eq 'receiver2@gmail.com'
+      expect( Oj.load(response.body)['data']['opponent']['id'] ).to eq user2.id
+      expect( Oj.load(response.body)['data']['opponent']['first_name'] ).to eq user2.first_name
+      expect( Oj.load(response.body)['data']['opponent']['last_name'] ).to eq user2.last_name
+      expect( Oj.load(response.body)['data']['opponent']['email'] ).to eq user2.email
       expect( Oj.load(response.body)['data']['opponent']['reply'] ).to eq 'reply'
 
       expect( Oj.load(response.body)['data']['my_message']['id'] ).to eq user.id
@@ -58,13 +60,13 @@ describe Api::ConversationsController do
     end
 
     it 'should receive conversation history' do
-      conv = FactoryGirl.create(:conversation, sender_id: user.id, initial: 'initial', reply: 'reply',
-                                 finished: 'finished')
+      conv = FactoryGirl.create(:conversation, sender_id: user.id, receiver_id: user2.id, initial: 'initial',
+                                reply: 'reply', finished: 'finished')
       post :history_of_digital_hello, authentication_token: user.sessions.first.auth_token
       conv.reload
-      expect( Oj.load(response.body)['data']['conversation0']['opponent']['opponent_id'] ).to eq 2
-      expect( Oj.load(response.body)['data']['conversation0']['opponent']['first_name'] ).to eq 'Tom_2'
-      expect( Oj.load(response.body)['data']['conversation0']['opponent']['last_name'] ).to eq 'Hasher_2'
+      expect( Oj.load(response.body)['data']['conversation0']['opponent']['opponent_id'] ).to eq user2.id
+      expect( Oj.load(response.body)['data']['conversation0']['opponent']['first_name'] ).to eq user2.first_name
+      expect( Oj.load(response.body)['data']['conversation0']['opponent']['last_name'] ).to eq user2.last_name
       expect( Oj.load(response.body)['data']['conversation0']['last_message']['sender_id'] ).to eq user.id
       expect( Oj.load(response.body)['data']['conversation0']['last_message']['text'] ).to eq 'finished'
       expect( Oj.load(response.body)['data']['conversation0']['last_message']['status'] ).to eq 'finished'
