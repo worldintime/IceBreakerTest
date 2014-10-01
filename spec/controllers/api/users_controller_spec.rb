@@ -48,12 +48,35 @@ describe Api::UsersController do
       end
     end
 
-    it '#location' do
+    it '#set_location' do
       loc = {latitude: '20,15', longitude: 24.33}
-      post :location, authentication_token: user.sessions.first.auth_token, location: loc
+      post :set_location, authentication_token: user.sessions.first.auth_token, location: loc
       user.reload
       expect(user.latitude).to eq 20.15
       expect(user.longitude).to eq 24.33
     end
+
+    it '#reset_location' do
+      post :reset_location, authentication_token: user.sessions.first.auth_token
+      user.reload
+      expect(user.latitude).to eq nil
+      expect(user.longitude).to eq nil
+    end
+
+    describe '#forgot_password' do
+      before :each do
+        ActionMailer::Base.deliveries.clear
+      end
+
+      it 'should send forgot password instructions' do
+        user = create(:user_confirmed)
+        post :forgot_password, email: user.email
+        mail =  UserMailer.forgot_password(user, '12345').deliver
+        expect(mail.subject).to match /New password for IceBr8kr account/
+        expect(mail.to).to include(user.email)
+      end
+    end
+
   end
+
 end
