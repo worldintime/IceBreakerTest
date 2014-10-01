@@ -51,6 +51,7 @@ class Api::SessionsController < ApplicationController
       session[:device] = auth['device']
       session[:device_token] = auth['device_token']
     end
+    Session.where(user_id: user.id).destroy_all
     Session.create(session)
     session
   end
