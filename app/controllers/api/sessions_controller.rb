@@ -15,6 +15,7 @@ class Api::SessionsController < ApplicationController
     user = User.authenticate(params[:email])
     render json: { errors: 'User not found!' }, status: 200 and return unless user
     if user.valid_password?(params[:password]) && user.confirmed?
+      Session.where(user_id: user.id).destroy_all
       session = create_session user, params[:auth]
       render json: { success: true,
                      info: 'Logged in',
