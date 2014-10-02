@@ -4,3 +4,7 @@ attributes :id, :first_name, :last_name, :address, :latitude, :longitude, :avata
 node :status do
   @status
 end
+
+node do
+  @blocked
+end

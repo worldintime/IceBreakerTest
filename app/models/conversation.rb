@@ -35,7 +35,7 @@ class Conversation < ActiveRecord::Base
     ignore = Mute.new(sender_id: sender_id, receiver_id: receiver_id, conversation_id: self.id, status: 'Ignored')
     ignore.save
     scheduler = Rufus::Scheduler.new
-    scheduler.at Time.now + 4.hours do
+    scheduler.at Time.now + 1.hours do
       Mute.find(ignore.id).destroy
     end
   end
