@@ -164,6 +164,10 @@ class Api::UsersController < ApplicationController
       render json: { success: true,
                      info: 'New location was set successfully',
                      status: 200 }
+    else
+      render json: { success: false,
+                     info: 'New location was not set',
+                     status: 200 }
     end
   end
 
@@ -173,9 +177,13 @@ class Api::UsersController < ApplicationController
   end
 
   def reset_location
-    if @current_user.update_attributes(latitude: nil, longitude: nil)
+    if @current_user.update_attributes(latitude: nil, longitude: nil, address: nil)
       render json: { success: true,
                      info: 'Location was reset successfully',
+                     status: 200 }
+    else
+      render json: { success: false,
+                     info: 'Location was not reset',
                      status: 200 }
     end
   end
