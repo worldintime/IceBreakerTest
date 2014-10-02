@@ -2,8 +2,8 @@ require 'rails_helper'
 
 describe Conversation do
   it 'should validate' do
-    validates_presence_of :sender_id
-    validates_presence_of :receiver_id
+    validate_presence_of :sender_id
+    validate_presence_of :receiver_id
   end
 
   it 'should create conversation' do

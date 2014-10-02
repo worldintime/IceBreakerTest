@@ -56,6 +56,13 @@ describe Api::UsersController do
       expect(user.longitude).to eq 24.33
     end
 
+    it '#reset_location' do
+      post :reset_location, authentication_token: user.sessions.first.auth_token
+      user.reload
+      expect(user.latitude).to eq nil
+      expect(user.longitude).to eq nil
+    end
+
     describe '#forgot_password' do
       before :each do
         ActionMailer::Base.deliveries.clear
