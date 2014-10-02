@@ -71,7 +71,7 @@ class User < ActiveRecord::Base
       session[:device] = auth['device']
       session[:device_token] = auth['device_token']
     end
-    Session.where(user_id: user.id).destroy_all
+    Session.where(user_id: self.id).destroy_all
     Session.create(session)
     session
   end
