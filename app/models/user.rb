@@ -137,17 +137,23 @@ class User < ActiveRecord::Base
      end
    end
 
-  def self.rating_update(user_ids)
-    sender   = self.find user_ids[:sender]
-    receiver = self.find user_ids[:receiver]
-    sender.update_attributes(sent_rating: sender.sent_rating + 1)
-    receiver.update_attributes(received_rating: receiver.received_rating + 1)
+  def search_results(current_user_id)
+    status = Conversation.where("status = 'Closed' AND sender_id = #{current_user_id} AND receiver_id = #{self.id}").to_a
+    status.blank? ? 'Open' : 'Closed'
   end
 
-  def search_results(current_user_id)
-    opened_conversation = Conversation.select('id, receiver_id').where("status = 'Closed' AND sender_id = #{current_user_id}")
-    status = opened_conversation.select('id, receiver_id').where("receiver_id = #{self.id}").to_a
-    status.blank? ? 'Open' : 'Closed'
+  def blocked_to(current_user_id)
+    muted = Mute.where( "sender_id = #{self.id} AND receiver_id = #{current_user_id} OR sender_id = #{current_user_id} AND receiver_id = #{self.id}")
+    if muted.blank?
+      { blocked_to: 'No',
+        blocked_status: 'No'}
+    else
+      start_time = muted.first.created_at
+      puts start_time
+      puts Time.now
+      { blocked_to: distance_of_time_in_words(start_time, Time.now),
+        blocked_status: muted.first.status }
+    end
   end
 
 end

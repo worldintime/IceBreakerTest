@@ -65,11 +65,12 @@ class Api::UsersController < ApplicationController
   swagger_api :upload_avatar do
     summary "Upload user's avatar"
     param :query, :avatar, :string, :optional, "User's avatar"
-    param :query, :authentication_token, :string, :required, "Authentication token"
+    param :query, :email, :string, :required, "User's email"
   end
 
   def upload_avatar
-    if @current_user.update_attribute(:avatar, params[:avatar])
+    user = User.find_by_email(params[:email])
+    if user.update_attribute(:avatar, params[:avatar])
       render json: { success: true,
                      info: 'Image successfully uploaded.',
                      status: 200 }
