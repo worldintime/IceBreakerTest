@@ -23,15 +23,19 @@ class Api::ConversationsController < ApplicationController
         when 'initial'
           conversation = Conversation.new(sender_id: params[:sender_id], receiver_id: params[:receiver_id],
                                           initial: params[:msg], status: 'Closed')
-          if conversation.save
-            User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id]})
-            User.send_push_notification({user_id: params[:receiver_id], message: params[:msg]})
-            render json: { success: true,
-                           info: 'Message sent',
-                           data: { conversation_id: conversation.id },
-                           status: 200 }
+          if conversation.check_if_already_received(params[:sender_id], params[:receiver_id]).blank?
+            if conversation.save
+              User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id]})
+              User.send_push_notification({user_id: params[:receiver_id], message: params[:msg]})
+              render json: { success: true,
+                             info: 'Message sent',
+                             data: { conversation_id: conversation.id },
+                             status: 200 }
+            else
+              render json: { errors: conversation.errors.full_messages, success: false }, status: 200
+            end
           else
-            render json: { errors: conversation.errors.full_messages, success: false }, status: 200
+            render json: { success: false, info: 'This user already sent a digital hello to you few minutes ago'}
           end
         when 'reply'
           conversation = Conversation.find(params[:conversation_id])
