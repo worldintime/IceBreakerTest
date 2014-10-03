@@ -145,12 +145,14 @@ class User < ActiveRecord::Base
   end
 
   def search_results(current_user_id)
-    status = Conversation.where("status = 'Closed' AND sender_id = #{current_user_id} AND receiver_id = #{self.id} OR status = 'Closed' AND sender_id = #{self.id} AND receiver_id = #{current_user_id} ").to_a
+    status = Conversation.where("status = ? AND sender_id = ? AND receiver_id = ? OR status = ? AND sender_id = ? AND receiver_id = ?", 'Closed',
+                                current_user_id, self.id, 'Closed', self.id, current_user_id ).to_a
     status.blank? ? 'Open' : 'Closed'
   end
 
   def blocked_to(current_user_id)
-    muted = Mute.where( "sender_id = #{self.id} AND receiver_id = #{current_user_id} OR sender_id = #{current_user_id} AND receiver_id = #{self.id}")
+    muted = Mute.where( "sender_id = ? AND receiver_id = ? OR sender_id = ? AND receiver_id = ?",
+                        self.id, current_user_id, current_user_id, self.id)
     if muted.blank?
       { blocked_to: 'No',
         blocked_status: 'No'}
