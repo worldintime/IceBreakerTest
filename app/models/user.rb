@@ -150,4 +150,33 @@ class User < ActiveRecord::Base
     status.blank? ? 'Open' : 'Closed'
   end
 
+  def set_location(lat, lng)
+    if lat.nil? || lng.nil?
+      { success: false,
+        info: 'Latitude or Longitude are missed',
+        status: 200 }
+    elsif self.update_attributes(latitude: lat.gsub(',', '.'), longitude: lng.gsub(',', '.'))
+      { success: true,
+        info: 'New location was set successfully',
+        status: 200 }
+    else
+      { success: false,
+        info: self.errors.full_messages,
+        status: 200 }
+    end
+  end
+
+  def reset_location!
+    begin
+      self.update_attributes!(latitude: nil, longitude: nil, address: nil)
+      { success: true,
+        info: 'Location was reset successfully',
+        status: 200 }
+    rescue Exception => e
+      { success: false,
+        info: e.message,
+        status: 200 }
+    end
+  end
+
 end
