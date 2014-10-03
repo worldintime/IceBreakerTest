@@ -155,22 +155,7 @@ class Api::UsersController < ApplicationController
   end
 
   def set_location
-    lat = params[:location][:latitude]
-    lng = params[:location][:longitude]
-
-    if lat.nil? || lng.nil?
-      render json: { success: false,
-                     info: 'Latitude or Longitude are missed',
-                     status: 200 }
-    elsif @current_user.update_attributes(latitude: lat.gsub(',', '.'), longitude: lng.gsub(',', '.'))
-      render json: { success: true,
-                     info: 'New location was set successfully',
-                     status: 200 }
-    else
-      render json: { success: false,
-                     info: 'New location was not set',
-                     status: 200 }
-    end
+    render json: @current_user.set_location(params[:location][:latitude], params[:location][:longitude])
   end
 
   swagger_api :reset_location do
@@ -179,15 +164,7 @@ class Api::UsersController < ApplicationController
   end
 
   def reset_location
-    if @current_user.update_attributes(latitude: nil, longitude: nil, address: nil)
-      render json: { success: true,
-                     info: 'Location was reset successfully',
-                     status: 200 }
-    else
-      render json: { success: false,
-                     info: 'Location was not reset',
-                     status: 200 }
-    end
+    render json: @current_user.reset_location!
   end
 
   private
