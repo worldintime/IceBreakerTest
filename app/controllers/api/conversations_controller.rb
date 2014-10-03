@@ -23,7 +23,8 @@ class Api::ConversationsController < ApplicationController
         when 'initial'
           conversation = Conversation.new(sender_id: params[:sender_id], receiver_id: params[:receiver_id],
                                           initial: params[:msg], status: 'Closed')
-          if conversation.check_if_already_received(params[:sender_id], params[:receiver_id]).blank?
+
+          if conversation.check_if_already_received?(params[:sender_id], params[:receiver_id])
             if conversation.save
               User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id]})
               User.send_push_notification({user_id: params[:receiver_id], message: params[:msg]})

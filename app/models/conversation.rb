@@ -8,9 +8,9 @@ class Conversation < ActiveRecord::Base
 
   include ActionView::Helpers::DateHelper
 
-  def check_if_already_received(sender_id, receiver_id)
-    already_sent = Conversation.where(sender_id: receiver_id, receiver_id: sender_id,
-                                      created_at: ((Time.now - 30.minutes)..Time.now))
+  def check_if_already_received?(sender_id, receiver_id)
+    Conversation.where(sender_id: receiver_id, receiver_id: sender_id,
+                       created_at: (30.minutes.ago..Time.now)).blank?
   end
 
   def attr_by_default
