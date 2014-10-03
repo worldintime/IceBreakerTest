@@ -8,6 +8,11 @@ class Conversation < ActiveRecord::Base
 
   include ActionView::Helpers::DateHelper
 
+  def check_if_already_received?(sender_id, receiver_id)
+    Conversation.where(sender_id: receiver_id, receiver_id: sender_id,
+                       created_at: (30.minutes.ago..Time.now)).blank?
+  end
+
   def attr_by_default
     self.initial_viewed = false
     self.reply_viewed = true
