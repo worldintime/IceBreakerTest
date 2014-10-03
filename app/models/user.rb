@@ -137,6 +137,13 @@ class User < ActiveRecord::Base
      end
   end
 
+  def self.rating_update(user_ids)
+    sender   = self.find user_ids[:sender]
+    receiver = self.find user_ids[:receiver]
+    sender.update_attributes(sent_rating: sender.sent_rating + 1)
+    receiver.update_attributes(received_rating: receiver.received_rating + 1)
+  end
+
   def search_results(current_user_id)
     status = Conversation.where("status = 'Closed' AND sender_id = #{current_user_id} AND receiver_id = #{self.id}").to_a
     status.blank? ? 'Open' : 'Closed'
