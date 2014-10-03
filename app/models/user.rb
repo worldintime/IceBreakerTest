@@ -9,7 +9,7 @@ class User < ActiveRecord::Base
   devise :database_authenticatable, :registerable, :confirmable,
          :recoverable, :rememberable, :trackable, :validatable
 
-  has_attached_file :avatar, styles: { thumb: '64x64' }, default_url: '/assets/avatar.png'
+  has_attached_file :avatar, styles: { thumb: '200x200#' }, default_url: '/assets/avatar.png'
   validates_attachment :avatar, content_type: { content_type: ['image/jpg', 'image/jpeg', 'image/png', 'image/gif'] }
   validates_presence_of :first_name, :last_name, :gender, :email, :user_name
   validates_presence_of :password, on: :create
@@ -71,7 +71,7 @@ class User < ActiveRecord::Base
       session[:device] = auth['device']
       session[:device_token] = auth['device_token']
     end
-    Session.where(user_id: user.id).destroy_all
+    Session.where(user_id: self.id).destroy_all
     Session.create(session)
     session
   end
