@@ -135,7 +135,7 @@ class User < ActiveRecord::Base
          end
        end
      end
-   end
+  end
 
   def search_results(current_user_id)
     status = Conversation.where("status = 'Closed' AND sender_id = #{current_user_id} AND receiver_id = #{self.id}").to_a
@@ -148,10 +148,9 @@ class User < ActiveRecord::Base
       { blocked_to: 'No',
         blocked_status: 'No'}
     else
-      start_time = muted.first.created_at
-      puts start_time
-      puts Time.now
-      { blocked_to: distance_of_time_in_words(start_time, Time.now),
+      start_time = muted.first.created_at.to_time
+      passed_time = TimeDifference.between(Time.now, start_time).in_minutes
+      { blocked_to: 60.00 - passed_time,
         blocked_status: muted.first.status }
     end
   end
