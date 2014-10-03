@@ -145,7 +145,7 @@ class User < ActiveRecord::Base
   end
 
   def search_results(current_user_id)
-    status = Conversation.where("status = 'Closed' AND sender_id = #{current_user_id} AND receiver_id = #{self.id}").to_a
+    status = Conversation.where("status = 'Closed' AND sender_id = #{current_user_id} AND receiver_id = #{self.id} OR status = 'Closed' AND sender_id = #{self.id} AND receiver_id = #{current_user_id} ").to_a
     status.blank? ? 'Open' : 'Closed'
   end
 
