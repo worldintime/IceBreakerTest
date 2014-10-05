@@ -2,7 +2,7 @@
 
 FactoryGirl.define do
   factory :mute do
-    sender_id '1'
-    receiver_id '2'
+    sender_id 1
+    receiver_id 2
   end
 end

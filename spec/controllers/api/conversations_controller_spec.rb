@@ -4,12 +4,35 @@ describe Api::ConversationsController do
   let(:user){ auth_user! }
   let(:user2){ auth_user! }
 
-  it '#messaging initial' do
-    expect{
-      post :messaging, authentication_token: user.sessions.first.auth_token, sender_id: user.id,
-                       receiver_id: user2.id, type: 'initial', msg: 'initial'
-    }.to change(Conversation, :count).by(1)
-    expect( Oj.load(response.body)['success'] ).to eq true
+  describe '#messaging :initial' do
+    before :each do
+      @params = { authentication_token: user.sessions.first.auth_token,
+                  sender_id: user.id,
+                  receiver_id: user2.id,
+                  type: 'initial',
+                  msg: 'Hi' }
+    end
+
+    it 'should create new' do
+      expect{
+        post :messaging, @params
+      }.to change(Conversation, :count).by(1)
+      expect( Oj.load(response.body)['success'] ).to eq true
+    end
+
+    it 'already received' do
+      Conversation.create(sender: user2, receiver: user, created_at: 5.minutes.ago)
+      post :messaging, @params
+      expect(Oj.load(response.body)['info']).to eq 'This user already sent a digital hello to you few minutes ago'
+    end
+  end
+
+  it '#messaging muted' do
+    Mute.create!(sender_id: user.id, receiver_id: user2.id)
+    post :messaging, authentication_token: user.sessions.first.auth_token,
+                     sender_id: user.id,
+                     receiver_id: user2.id
+    expect(Oj.load(response.body)['info']).to eq 'You have been muted with this user'
   end
 
   describe 'conversation' do

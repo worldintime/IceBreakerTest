@@ -33,21 +33,6 @@ describe Api::UsersController do
       expect(user.avatar.url).to match /photo\.jpg/
     end
 
-    describe '#search' do
-      render_views
-
-      it 'should render json with data match location' do
-        user_in_radius     = create(:user_confirmed, latitude: 40.7140, longitude: -74.0080)
-        user_out_of_radius = create(:user_confirmed, latitude: 40.7, longitude: -74.1)
-        post :search, authentication_token: user.sessions.first.auth_token, format: 'json'
-
-        expect( assigns(:users_in_radius) ).to eq [user_in_radius]
-        expect( assigns(:users_out_of_radius) ).to eq [user_out_of_radius]
-        expect( Oj.load(response.body)['users_in_radius'][0]['id'] ).to eq user_in_radius.id
-        expect( Oj.load(response.body)['users_out_of_radius'][0]['id'] ).to eq user_out_of_radius.id
-      end
-    end
-
     it '#set_location' do
       loc = {latitude: '20,15', longitude: 24.33}
       post :set_location, authentication_token: user.sessions.first.auth_token, location: loc
@@ -77,6 +62,40 @@ describe Api::UsersController do
       end
     end
 
+    describe 'json view' do
+      render_views
+
+      describe '#search' do
+        it 'should render json with data match location' do
+          user_in_radius     = create(:user_confirmed, latitude: 40.7140, longitude: -74.0080)
+          user_out_of_radius = create(:user_confirmed, latitude: 40.7, longitude: -74.1)
+          post :search, authentication_token: user.sessions.first.auth_token, format: 'json'
+
+          expect( assigns(:users_in_radius) ).to eq [user_in_radius]
+          expect( assigns(:users_out_of_radius) ).to eq [user_out_of_radius]
+          expect( Oj.load(response.body)['users_in_radius'][0]['id'] ).to eq user_in_radius.id
+          expect( Oj.load(response.body)['users_out_of_radius'][0]['id'] ).to eq user_out_of_radius.id
+        end
+      end
+
+      it '#canned_statements' do
+        c_s = CannedStatement.create(user_id: user.id, body: 'X')
+        post :canned_statements, authentication_token: user.sessions.first.auth_token, format: 'json'
+        expect(Oj.load(response.body)['canned_statements'][0]['id']).to eq c_s.id
+        expect(Oj.load(response.body)['canned_statements'][0]['body']).to eq c_s.body
+      end
+    end
+
+    it '#upload_avatar' do
+      avatar = fixture_file_upload('files/photo.jpg', 'image/jpg')
+      post :upload_avatar, authentication_token: user.sessions.first.auth_token,
+                           email: user.email,
+                           avatar: avatar,
+                           format: 'json'
+      user.reload
+      expect(user.avatar_file_name).to eq 'photo.jpg'
+      expect(Oj.load(response.body)['info']).to match /Image successfully uploaded/
+    end
   end
 
 end

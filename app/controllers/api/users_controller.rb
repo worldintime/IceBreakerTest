@@ -3,6 +3,7 @@ class Api::UsersController < ApplicationController
 
   swagger_controller :users, "User Management"
 
+  # :nocov:
   swagger_api :create do
     summary "Creates a new User"
     param :query, :first_name, :string, :required, "First name"
@@ -17,6 +18,7 @@ class Api::UsersController < ApplicationController
     param :query, :facebook_avatar, :string, :optional, "Facebook avatar"
     param :query, :facebook_uid, :string, :optional, "Facebook user id"
   end
+  # :nocov:
 
   def create
     user_info = {}
@@ -53,20 +55,24 @@ class Api::UsersController < ApplicationController
     render json: @user.register_or_login(user_info)
   end
 
+  # :nocov:
   swagger_api :canned_statements do
     summary "Return all canned statements"
     param :query, :authentication_token, :string, :required, "Authentication token"
   end
+  # :nocov:
 
   def canned_statements
     @canned_statements = CannedStatement.all
   end
 
+  # :nocov:
   swagger_api :upload_avatar do
     summary "Upload user's avatar"
     param :query, :avatar, :string, :optional, "User's avatar"
     param :query, :email, :string, :required, "User's email"
   end
+  # :nocov:
 
   def upload_avatar
     user = User.find_by_email(params[:email])
@@ -82,6 +88,7 @@ class Api::UsersController < ApplicationController
     end
   end
 
+  # :nocov:
   swagger_api :edit_profile do
     summary "Edit profile of existing User"
     param :query, :authentication_token, :string, :required, "Authentication token"
@@ -94,6 +101,7 @@ class Api::UsersController < ApplicationController
     param :query, 'user[password]', :string, :optional, "Password"
     param :query, 'user[avatar]', :string, :optional, "User's avatar"
   end
+  # :nocov:
 
   def edit_profile
     if @current_user.update_attributes!(user_params)
@@ -109,10 +117,12 @@ class Api::UsersController < ApplicationController
     end
   end
 
+  # :nocov:
   swagger_api :forgot_password do
     summary "Search designated Users"
     param :query, :email, :string, :required, "Email"
   end
+  # :nocov:
 
   def forgot_password
     @user = User.find_by_email(params[:email])
@@ -128,10 +138,12 @@ class Api::UsersController < ApplicationController
     end
   end
 
+  # :nocov:
   swagger_api :search do
     summary "Search designated Users"
     param :query, :authentication_token, :string, :required, "Authentication token"
   end
+  # :nocov:
 
   def search
     lat = @current_user.latitude
@@ -147,21 +159,25 @@ class Api::UsersController < ApplicationController
     @users_out_of_radius = User.near([lat, lng], 8).where.not(id: [@current_user.id] + @users_in_radius)
   end
 
+  # :nocov:
   swagger_api :set_location do
     summary "Set location of current User"
     param :query, :authentication_token, :string, :required, "Authentication token"
     param :query, 'location[latitude]', :string, :required, "Latitude"
     param :query, 'location[longitude]', :string, :required, "Longitude"
   end
+  # :nocov:
 
   def set_location
     render json: @current_user.set_location(params[:location][:latitude], params[:location][:longitude])
   end
 
+  # :nocov:
   swagger_api :reset_location do
     summary "Reset location of current User"
     param :query, :authentication_token, :string, :required, "Authentication token"
   end
+  # :nocov:
 
   def reset_location
     render json: @current_user.reset_location!

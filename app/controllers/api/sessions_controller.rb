@@ -3,6 +3,7 @@ class Api::SessionsController < ApplicationController
   
   swagger_controller :users, "Session Management"
 
+  # :nocov:
   swagger_api :create do
     summary "Login User"
     param :query, :email, :string, :required, "Email address"
@@ -10,6 +11,7 @@ class Api::SessionsController < ApplicationController
     param :query, 'auth[device]', :string, :optional, "Device"
     param :query, 'auth[device_token]', :string, :optional, "Device token"
   end
+  # :nocov:
   
   def create
     user = User.authenticate(params[:email])
@@ -27,10 +29,12 @@ class Api::SessionsController < ApplicationController
     end
   end
 
+  # :nocov:
   swagger_api :destroy do
     summary "Logout current User"
     param :query, :authentication_token, :string, :required, "Authentication token"
   end
+  # :nocov:
 
   def destroy
     session = Session.where(auth_token: params[:authentication_token]).first
@@ -60,17 +64,8 @@ class Api::SessionsController < ApplicationController
     session.destroy
   end
 
-  def set_session
-    @session = Session.find(params[:auth_token])
-  end
-
   def configure_permitted_parameters
     devise_parameter_sanitizer.for(:create).push(:auth_token, :user_id)
-  end
-
-  def session_params
-    params.require(:session).permit(:auth_token, :device, :device_token, :user_id, :updated_at, :email, :password,
-                                    :user_id)
   end
 
 end

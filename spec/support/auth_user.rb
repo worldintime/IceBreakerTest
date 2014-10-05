@@ -5,7 +5,7 @@ module AuthUser
       user.sessions << create(:session)
       user.save!
     else
-      user = create(:user_confirmed, sessions: [ create(:session) ], latitude: 40.7140, longitude: -74.0080)
+      create(:user_confirmed, sessions: [ create(:session) ], latitude: 40.7140, longitude: -74.0080)
     end
   end
 end
