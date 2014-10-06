@@ -1,10 +1,9 @@
-attributes :id, :first_name, :last_name, :gender, :address, :latitude, :longitude, :avatar, :sent_rating, :received_rating,
-           :user_name
+attributes :id, :first_name, :last_name, :user_name, :gender, :address, :latitude, :longitude, :avatar, :facebook_avatar, :sent_rating, :received_rating
 
 node :status do
   @status
 end
 
-node do
+node :blocked do
   @blocked
 end
