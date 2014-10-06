@@ -5,6 +5,6 @@ node :status do
   @status
 end
 
-node do
+node :blocked do
   @blocked
 end

@@ -1,5 +1,5 @@
 class Api::UsersController < ApplicationController
-  before_action :api_authenticate_user, except: [:create, :forgot_password]
+  before_action :api_authenticate_user, except: [:create, :forgot_password, :upload_avatar]
 
   swagger_controller :users, "User Management"
 
@@ -73,7 +73,7 @@ class Api::UsersController < ApplicationController
     if user.update_attribute(:avatar, params[:avatar])
       render json: { success: true,
                      info: 'Image successfully uploaded.',
-                     data: @current_user.avatar.url(:thumb),
+                     data: user.avatar.url(:thumb),
                      status: 200 }
     else
       render json: { success: false,
