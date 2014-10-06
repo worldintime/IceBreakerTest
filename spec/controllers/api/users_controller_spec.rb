@@ -86,15 +86,23 @@ describe Api::UsersController do
       end
     end
 
-    it '#upload_avatar' do
-      avatar = fixture_file_upload('files/photo.jpg', 'image/jpg')
-      post :upload_avatar, authentication_token: user.sessions.first.auth_token,
-                           email: user.email,
-                           avatar: avatar,
-                           format: 'json'
-      user.reload
-      expect(user.avatar_file_name).to eq 'photo.jpg'
-      expect(Oj.load(response.body)['info']).to match /Image successfully uploaded/
+    describe '#upload_avatar' do
+      before :each do
+        avatar = fixture_file_upload('files/photo.jpg', 'image/jpg')
+        @params = { authentication_token: user.sessions.first.auth_token,
+                    email: user.email,
+                    avatar: avatar,
+                    format: 'json' }
+      end
+
+      %w(GET POST OPTIONS).each do |method|
+        it "via #{method}" do
+          process(:upload_avatar, method, @params)
+          user.reload
+          expect(user.avatar_file_name).to eq 'photo.jpg'
+          expect(Oj.load(response.body)['info']).to match /Image successfully uploaded/
+        end
+      end
     end
   end
 
