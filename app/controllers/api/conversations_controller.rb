@@ -46,7 +46,7 @@ class Api::ConversationsController < ApplicationController
             conversation = Conversation.find(params[:conversation_id])
             if conversation.update_attributes!(reply: params[:msg], reply_viewed: false)
               User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id]})
-              User.send_push_notification({user_id: params[:receiver_id], message: params[:msg]})
+              User.send_push_notification({user_id: params[:sender_id], message: params[:msg]})
               render json: { success: true,
                              info: 'Message sent',
                              data: { conversation_id: conversation.id },
