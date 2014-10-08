@@ -35,7 +35,6 @@ describe Api::UsersController do
 
     describe '#search' do
       render_views
-
       it 'should render json with data match location' do
         user_in_radius     = create(:user_confirmed, latitude: 40.7140, longitude: -74.0080)
         user_out_of_radius = create(:user_confirmed, latitude: 40.7, longitude: -74.1)
@@ -49,8 +48,12 @@ describe Api::UsersController do
     end
 
     it '#set_location' do
+      user2 = FactoryGirl.create(:user, latitude: 20.15, longitude: 24.33 )
+      pending = PendingConversation.create(sender_id: user.id, receiver_id: user2.id)
       loc = {latitude: '20,15', longitude: 24.33}
-      post :set_location, authentication_token: user.sessions.first.auth_token, location: loc
+      expect{
+        post :set_location, authentication_token: user.sessions.first.auth_token, location: loc
+      }.to change(PendingConversation, :count).by(-1)
       user.reload
       expect(user.latitude).to eq 20.15
       expect(user.longitude).to eq 24.33

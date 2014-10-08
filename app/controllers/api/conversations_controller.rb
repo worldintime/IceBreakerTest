@@ -23,9 +23,45 @@ class Api::ConversationsController < ApplicationController
         when 'initial'
           conversation = Conversation.new(sender_id: params[:sender_id], receiver_id: params[:receiver_id],
                                           initial: params[:msg], status: 'Closed')
-
-          if conversation.check_if_already_received?(params[:sender_id], params[:receiver_id])
-            if conversation.save
+          if @current_user.in_radius?(params[:receiver_id])
+            if conversation.check_if_already_received?(params[:sender_id], params[:receiver_id])
+              if conversation.save
+                User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id]})
+                User.send_push_notification({user_id: params[:receiver_id], message: params[:msg]})
+                render json: { success: true,
+                               info: 'Message sent',
+                               data: { conversation_id: conversation.id },
+                               status: 200 }
+              else
+                render json: { errors: conversation.errors.full_messages, success: false }, status: 200
+              end
+            else
+              render json: { success: false, info: 'This user already sent a digital hello to you few minutes ago'}
+            end
+          else
+            render json: { errors: 'You are out of radius'}
+          end
+        when 'reply'
+          if @current_user.in_radius?(params[:sender_id])
+            conversation = Conversation.find(params[:conversation_id])
+            if conversation.update_attributes!(reply: params[:msg], reply_viewed: false)
+              User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id]})
+              User.send_push_notification({user_id: params[:sender_id], message: params[:msg]})
+              render json: { success: true,
+                             info: 'Message sent',
+                             data: { conversation_id: conversation.id },
+                             status: 200 }
+            else
+              render json: { errors: conversation.errors.full_messages, success: false }, status: 200
+            end
+          else
+            @current_user.place_to_pending(params[:conversation_id], params[:sender_id])
+            render json: { errors: 'You are out of radius'}
+          end
+        when 'finished'
+          if @current_user.in_radius?(params[:receiver_id])
+            conversation = Conversation.find(params[:conversation_id])
+            if conversation.update_attributes!(finished: params[:msg], finished_viewed: false, status: 'Open')
               User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id]})
               User.send_push_notification({user_id: params[:receiver_id], message: params[:msg]})
               render json: { success: true,
@@ -36,31 +72,7 @@ class Api::ConversationsController < ApplicationController
               render json: { errors: conversation.errors.full_messages, success: false }, status: 200
             end
           else
-            render json: { success: false, info: 'This user already sent a digital hello to you few minutes ago'}
-          end
-        when 'reply'
-          conversation = Conversation.find(params[:conversation_id])
-          if conversation.update_attributes!(reply: params[:msg], reply_viewed: false)
-            User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id]})
-            User.send_push_notification({user_id: params[:sender_id], message: params[:msg]})
-            render json: { success: true,
-                           info: 'Message sent',
-                           data: { conversation_id: conversation.id },
-                           status: 200 }
-          else
-            render json: { errors: conversation.errors.full_messages, success: false }, status: 200
-          end
-        when 'finished'
-          conversation = Conversation.find(params[:conversation_id])
-          if conversation.update_attributes!(finished: params[:msg], finished_viewed: false, status: 'Open')
-            User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id]})
-            User.send_push_notification({user_id: params[:receiver_id], message: params[:msg]})
-            render json: { success: true,
-                           info: 'Message sent',
-                           data: { conversation_id: conversation.id },
-                           status: 200 }
-          else
-            render json: { errors: conversation.errors.full_messages, success: false }, status: 200
+            render json: { errors: 'You are out of radius'}
           end
         when 'ignore'
           conversation = Conversation.find(params[:conversation_id])
@@ -69,7 +81,7 @@ class Api::ConversationsController < ApplicationController
             User.send_push_notification({user_id: params[:receiver_id]})
             conversation.ignore_user(params[:sender_id], params[:receiver_id])
             render json: { success: true,
-                           info: 'You now ignore this user for 4 hours' }
+                           info: 'You now ignore this user for 1 hours' }
           else
             render json: { success: false,
                            info: 'Bad request' }
