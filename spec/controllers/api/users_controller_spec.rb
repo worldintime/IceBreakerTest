@@ -49,7 +49,7 @@ describe Api::UsersController do
 
     it '#set_location' do
       user2 = FactoryGirl.create(:user, latitude: 20.15, longitude: 24.33 )
-      pending = PendingConversation.create(sender_id: user.id, receiver_id: user2.id)
+      pending = PendingConversation.create(sender_id: user.id, receiver_id: user2.id, conversation_id: 1)
       loc = {latitude: '20,15', longitude: 24.33}
       expect{
         post :set_location, authentication_token: user.sessions.first.auth_token, location: loc
