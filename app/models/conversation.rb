@@ -24,20 +24,14 @@ class Conversation < ActiveRecord::Base
     if self.finished_changed?
       mute = Mute.new(sender_id: self.sender_id, receiver_id: self.receiver_id, conversation_id: self.id, status: 'Muted')
       mute.save
-      scheduler = Rufus::Scheduler.new
-      scheduler.at Time.now + 1.hours do
-        Mute.find(mute.id).destroy
-      end
+      Mute.delay(run_at: 1.hour.from_now.getutc).destroy(mute.id)
     end
   end
 
   def ignore_user sender_id, receiver_id
     ignore = Mute.new(sender_id: sender_id, receiver_id: receiver_id, conversation_id: self.id, status: 'Ignored')
     ignore.save
-    scheduler = Rufus::Scheduler.new
-    scheduler.at Time.now + 1.hours do
-      Mute.find(ignore.id).destroy
-    end
+    Mute.delay(run_at: 1.hour.from_now.getutc).destroy(ignore.id)
   end
 
   def to_json(current_user_id)

@@ -11,9 +11,9 @@ gem 'paperclip', '~> 4.2.0'
 gem 'grocer', '~> 0.6.0'
 gem 'swagger-docs', '~> 0.1.9'
 gem 'rest-client', '~> 1.7.2'
-gem 'rufus-scheduler', '~> 3.0.9'
 gem 'factory_girl_rails', '~> 4.4.1'
 gem 'time_difference', '~> 0.3.2'
+gem 'delayed_job_active_record', '~> 4.0.2'
 
 group :assets do
   gem 'sass-rails', '~> 4.0.3'
