@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20141008085158) do
+ActiveRecord::Schema.define(version: 20141010145842) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -35,6 +35,9 @@ ActiveRecord::Schema.define(version: 20141008085158) do
     t.string   "status"
   end
 
+  add_index "conversations", ["receiver_id"], name: "index_conversations_on_receiver_id", using: :btree
+  add_index "conversations", ["sender_id"], name: "index_conversations_on_sender_id", using: :btree
+
   create_table "mutes", force: true do |t|
     t.integer  "receiver_id"
     t.integer  "sender_id"
@@ -44,6 +47,9 @@ ActiveRecord::Schema.define(version: 20141008085158) do
     t.string   "status"
   end
 
+  add_index "mutes", ["receiver_id"], name: "index_mutes_on_receiver_id", using: :btree
+  add_index "mutes", ["sender_id"], name: "index_mutes_on_sender_id", using: :btree
+
   create_table "pending_conversations", force: true do |t|
     t.integer  "sender_id"
     t.integer  "receiver_id"
@@ -51,6 +57,9 @@ ActiveRecord::Schema.define(version: 20141008085158) do
     t.datetime "created_at"
     t.datetime "updated_at"
   end
+
+  add_index "pending_conversations", ["receiver_id"], name: "index_pending_conversations_on_receiver_id", using: :btree
+  add_index "pending_conversations", ["sender_id"], name: "index_pending_conversations_on_sender_id", using: :btree
 
   create_table "sessions", force: true do |t|
     t.string   "auth_token"
@@ -61,6 +70,8 @@ ActiveRecord::Schema.define(version: 20141008085158) do
     t.string   "api_key"
     t.datetime "created_at"
   end
+
+  add_index "sessions", ["auth_token"], name: "index_sessions_on_auth_token", using: :btree
 
   create_table "users", force: true do |t|
     t.string   "first_name"
