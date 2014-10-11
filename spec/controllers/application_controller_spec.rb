@@ -7,7 +7,7 @@ describe ApplicationController do
   end
 
   it 'should call #set_access_control_headers' do
-    expect(subject).to receive(:set_access_control_headers)
+    expect(subject).to receive(:allow_cors)
     get :home
   end
 end
