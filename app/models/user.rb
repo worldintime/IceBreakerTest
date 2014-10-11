@@ -103,16 +103,14 @@ class User < ActiveRecord::Base
   def send_forgot_password_email!
     password = SecureRandom.hex(8)
     self.update_attributes(password: password, password_confirmation: password)
-    UserMailer.forgot_password(self, password).deliver
+    UserMailer.delay.forgot_password(self, password)
   end
 
-  handle_asynchronously :send_forgot_password_email!, priority: 1
 
   def send_facebook_password_email(password)
-    UserMailer.facebook_password(self, password).deliver
+    UserMailer.delay.facebook_password(self, password)
   end
 
-  handle_asynchronously :send_facebook_password_email, priority: 1
 
   def self.send_push_notification(options = {})
     user    = User.find options[:user_id]
