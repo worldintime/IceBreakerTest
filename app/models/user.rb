@@ -103,18 +103,14 @@ class User < ActiveRecord::Base
   def send_forgot_password_email!
     password = SecureRandom.hex(8)
     self.update_attributes(password: password, password_confirmation: password)
-    scheduler = Rufus::Scheduler.new
-    scheduler.at Time.now + 5.seconds do
-      UserMailer.forgot_password(self, password).deliver
-    end
+    UserMailer.delay.forgot_password(self, password)
   end
 
+
   def send_facebook_password_email(password)
-    scheduler = Rufus::Scheduler.new
-    scheduler.at Time.now + 5.seconds do
-      UserMailer.facebook_password(self, password).deliver
-    end
+    UserMailer.delay.facebook_password(self, password)
   end
+
 
   def self.send_push_notification(options = {})
     user    = User.find options[:user_id]
