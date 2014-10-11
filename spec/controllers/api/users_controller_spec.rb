@@ -33,9 +33,27 @@ describe Api::UsersController do
       expect(user.avatar.url).to match /photo\.jpg/
     end
 
+    describe '#search' do
+      render_views
+      it 'should render json with data match location' do
+        user_in_radius     = create(:user_confirmed, latitude: 40.7140, longitude: -74.0080)
+        user_out_of_radius = create(:user_confirmed, latitude: 40.7, longitude: -74.1)
+        post :search, authentication_token: user.sessions.first.auth_token, format: 'json'
+
+        expect( assigns(:users_in_radius) ).to eq [user_in_radius]
+        expect( assigns(:users_out_of_radius) ).to eq [user_out_of_radius]
+        expect( Oj.load(response.body)['users_in_radius'][0]['id'] ).to eq user_in_radius.id
+        expect( Oj.load(response.body)['users_out_of_radius'][0]['id'] ).to eq user_out_of_radius.id
+      end
+    end
+
     it '#set_location' do
+      user2 = FactoryGirl.create(:user, latitude: 20.15, longitude: 24.33 )
+      pending = PendingConversation.create(sender_id: user.id, receiver_id: user2.id, conversation_id: 1)
       loc = {latitude: '20,15', longitude: 24.33}
-      post :set_location, authentication_token: user.sessions.first.auth_token, location: loc
+      expect{
+        post :set_location, authentication_token: user.sessions.first.auth_token, location: loc
+      }.to change(PendingConversation, :count).by(-1)
       user.reload
       expect(user.latitude).to eq 20.15
       expect(user.longitude).to eq 24.33

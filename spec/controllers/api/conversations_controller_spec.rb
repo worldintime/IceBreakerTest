@@ -66,6 +66,23 @@ describe Api::ConversationsController do
 
     end
 
+    it 'should block if users out of radius' do
+
+      conv = FactoryGirl.create(:conversation, sender_id: user.id, receiver_id: user2.id,
+                                initial: 'initial', reply: nil,finished: nil)
+      user.latitude = 48.63
+      user.longitude = 22.39
+      user.save
+      user2.latitude = 48.23
+      user2.longitude = 22.19
+      user2.save
+      expect{
+        post :messaging, authentication_token: user.sessions.first.auth_token, sender_id: user2.id,
+             receiver_id: user.id, type: 'reply', conversation_id: conversation.id
+      }.to change(PendingConversation, :count).by(1)
+      expect(conversation.reply).to eq nil
+    end
+
     it 'should receive conversation detail' do
       conv = FactoryGirl.create(:conversation, sender_id: user.id, receiver_id: user2.id,
                                 initial: 'initial', reply: 'reply',finished: 'finished')

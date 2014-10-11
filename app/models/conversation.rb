@@ -129,20 +129,21 @@ class Conversation < ActiveRecord::Base
                     first_name: opponent.first_name,
                     last_name: opponent.last_name,
                     user_avatar: receiver_avatar(current_user_id),
-                    user_name: opponent.user_name
+                    user_name: opponent.user_name,
+                    facebook_avatar: opponent.facebook_avatar
       },
         last_message: last_message_from_sender
       }
     else
       opponent = User.find(self.receiver_id)
-      { opponent:  { opponent_id: opponent.id,
-                     first_name: opponent.first_name,
-                     last_name: opponent.last_name,
-                     user_avatar: receiver_avatar(current_user_id),
-                     user_name: opponent.user_name
+      { opponent: { opponent_id: opponent.id,
+                    first_name: opponent.first_name,
+                    last_name: opponent.last_name,
+                    user_avatar: receiver_avatar(current_user_id),
+                    user_name: opponent.user_name,
+                    facebook_avatar: opponent.facebook_avatar
       },
         last_message: last_message_from_sender
-
       }
     end
   end

@@ -66,6 +66,24 @@ class User < ActiveRecord::Base
        status: 200 }
   end
 
+  def in_radius?(user_id)
+    User.near([self.latitude, self.longitude], 0.1).where(id: user_id).present?
+  end
+
+  def place_to_pending(conversation_id, user_id)
+    pend = PendingConversation.new(conversation_id: conversation_id, receiver_id: user_id, sender_id: self.id)
+    pend.save
+  end
+
+  def back_in_radius
+    back = PendingConversation.where(sender_id: self.id).pluck(:receiver_id)
+    user = User.find(back)
+    if User.near([self.latitude, self.longitude], 0.1).where(id: back).present?
+      PendingConversation.where(receiver_id: back, sender_id: self.id).destroy_all
+      User.send_push_notification(user_id: self.id, message: "#{user.first.user_name} is back in radius")
+    end
+  end
+
   def create_session auth
     range = [*'0'..'9', *'a'..'z', *'A'..'Z']
     session = {user_id: self.id, auth_token: Array.new(30){range.sample}.join, updated_at: Time.now}
@@ -117,6 +135,7 @@ class User < ActiveRecord::Base
         info: 'Latitude or Longitude are missed',
         status: 200 }
     elsif self.update_attributes(latitude: lat.gsub(',', '.'), longitude: lng.gsub(',', '.'))
+      self.back_in_radius
       { success: true,
         info: 'New location was set successfully',
         status: 200 }

@@ -1,16 +1,17 @@
 class ApplicationController < ActionController::Base
-  before_filter :set_access_control_headers
+  before_filter :allow_cors
 
   def home
     render json: {success: false, status: 402, info: 'Wrong request'}
   end
 
   private
-  def set_access_control_headers
-     headers['Access-Control-Allow-Origin'] = '*'
-     headers['Access-Control-Allow-Methods'] = 'POST, PUT, DELETE, GET, OPTIONS'
-     headers['Access-Control-Request-Method'] = '*'
-     headers['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+
+  def allow_cors
+    headers["Access-Control-Allow-Origin"] = "*"
+    headers["Access-Control-Allow-Methods"] = %w{GET POST PUT DELETE}.join(",")
+    headers["Access-Control-Allow-Headers"] = %w{Origin Accept Content-Type X-Requested-With X-CSRF-Token}.join(",")
+    head(:ok) if request.request_method == "OPTIONS"
   end
 
   def api_authenticate_user
