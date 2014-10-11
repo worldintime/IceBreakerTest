@@ -1,6 +1,5 @@
 class Api::UsersController < ApplicationController
-  before_action :api_authenticate_user, except: [:create, :forgot_password]
-
+  before_action :api_authenticate_user, except: [:create, :forgot_password, :upload_avatar]
   swagger_controller :users, "User Management"
 
   swagger_api :create do
@@ -70,7 +69,7 @@ class Api::UsersController < ApplicationController
 
   def upload_avatar
     user = User.find_by_email(params[:email])
-    if user.update_attribute(:avatar, params[:avatar])
+    if user.update_attributes(avatar: params[:avatar])
       render json: { success: true,
                      info: 'Image successfully uploaded.',
                      data: user.avatar.url(:thumb),
