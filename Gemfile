@@ -31,4 +31,5 @@ group :test do
   gem 'shoulda', '~> 3.5.0'
   gem 'rspec-rails', '~> 3.1.0'
   gem 'simplecov', '~> 0.9.0', :require => false
+  gem 'timecop'
 end

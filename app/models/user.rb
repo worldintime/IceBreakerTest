@@ -1,6 +1,4 @@
 class User < ActiveRecord::Base
-  # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable and :omniauthable
   has_many :sessions
   has_many :mutes
   has_many :conversations_my, class_name: Conversation, foreign_key: :sender_id
@@ -19,6 +17,7 @@ class User < ActiveRecord::Base
   reverse_geocoded_by :latitude, :longitude
   after_validation :reverse_geocode
 
+  # TODO: #register_or_login need test
   def register_or_login(user_info = {})
     new_fb_user      = user_info['new_fb_user']
     existing_fb_user = user_info['existing_fb_user']
@@ -85,19 +84,13 @@ class User < ActiveRecord::Base
   def create_session auth
     range = [*'0'..'9', *'a'..'z', *'A'..'Z']
     session = {user_id: self.id, auth_token: Array.new(30){range.sample}.join, updated_at: Time.now}
-    if auth && auth[:device].present? && auth[:device_token].present?
+    if auth && auth['device'].present? && auth['device_token'].present?
       session[:device] = auth['device']
       session[:device_token] = auth['device_token']
     end
     Session.where(user_id: self.id).destroy_all
     Session.create(session)
     session
-  end
-
-  def self.authenticate(param)
-    user = User.find_for_authentication(email: param)
-    user = User.find_for_authentication(user_name: param) if user.nil?
-    user
   end
 
   def send_forgot_password_email!
@@ -185,6 +178,7 @@ class User < ActiveRecord::Base
     end
   end
 
+  # FIXES: response need move to json view
   def reset_location!
     begin
       self.update_attributes!(latitude: nil, longitude: nil, address: nil)
@@ -209,6 +203,60 @@ class User < ActiveRecord::Base
       passed_time = TimeDifference.between(Time.now, start_time).in_minutes
       { blocked_to: 60.00 - passed_time,
         blocked_status: muted.first.status }
+    end
+  end
+
+  class << self
+    def authenticate(param)
+      user = User.find_for_authentication(email: param)
+      user = User.find_for_authentication(user_name: param) if user.nil?
+      user
+    end
+
+    def send_push_notification(options = {})
+      user    = User.find options[:user_id]
+      message = options[:message] ? options[:message] : "You have been ignored!"
+      result  = false
+      info    = 'Something went wrong'
+
+      user.sessions.each do |session|
+        if session.device && session.device_token
+
+          if session.device.downcase == 'ios'
+            notification = Grocer::Notification.new(
+                device_token: session.device_token,
+                alert:        message
+            )
+            IceBr8kr::Application::IOS_PUSHER.push(notification)
+            result = true
+            info = 'Pushed to IOS'
+          elsif session.device.downcase == 'android'
+            require 'rest_client'
+            url = 'https://android.googleapis.com/gcm/send'
+            headers = {
+                'Authorization' => 'key=AIzaSyBCK9NX8gRY51g9UwtY1znEirJuZqTNmAU',
+                'Content-Type'  => 'application/json'
+            }
+            request = {
+                'registration_ids' => [session.device_token],
+                data: {
+                    'message' => message
+                }
+            }
+
+            response = RestClient.post(url, request.to_json, headers)
+            result = true
+            info = 'Pushed to Android'
+          end
+        end
+      end
+    end
+
+    def rating_update(user_ids)
+      sender   = self.find user_ids[:sender]
+      receiver = self.find user_ids[:receiver]
+      sender.update_attributes(sent_rating: sender.sent_rating + 1)
+      receiver.update_attributes(received_rating: receiver.received_rating + 1)
     end
   end
 

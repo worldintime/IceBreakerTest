@@ -17,6 +17,7 @@
 require 'simplecov'
 SimpleCov.start do
   add_filter "config/initializers/swagger_docs.rb"
+  add_filter "spec/support/*"
 end
 require 'factory_girl'
 

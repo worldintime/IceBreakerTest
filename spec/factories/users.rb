@@ -13,7 +13,7 @@ FactoryGirl.define do
 
     factory :user_confirmed do
       confirmation_token nil
-      confirmed_at DateTime.now
+      confirmed_at Time.now
     end
   end
 end

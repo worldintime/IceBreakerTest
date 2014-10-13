@@ -3,6 +3,7 @@ class Api::ConversationsController < ApplicationController
   
   swagger_controller :conversations, "Conversation Management"
 
+  # :nocov:
   swagger_api :messaging do
     summary "Messaging between users"
     param :query, :authentication_token, :string, :required, "Authentication token"
@@ -12,7 +13,8 @@ class Api::ConversationsController < ApplicationController
     param :query, :msg, :string, :required, "Message"
     param :query, :conversation_id, :integer, :required, "Conversation id. Receives after type:initial, and required for other types"
   end
-  
+  # :nocov:
+
   def messaging
     if Mute.where(sender_id: [params[:sender_id],params[:receiver_id]],
                   receiver_id: [params[:receiver_id],params[:sender_id]]).any?
@@ -91,11 +93,13 @@ class Api::ConversationsController < ApplicationController
     end
   end
 
+  # :nocov:
   swagger_api :conversation_detail do
     summary "Conversation detail"
     param :query, :authentication_token, :string, :required, "Authentication token"
     param :query, :conversation_id, :integer, :required, "Conversation id"
   end
+  # :nocov:
 
   def conversation_detail
     conversation = Conversation.find(params[:conversation_id])
@@ -111,10 +115,12 @@ class Api::ConversationsController < ApplicationController
     end
   end
 
+  # :nocov:
   swagger_api :unread_messages do
     summary "Number of unread messages"
     param :query, :authentication_token, :string, :required, "Authentication token"
   end
+  # :nocov:
 
   def unread_messages
     messages = Conversation.unread_messages(@current_user.id)
@@ -130,10 +136,12 @@ class Api::ConversationsController < ApplicationController
     end
   end
 
+  # :nocov:
   swagger_api :history_of_digital_hello do
     summary "History of all digital hello"
     param :query, :authentication_token, :string, :required, "Authentication token"
   end
+  # :nocov:
 
   def history_of_digital_hello
     conv_arel = Conversation.arel_table
