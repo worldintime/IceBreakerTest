@@ -28,7 +28,8 @@ describe Conversation do
       end
 
       it 'should call #mute_users' do
-        @conversation.update(finished: true)
+        stub_mute_destroy_task
+        @conversation.update(finished: false)
         expect(@conversation.mute.status).to eq 'Muted'
       end
     end
@@ -46,7 +47,8 @@ describe Conversation do
     end
 
     it '#ignore_user' do
-      expect_any_instance_of(Rufus::Scheduler).to receive(:at)
+      ActionMailer::Base.deliveries.clear
+      stub_mute_destroy_task
       @conversation.ignore_user(1, 2)
       expect(@conversation.mute.status).to eq 'Ignored'
     end

@@ -123,7 +123,7 @@ class User < ActiveRecord::Base
      user.sessions.each do |session|
        if session.device && session.device_token
  
-         if session.device == 'IOS'
+         if session.device.downcase == 'ios'
            notification = Grocer::Notification.new(
              device_token: session.device_token,
              alert:        message
@@ -131,7 +131,7 @@ class User < ActiveRecord::Base
            IceBr8kr::Application::IOS_PUSHER.push(notification)
            result = true
            info = 'Pushed to IOS'
-         elsif session.device == 'Android'
+         elsif session.device.downcase == 'android'
            require 'rest_client'
            url = 'https://android.googleapis.com/gcm/send'
            headers = {
