@@ -20,7 +20,7 @@ class Api::SessionsController < ApplicationController
       session = create_session user, params[:auth]
       render json: { success: true,
                      info: 'Logged in',
-                     data: {authentication_token: session[:auth_token], user: user, avatar: user.avatar.url},
+                     data: {authentication_token: session[:auth_token], user: user, avatar: user.avatar.url(:thumb)},
                      status: 200 }
     elsif user.confirmed_at == nil
       render json: { errors: 'Please confirm your email first' }, status: 200
