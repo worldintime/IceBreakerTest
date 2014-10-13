@@ -10,6 +10,8 @@ describe Api::ConversationsController do
                        receiver_id: user2.id, type: 'initial', msg: 'initial'
     }.to change(Conversation, :count).by(1)
     expect( Oj.load(response.body)['success'] ).to eq true
+    user2.reload
+    expect(user2.facebook_rating).to eq(1)
   end
 
   describe 'conversation' do
