@@ -210,6 +210,7 @@ describe User do
     expect{ user.back_in_radius
     }.to change(PendingConversation, :count).by(0)
   end
+
   describe 'facebook_rating' do
     it 'should return true if facebook rating equals 10 or more' do
       user = create(:user, facebook_rating: 13)
@@ -225,6 +226,7 @@ describe User do
       expect( user.facebook_rating).to eq 9
     end
   end
+
   it 'should raise receivers rating by 1 when he receives initial hello' do
     user1 = create(:user, facebook_rating: 9)
     user2 = create(:user, facebook_rating: 13)
@@ -232,7 +234,6 @@ describe User do
     expect( User.rating_update( {sender: user1.id, receiver: user2.id, fb_rating: 1} ) ).to eq true
     user2.reload
     expect( user2.facebook_rating).to eq 14
-
   end
 
 end

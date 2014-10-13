@@ -28,6 +28,7 @@ describe Api::ConversationsController do
       post :messaging, @params
       expect(Oj.load(response.body)['info']).to eq 'This user already sent a digital hello to you few minutes ago'
     end
+   end
 
   describe 'conversation' do
     let(:user){ auth_user! }

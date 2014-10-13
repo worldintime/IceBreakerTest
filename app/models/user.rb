@@ -104,53 +104,6 @@ class User < ActiveRecord::Base
     UserMailer.delay.facebook_password(self, password)
   end
 
-
-  def self.send_push_notification(options = {})
-    user    = User.find options[:user_id]
-    message = options[:message] ? options[:message] : "You have been ignored!"
-    result  = false
-    info    = 'Something went wrong'
- 
-     user.sessions.each do |session|
-       if session.device && session.device_token
- 
-         if session.device == 'IOS'
-           notification = Grocer::Notification.new(
-             device_token: session.device_token,
-             alert:        message
-           )
-           IceBr8kr::Application::IOS_PUSHER.push(notification)
-           result = true
-           info = 'Pushed to IOS'
-         elsif session.device == 'Android'
-           require 'rest_client'
-           url = 'https://android.googleapis.com/gcm/send'
-           headers = {
-             'Authorization' => 'key=AIzaSyBCK9NX8gRY51g9UwtY1znEirJuZqTNmAU',
-             'Content-Type'  => 'application/json'
-           }
-           request = {
-             'registration_ids' => [session.device_token],
-             data: {
-               'message' => message
-             }
-           }
- 
-           response = RestClient.post(url, request.to_json, headers)
-           result = true
-           info = 'Pushed to Android'
-         end
-       end
-     end
-  end
-
-  def self.rating_update(user_ids)
-    sender   = self.find user_ids[:sender]
-    receiver = self.find user_ids[:receiver]
-    sender.update_attributes(sent_rating: sender.sent_rating + 1)
-    receiver.update_attributes(received_rating: receiver.received_rating + 1, facebook_rating: receiver.facebook_rating.to_i + user_ids[:fb_rating])
-  end
-
   def facebook_share_rating
     self.facebook_rating.to_i >= 10 ? self.update_attributes(facebook_rating: self.facebook_rating.to_i - 10) : false
   end
@@ -256,7 +209,7 @@ class User < ActiveRecord::Base
       sender   = self.find user_ids[:sender]
       receiver = self.find user_ids[:receiver]
       sender.update_attributes(sent_rating: sender.sent_rating + 1)
-      receiver.update_attributes(received_rating: receiver.received_rating + 1)
+      receiver.update_attributes(received_rating: receiver.received_rating + 1, facebook_rating: receiver.facebook_rating.to_i + user_ids[:fb_rating].to_i)
     end
   end
 

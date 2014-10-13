@@ -10,6 +10,7 @@ FactoryGirl.define do
     email{|u| "#{u.first_name.downcase}@factory.com"}
     password '123456789'
     password_confirmation '123456789'
+    facebook_rating 0
 
     factory :user_confirmed do
       confirmation_token nil
