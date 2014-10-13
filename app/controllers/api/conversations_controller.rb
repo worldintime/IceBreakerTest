@@ -1,6 +1,6 @@
 class Api::ConversationsController < ApplicationController
   before_action :api_authenticate_user
-
+  
   swagger_controller :conversations, "Conversation Management"
 
   # :nocov:
