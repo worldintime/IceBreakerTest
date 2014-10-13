@@ -19,6 +19,7 @@ class Api::ConversationsController < ApplicationController
       render json: { success: false,
                      info: 'You have been muted with this user' }
     else
+      message = "#{@current_user.user_name} : #{params[:msg]}"
       case params[:type]
         when 'initial'
           conversation = Conversation.new(sender_id: params[:sender_id], receiver_id: params[:receiver_id],
@@ -27,7 +28,7 @@ class Api::ConversationsController < ApplicationController
             if conversation.check_if_already_received?(params[:sender_id], params[:receiver_id])
               if conversation.save
                 User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id]})
-                User.send_push_notification({user_id: params[:receiver_id], message: params[:msg]})
+                User.send_push_notification({user_id: params[:receiver_id], message: message})
                 render json: { success: true,
                                info: 'Message sent',
                                data: { conversation_id: conversation.id },
@@ -46,7 +47,7 @@ class Api::ConversationsController < ApplicationController
             conversation = Conversation.find(params[:conversation_id])
             if conversation.update_attributes!(reply: params[:msg], reply_viewed: false)
               User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id]})
-              User.send_push_notification({user_id: params[:receiver_id], message: params[:msg]})
+              User.send_push_notification({user_id: params[:receiver_id], message: message})
               render json: { success: true,
                              info: 'Message sent',
                              data: { conversation_id: conversation.id },
@@ -63,7 +64,7 @@ class Api::ConversationsController < ApplicationController
             conversation = Conversation.find(params[:conversation_id])
             if conversation.update_attributes!(finished: params[:msg], finished_viewed: false, status: 'Open')
               User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id]})
-              User.send_push_notification({user_id: params[:receiver_id], message: params[:msg]})
+              User.send_push_notification({user_id: params[:receiver_id], message: message})
               render json: { success: true,
                              info: 'Message sent',
                              data: { conversation_id: conversation.id },
