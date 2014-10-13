@@ -15,27 +15,13 @@ class Conversation < ActiveRecord::Base
                        created_at: (30.minutes.ago..Time.now)).blank?
   end
 
-  def attr_by_default
-    self.initial_viewed = false
-    self.reply_viewed = true
-    self.finished_viewed = true
-    nil
-  end
-
-  def mute_users
-    if self.finished_changed?
-      mute = Mute.new(sender_id: self.sender_id, receiver_id: self.receiver_id, conversation_id: self.id, status: 'Muted')
-      mute.save
-      Mute.delay(run_at: 1.hour.from_now.getutc).destroy(mute.id)
-    end
-  end
-
   def ignore_user sender_id, receiver_id
     ignore = Mute.new(sender_id: sender_id, receiver_id: receiver_id, conversation_id: self.id, status: 'Ignored')
     ignore.save
     Mute.delay(run_at: 1.hour.from_now.getutc).destroy(ignore.id)
   end
 
+  # FIXME: #to_json and all relater methods need refactoring
   def to_json(current_user_id)
     opponent_identity(current_user_id).merge(conversation_status_for_json(current_user_id))
   end
@@ -70,14 +56,6 @@ class Conversation < ActiveRecord::Base
     else
       {finished_viewed: true}
     end
-  end
-
-  def self.unread_messages(current_user_id)
-    query1 = "SELECT SUM((CASE WHEN reply_viewed = false THEN 1 ELSE 0 END)) AS reply_sum FROM conversations WHERE (conversations.sender_id = #{current_user_id})"
-    query2 = "SELECT SUM((CASE WHEN initial_viewed = false THEN 1 ELSE 0 END) + (CASE WHEN finished_viewed = false THEN 1 ELSE 0 END)) AS total_sum FROM conversations WHERE (conversations.receiver_id = #{current_user_id})"
-    reply = connection.execute(query1).to_a.first['reply_sum'].to_i
-    initial = connection.execute(query2).to_a.first['total_sum'].to_i
-    sum = initial + reply
   end
 
   def blocked_to(current_user_id)
@@ -129,6 +107,7 @@ class Conversation < ActiveRecord::Base
     end
   end
 
+  # FIXME: returned hash has 2 equal key -> :avatar
   def check_if_sender(current_user_id)
     receiver = User.find(self.receiver_id)
     sender = User.find(self.sender_id)
@@ -169,6 +148,33 @@ class Conversation < ActiveRecord::Base
   def receiver_avatar(current_user_id)
     friend_id = [sender_id,receiver_id].select{|id| id != current_user_id}
     @user_avatar ||= User.find(friend_id).first.avatar.url
+  end
+
+  private
+
+  def attr_by_default
+    self.initial_viewed = false
+    self.reply_viewed = true
+    self.finished_viewed = true
+    nil
+  end
+
+  def mute_users
+    if self.finished_changed?
+      mute = Mute.new(sender_id: self.sender_id, receiver_id: self.receiver_id, conversation_id: self.id, status: 'Muted')
+      mute.save
+      Mute.delay(run_at: 1.hour.from_now.getutc).destroy(mute.id)
+    end
+  end
+
+  class << self
+    def unread_messages(current_user_id)
+      query1 = "SELECT SUM((CASE WHEN reply_viewed = false THEN 1 ELSE 0 END)) AS reply_sum FROM conversations WHERE (conversations.sender_id = #{current_user_id})"
+      query2 = "SELECT SUM((CASE WHEN initial_viewed = false THEN 1 ELSE 0 END) + (CASE WHEN finished_viewed = false THEN 1 ELSE 0 END)) AS total_sum FROM conversations WHERE (conversations.receiver_id = #{current_user_id})"
+      reply = connection.execute(query1).to_a.first['reply_sum'].to_i
+      initial = connection.execute(query2).to_a.first['total_sum'].to_i
+      sum = initial + reply
+    end
   end
 
 end
