@@ -114,11 +114,10 @@ class Conversation < ActiveRecord::Base
 
     if self.sender_id != current_user_id
       { opponent:  {id: sender.id,
-                    avatar: sender.avatar.url,
                     email: sender.email,
                     first_name: sender.first_name,
                     last_name: sender.last_name,
-                    avatar: sender.avatar.url,
+                    avatar: sender.avatar.url(:thumb),
                     initial: self.initial,
                     finished: self.finished,
                     user_name: sender.user_name,
@@ -130,11 +129,10 @@ class Conversation < ActiveRecord::Base
       }
     else
       { opponent:  {id: receiver.id,
-                    avatar: receiver.avatar.url,
                     email: receiver.email,
                     first_name: receiver.first_name,
                     last_name: receiver.last_name,
-                    avatar: receiver.avatar.url,
+                    avatar: receiver.avatar.url(:thumb),
                     reply: self.reply,
                     user_name: receiver.user_name,
                     facebook_avatar: receiver.facebook_avatar},
@@ -147,7 +145,7 @@ class Conversation < ActiveRecord::Base
 
   def receiver_avatar(current_user_id)
     friend_id = [sender_id,receiver_id].select{|id| id != current_user_id}
-    @user_avatar ||= User.find(friend_id).first.avatar.url
+    @user_avatar ||= User.find(friend_id).first.avatar.url(:thumb)
   end
 
   private

@@ -107,7 +107,7 @@ class Api::ConversationsController < ApplicationController
     if conversation
       conversation.update_attributes!(conversation.existing_messages)
       render json: { success: true,
-                     data:  conversation.check_if_sender(@current_user.id),
+                     data: conversation.check_if_sender(@current_user.id),
                      conversation_id: params[:conversation_id] }
     else
       render json: { success: false,
