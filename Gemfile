@@ -14,6 +14,7 @@ gem 'rest-client', '~> 1.7.2'
 gem 'factory_girl_rails', '~> 4.4.1'
 gem 'time_difference', '~> 0.3.2'
 gem 'delayed_job_active_record', '~> 4.0.2'
+gem 'daemons', '~> 1.1.9'
 
 group :assets do
   gem 'sass-rails', '~> 4.0.3'
