@@ -19,8 +19,7 @@ class User < ActiveRecord::Base
   reverse_geocoded_by :latitude, :longitude
   after_validation :reverse_geocode
 
-  #TODO: #register_or_login need test
-
+  # TODO: #register_or_login need test
   def register_or_login(user_info = {})
     new_fb_user      = user_info['new_fb_user']
     existing_fb_user = user_info['existing_fb_user']
@@ -183,8 +182,7 @@ class User < ActiveRecord::Base
     end
   end
 
-  #FIXES: response need move to json view
-
+  # FIXES: response need move to json view
   def reset_location!
     begin
       self.update_attributes!(latitude: nil, longitude: nil, address: nil)
