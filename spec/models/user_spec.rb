@@ -49,14 +49,18 @@ describe User do
     expect( user.in_radius?(user3.id) ).to eq false
   end
 
-  it 'should return true or false if facebook rating equals 10 or less' do
-    user1 = create(:user, facebook_rating: 9)
-    user2 = create(:user, facebook_rating: 13)
+  it 'should return true if facebook rating equals 10 or more' do
+    user = create(:user, facebook_rating: 13)
 
-    expect( user1.facebook_share_rating).to eq false
-    expect( user1.facebook_rating).to eq 9
-    expect( user2.facebook_share_rating).to eq true
-    expect( user2.facebook_rating).to eq 3
+    expect( user.facebook_share_rating).to eq true
+    expect( user.facebook_rating).to eq 3
+  end
+
+  it 'should return false if facebook rating less then 10' do
+    user = create(:user, facebook_rating: 9)
+
+    expect( user.facebook_share_rating).to eq false
+    expect( user.facebook_rating).to eq 9
   end
 
   it 'should raise receivers rating by 1 when he receives initial hello' do
