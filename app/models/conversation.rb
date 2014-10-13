@@ -107,7 +107,6 @@ class Conversation < ActiveRecord::Base
     end
   end
 
-  # FIXME: returned hash has 2 equal key -> :avatar
   def check_if_sender(current_user_id)
     receiver = User.find(self.receiver_id)
     sender = User.find(self.sender_id)
