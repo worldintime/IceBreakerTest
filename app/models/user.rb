@@ -155,7 +155,11 @@ class User < ActiveRecord::Base
     sender   = self.find user_ids[:sender]
     receiver = self.find user_ids[:receiver]
     sender.update_attributes(sent_rating: sender.sent_rating + 1)
-    receiver.update_attributes(received_rating: receiver.received_rating + 1)
+    receiver.update_attributes(received_rating: receiver.received_rating + 1, facebook_rating: receiver.facebook_rating.to_i + user_ids[:fb_rating])
+  end
+
+  def facebook_share_rating
+    self.facebook_rating.to_i >= 10 ? self.update_attributes(facebook_rating: self.facebook_rating.to_i - 10) : false
   end
 
   def search_results(current_user_id)

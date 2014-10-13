@@ -27,7 +27,7 @@ class Api::ConversationsController < ApplicationController
           if @current_user.in_radius?(params[:receiver_id])
             if conversation.check_if_already_received?(params[:sender_id], params[:receiver_id])
               if conversation.save
-                User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id]})
+                User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id], fb_rating: 1})
                 User.send_push_notification({user_id: params[:receiver_id], message: message})
                 render json: { success: true,
                                info: 'Message sent',
@@ -45,8 +45,8 @@ class Api::ConversationsController < ApplicationController
         when 'reply'
           if @current_user.in_radius?(params[:sender_id])
             conversation = Conversation.find(params[:conversation_id])
-            if conversation.update_attributes!(reply: params[:msg], reply_viewed: false)
-              User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id]})
+            if conversation.update_attributes!(reply: params[:msg], reply_viewed: 0)
+              User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id], fb_rating: 0})
               User.send_push_notification({user_id: params[:receiver_id], message: message})
               render json: { success: true,
                              info: 'Message sent',
@@ -63,7 +63,7 @@ class Api::ConversationsController < ApplicationController
           if @current_user.in_radius?(params[:receiver_id])
             conversation = Conversation.find(params[:conversation_id])
             if conversation.update_attributes!(finished: params[:msg], finished_viewed: false, status: 'Open')
-              User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id]})
+              User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id], fb_rating: 0})
               User.send_push_notification({user_id: params[:receiver_id], message: message})
               render json: { success: true,
                              info: 'Message sent',
@@ -142,6 +142,7 @@ class Api::ConversationsController < ApplicationController
     if history
       render json: { success: true,
                      data: Hash[history.each_with_index.map{|h,i| ["conversation#{i}", h.to_json(@current_user.id)]}],
+                     fb_share: @current_user.facebook_share_rating,
                      status: 200 }
     else
       render json: { success: false,
