@@ -1,5 +1,6 @@
 class Api::UsersController < ApplicationController
-  before_action :api_authenticate_user, except: [:create, :forgot_password, :upload_avatar]
+  before_action :api_authenticate_user, except: [:create, :forgot_password, :upload_avatar, :test_push_notification]
+
   swagger_controller :users, "User Management"
 
   # :nocov:
@@ -181,6 +182,45 @@ class Api::UsersController < ApplicationController
   def reset_location
     render json: @current_user.reset_location!
   end
+
+  # Temporarily action for client side testing
+  def test_push_notification
+    device = params[:device_type]
+    result = false
+    message = 'Hi IceBr8kr team!'
+    info = 'Something went wrong'
+
+    if device == 'IOS'
+      notification = Grocer::Notification.new(
+        device_token: params[:device_token],
+        alert:        message
+      )
+      IceBr8kr::Application::IOS_PUSHER.push(notification)
+      result = true
+      info = 'Pushed to IOS'
+    elsif device == 'Android'
+      require 'rest_client'
+      url = 'https://android.googleapis.com/gcm/send'
+      headers = {
+        'Authorization' => 'key=AIzaSyBCK9NX8gRY51g9UwtY1znEirJuZqTNmAU',
+        'Content-Type' => "application/json"
+      }
+      request = {
+        'registration_ids' => [params[:device_token]],
+        data: {
+          'message' => message
+        }
+      }
+
+      response = RestClient.post(url, request.to_json, headers)
+      response_hash = YAML.load(response)
+      result = true
+      info = 'Pushed to Android'
+    end
+
+    render json: { success: result.to_s, info: info }, status: 200
+  end
+
 
   private
 
