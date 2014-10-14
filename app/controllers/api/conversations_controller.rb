@@ -45,7 +45,7 @@ class Api::ConversationsController < ApplicationController
             render json: { errors: 'You are out of radius'}
           end
         when 'reply'
-          if @current_user.in_radius?(params[:sender_id])
+          if @current_user.in_radius?(params[:receiver_id])
             conversation = Conversation.find(params[:conversation_id])
             if conversation.update_attributes!(reply: params[:msg], reply_viewed: 0)
               User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id], fb_rating: 0})
