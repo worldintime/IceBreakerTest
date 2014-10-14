@@ -85,8 +85,8 @@ describe Api::ConversationsController do
       user2.longitude = 22.19
       user2.save
       expect{
-        post :messaging, authentication_token: user.sessions.first.auth_token, sender_id: user2.id,
-             receiver_id: user.id, type: 'reply', conversation_id: conversation.id
+        post :messaging, authentication_token: user.sessions.first.auth_token, sender_id: user.id,
+             receiver_id: user2.id, type: 'reply', conversation_id: conversation.id
       }.to change(PendingConversation, :count).by(1)
       expect(conversation.reply).to eq nil
     end
