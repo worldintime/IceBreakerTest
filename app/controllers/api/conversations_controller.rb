@@ -145,18 +145,8 @@ class Api::ConversationsController < ApplicationController
 
   def history_of_digital_hello
     conv_arel = Conversation.arel_table
-    history = Conversation.where(conv_arel[:sender_id].eq(@current_user.id).or(conv_arel[:receiver_id].eq(@current_user.id)))
-
-    if history
-      render json: { success: true,
-                     data: Hash[history.each_with_index.map{|h,i| ["conversation#{i}", h.to_json(@current_user.id)]}],
-                     fb_share: @current_user.facebook_share_rating,
-                     status: 200 }
-    else
-      render json: { success: false,
-                     info: 'Failed',
-                     status: 200 }
-    end
+    @history_of_digital_hello = Conversation.where(conv_arel[:sender_id].eq(@current_user.id).or(conv_arel[:receiver_id].eq(@current_user.id)))
+    @history_of_digital_hello.each { |conv| conv.current_user = @current_user }
   end
 
   private

@@ -99,7 +99,6 @@ class User < ActiveRecord::Base
     UserMailer.delay.forgot_password(self, password)
   end
 
-
   def send_facebook_password_email(password)
     UserMailer.delay.facebook_password(self, password)
   end

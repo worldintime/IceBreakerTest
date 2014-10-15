@@ -8,6 +8,9 @@ class Conversation < ActiveRecord::Base
   before_create :attr_by_default
   before_update :mute_users
 
+  attr_accessor :current_user
+  attr_reader :last_message_text, :last_message_status, :last_message_sender, :blocked_to, :opponent_identity
+
   include ActionView::Helpers::DateHelper
 
   def check_if_already_received?(sender_id, receiver_id)
@@ -22,30 +25,24 @@ class Conversation < ActiveRecord::Base
   end
 
   # FIXME: #to_json and all relater methods need refactoring
-  def to_json(current_user_id)
-    opponent_identity(current_user_id).merge(conversation_status_for_json(current_user_id))
-  end
-
-  def conversation_status_for_json(current_user_id)
-    {blocked_to: blocked_to(current_user_id),
-     conversation_id: self.id,
-     updated_at: self.updated_at}
-  end
 
   def last_message_from_sender
-    if self.finished.nil? && self.reply.nil?
-      {sender_id: self.sender_id,
-       text: self.initial,
-       status: 'initial'}
-    elsif self.finished.nil? && self.initial != nil
-      {sender_id: self.receiver_id,
-       text: self.reply,
-       status: 'reply'}
-    else
-      {sender_id: self.sender_id,
-       text: self.finished,
-       status: 'finished'}
-    end
+    @last_message ||= [{ text: self.initial, status: 'initial' },
+                       { text: self.reply, status: 'reply' },
+                       {  text: self.finished, status: 'finished'}
+                      ].delete_if{ |item| item[:text].blank? }.last
+  end
+
+  def last_message_text
+    last_message_from_sender[:text]
+  end
+
+  def last_message_status
+    last_message_from_sender[:status]
+  end
+
+  def last_message_sender
+    self.finished.nil? && self.initial != nil ? self.receiver_id : self.sender_id
   end
 
   def existing_messages
@@ -58,14 +55,14 @@ class Conversation < ActiveRecord::Base
     end
   end
 
-  def blocked_to(current_user_id)
+  def blocked_to
     if self.mute
       if self.mute.status == 'Muted'
         start_time = self.mute.created_at
         distance_of_time_in_words(start_time, Time.now)
       elsif self.mute.status == 'Ignored'
         start_time = self.mute.created_at
-        start_time = start_time + 4.hours
+        start_time = start_time + 1.hours
         distance_of_time_in_words(start_time, Time.now)
       end
     else
@@ -73,36 +70,24 @@ class Conversation < ActiveRecord::Base
     end
   end
 
-  def ignored
-    if Mute.find_by_conversation_id(self.id)
-      true
-    else
-      false
-    end
-  end
-
-  def opponent_identity(current_user_id)
-    if self.sender_id != current_user_id
+  def opponent_identity
+    if self.sender_id != current_user
       opponent = User.find(self.sender_id)
-      { opponent: { opponent_id: opponent.id,
-                    first_name: opponent.first_name,
-                    last_name: opponent.last_name,
-                    user_avatar: receiver_avatar(current_user_id),
-                    user_name: opponent.user_name,
-                    facebook_avatar: opponent.facebook_avatar
-      },
-        last_message: last_message_from_sender
+      {     opponent_id: opponent.id,
+             first_name: opponent.first_name,
+              last_name: opponent.last_name,
+            user_avatar: opponent_avatar,
+              user_name: opponent.user_name,
+        facebook_avatar: opponent.facebook_avatar
       }
     else
       opponent = User.find(self.receiver_id)
-      { opponent: { opponent_id: opponent.id,
-                    first_name: opponent.first_name,
-                    last_name: opponent.last_name,
-                    user_avatar: receiver_avatar(current_user_id),
-                    user_name: opponent.user_name,
-                    facebook_avatar: opponent.facebook_avatar
-      },
-        last_message: last_message_from_sender
+      {     opponent_id: opponent.id,
+             first_name: opponent.first_name,
+              last_name: opponent.last_name,
+            user_avatar: opponent_avatar,
+              user_name: opponent.user_name,
+        facebook_avatar: opponent.facebook_avatar
       }
     end
   end
@@ -142,8 +127,8 @@ class Conversation < ActiveRecord::Base
     end
   end
 
-  def receiver_avatar(current_user_id)
-    friend_id = [sender_id,receiver_id].select{|id| id != current_user_id}
+  def opponent_avatar
+    friend_id = [sender_id,receiver_id].select{|id| id != current_user}
     @user_avatar ||= User.find(friend_id).first.avatar.url(:thumb)
   end
 
