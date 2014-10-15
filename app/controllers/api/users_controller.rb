@@ -155,8 +155,8 @@ class Api::UsersController < ApplicationController
                      status: 200 }
     end
 
-    @users_in_radius     = User.near([lat, lng], 0.09144).where.not(id: @current_user.id)
-    @users_out_of_radius = User.near([lat, lng], 8.047).where.not(id: [@current_user.id] + @users_in_radius)
+    @users_in_radius     = User.near([lat, lng], User::DISTANCE_IN_RADIUS).where.not(id: @current_user.id)
+    @users_out_of_radius = User.near([lat, lng], User::DISTANCE_OUT_OF_RADIUS).where.not(id: [@current_user.id] + @users_in_radius)
   end
 
   # :nocov:
