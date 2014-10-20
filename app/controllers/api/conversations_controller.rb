@@ -58,7 +58,7 @@ class Api::ConversationsController < ApplicationController
               render json: { errors: conversation.errors.full_messages, success: false }, status: 200
             end
           else
-            @current_user.place_to_pending(params[:conversation_id], params[:sender_id])
+            @current_user.place_to_pending(params[:conversation_id], params[:receiver_id])
             render json: { errors: 'You are out of radius'}
           end
         when 'finished'

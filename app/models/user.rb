@@ -17,6 +17,9 @@ class User < ActiveRecord::Base
   reverse_geocoded_by :latitude, :longitude
   after_validation :reverse_geocode
 
+  DISTANCE_IN_RADIUS     = 0.09144 # 100 yards in kilometers
+  DISTANCE_OUT_OF_RADIUS = 8.047   # 5 miles in kilometers
+
   # TODO: #register_or_login need test
   def register_or_login(user_info = {})
     new_fb_user      = user_info['new_fb_user']

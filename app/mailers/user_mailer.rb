@@ -1,5 +1,6 @@
-class UserMailer < ActionMailer::Base
-  default from: "from@example.com"
+class UserMailer < Devise::Mailer
+  helper :application
+  default from: "icebr8kr@gmail.com"
 
   def forgot_password(user, password)
     @user = user
@@ -12,5 +13,8 @@ class UserMailer < ActionMailer::Base
     @password = password
     mail(to: @user.email, subject: 'Password and user name for IceBr8kr account')
   end
+
+  def confirmation_instructions(record, token, opts={})
+    super
+  end
 end
- 

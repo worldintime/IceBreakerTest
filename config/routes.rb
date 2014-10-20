@@ -7,6 +7,8 @@ Rails.application.routes.draw do
   end
 
   namespace :api, defaults: {format: 'json'} do
+    post 'test_push_notification', to: 'users#test_push_notification'
+
     resources :users
     post 'canned_statements',      to: 'users#canned_statements'
     post 'search',                 to: 'users#search'
