@@ -107,18 +107,23 @@ describe Api::ConversationsController do
       expect( Oj.load(response.body)['data']['my_message']['finished'] ).to eq 'finished'
     end
 
-    it 'should receive conversation history' do
-      conv = FactoryGirl.create(:conversation, sender_id: user.id, receiver_id: user2.id, initial: 'initial',
-                                reply: 'reply', finished: 'finished')
-      post :history_of_digital_hello, authentication_token: user.sessions.first.auth_token, format: 'json'
-      conv.reload
-      expect( Oj.load(response.body)['data']['conversation0']['opponent']['opponent_id'] ).to eq user2.id
-      expect( Oj.load(response.body)['data']['conversation0']['opponent']['first_name'] ).to eq user2.first_name
-      expect( Oj.load(response.body)['data']['conversation0']['opponent']['last_name'] ).to eq user2.last_name
-      expect( Oj.load(response.body)['data']['conversation0']['last_message']['sender_id'] ).to eq user.id
-      expect( Oj.load(response.body)['data']['conversation0']['last_message']['text'] ).to eq 'finished'
-      expect( Oj.load(response.body)['data']['conversation0']['last_message']['status'] ).to eq 'finished'
+    describe 'Rabl viewes' do
 
+      render_views
+
+      it 'should receive conversation history' do
+        conv = FactoryGirl.create(:conversation, sender_id: user.id, receiver_id: user2.id, initial: 'initial',
+                                  reply: 'reply', finished: 'finished')
+        post :history_of_digital_hello, authentication_token: user.sessions.first.auth_token, format: 'json'
+
+        expect( Oj.load(response.body)['data']['conversation0']['opponent']['opponent_id'] ).to eq user2.id
+        expect( Oj.load(response.body)['data']['conversation0']['opponent']['first_name'] ).to eq user2.first_name
+        expect( Oj.load(response.body)['data']['conversation0']['opponent']['last_name'] ).to eq user2.last_name
+        expect( Oj.load(response.body)['data']['conversation0']['last_message']['sender_id'] ).to eq user.id
+        expect( Oj.load(response.body)['data']['conversation0']['last_message']['text'] ).to eq 'finished'
+        expect( Oj.load(response.body)['data']['conversation0']['last_message']['status'] ).to eq 'finished'
+
+      end
     end
 
     it 'should receive number of unread messages' do

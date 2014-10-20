@@ -23,8 +23,6 @@ class Conversation < ActiveRecord::Base
     Mute.delay(run_at: 1.hour.from_now.getutc).destroy(ignore.id)
   end
 
-  # FIXME: #to_json and all relater methods need refactoring
-
   def last_message_from_sender
     @last_message ||= [{ text: self.initial, status: 'initial', sender_id: self.sender_id },
                        { text: self.reply, status: 'reply', sender_id: receiver_id },

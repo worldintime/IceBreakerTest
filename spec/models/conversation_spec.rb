@@ -70,18 +70,6 @@ describe Conversation do
       end
     end
 
-    describe '#ignored' do
-      it 'without Mute' do
-        expect(@conversation.ignored).to be_falsey
-      end
-
-      it 'with Mute' do
-        @conversation.mute = build(:mute)
-        @conversation.save!
-        expect(@conversation.ignored).to be_truthy
-      end
-    end
-
     describe '#check_if_sender' do
       before :each do
         @current_user = create(:user_confirmed)
