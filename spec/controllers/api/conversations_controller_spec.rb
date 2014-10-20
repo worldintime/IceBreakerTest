@@ -110,7 +110,7 @@ describe Api::ConversationsController do
     it 'should receive conversation history' do
       conv = FactoryGirl.create(:conversation, sender_id: user.id, receiver_id: user2.id, initial: 'initial',
                                 reply: 'reply', finished: 'finished')
-      post :history_of_digital_hello, authentication_token: user.sessions.first.auth_token
+      post :history_of_digital_hello, authentication_token: user.sessions.first.auth_token, format: 'json'
       conv.reload
       expect( Oj.load(response.body)['data']['conversation0']['opponent']['opponent_id'] ).to eq user2.id
       expect( Oj.load(response.body)['data']['conversation0']['opponent']['first_name'] ).to eq user2.first_name

@@ -146,7 +146,6 @@ class Api::ConversationsController < ApplicationController
   def history_of_digital_hello
     conv_arel = Conversation.arel_table
     @history_of_digital_hello = Conversation.where(conv_arel[:sender_id].eq(@current_user.id).or(conv_arel[:receiver_id].eq(@current_user.id)))
-    @history_of_digital_hello.each { |conv| conv.current_user = @current_user }
   end
 
   private

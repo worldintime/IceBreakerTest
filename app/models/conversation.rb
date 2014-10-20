@@ -8,8 +8,7 @@ class Conversation < ActiveRecord::Base
   before_create :attr_by_default
   before_update :mute_users
 
-  attr_accessor :current_user
-  attr_reader :last_message_text, :last_message_status, :last_message_sender, :blocked_to, :opponent_identity, :opponent_avatar
+  attr_reader :last_message_text, :last_message_status, :last_message_sender, :blocked_to, :opponent_identity
 
   include ActionView::Helpers::DateHelper
 
@@ -27,9 +26,9 @@ class Conversation < ActiveRecord::Base
   # FIXME: #to_json and all relater methods need refactoring
 
   def last_message_from_sender
-    @last_message ||= [{ text: self.initial, status: 'initial' },
-                       { text: self.reply, status: 'reply' },
-                       {  text: self.finished, status: 'finished'}
+    @last_message ||= [{ text: self.initial, status: 'initial', sender_id: self.sender_id },
+                       { text: self.reply, status: 'reply', sender_id: receiver_id },
+                       {  text: self.finished, status: 'finished', sender_id: self.sender_id}
                       ].delete_if{ |item| item[:text].blank? }.last
   end
 
@@ -42,7 +41,7 @@ class Conversation < ActiveRecord::Base
   end
 
   def last_message_sender
-    self.finished.nil? && self.initial != nil ? self.receiver_id : self.sender_id
+    last_message_from_sender[:sender_id]
   end
 
   def existing_messages
@@ -70,8 +69,8 @@ class Conversation < ActiveRecord::Base
     end
   end
 
-  def opponent_identity
-    if self.sender_id != current_user
+  def opponent_identity(current_user_id)
+    if self.sender_id != current_user_id
       opponent = User.find(self.sender_id)
     else
       opponent = User.find(self.receiver_id)
@@ -111,11 +110,6 @@ class Conversation < ActiveRecord::Base
                      finished: self.finished}
       }
     end
-  end
-
-  def opponent_avatar
-    friend_id = [sender_id,receiver_id].select{|id| id != current_user}
-    @user_avatar ||= User.find(friend_id).first.avatar.url(:thumb)
   end
 
   private

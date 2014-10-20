@@ -1,6 +1,12 @@
 attributes :updated_at, :blocked_to
-attributes :last_message_text => :sender_id, :last_message_text => :text, :last_message_status => :status, :id => :conversation_id
+attribute :id => :conversation_id
 
 node :opponent do
-    partial("api/conversations/base2", object: @opponent.opponent_identity)
+    partial("api/conversations/opponent", object: @history.opponent_identity(@current_user.id))
 end
+
+node :last_message do
+    partial("api/conversations/last_message", object: @history)
+end
+
+
