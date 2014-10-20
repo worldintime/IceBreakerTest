@@ -9,7 +9,7 @@ class Conversation < ActiveRecord::Base
   before_update :mute_users
 
   attr_accessor :current_user
-  attr_reader :last_message_text, :last_message_status, :last_message_sender, :blocked_to, :opponent_identity
+  attr_reader :last_message_text, :last_message_status, :last_message_sender, :blocked_to, :opponent_identity, :opponent_avatar
 
   include ActionView::Helpers::DateHelper
 
@@ -73,22 +73,8 @@ class Conversation < ActiveRecord::Base
   def opponent_identity
     if self.sender_id != current_user
       opponent = User.find(self.sender_id)
-      {     opponent_id: opponent.id,
-             first_name: opponent.first_name,
-              last_name: opponent.last_name,
-            user_avatar: opponent_avatar,
-              user_name: opponent.user_name,
-        facebook_avatar: opponent.facebook_avatar
-      }
     else
       opponent = User.find(self.receiver_id)
-      {     opponent_id: opponent.id,
-             first_name: opponent.first_name,
-              last_name: opponent.last_name,
-            user_avatar: opponent_avatar,
-              user_name: opponent.user_name,
-        facebook_avatar: opponent.facebook_avatar
-      }
     end
   end
 
