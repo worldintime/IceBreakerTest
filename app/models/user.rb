@@ -29,7 +29,7 @@ class User < ActiveRecord::Base
 
     if new_fb_user
       self.skip_confirmation!
-      password = SecureRandom.hex(8)
+      password = SecureRandom.hex(4)
       self.update_attributes(password: password,
                 password_confirmation: password)
 
@@ -97,7 +97,7 @@ class User < ActiveRecord::Base
   end
 
   def send_forgot_password_email!
-    password = SecureRandom.hex(8)
+    password = SecureRandom.hex(4)
     self.update_attributes(password: password, password_confirmation: password)
     UserMailer.delay.forgot_password(self, password)
   end
