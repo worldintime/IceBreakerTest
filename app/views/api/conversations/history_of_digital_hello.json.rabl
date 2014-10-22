@@ -19,9 +19,3 @@ end
 node :status do
     200
 end
-
-
-
-
-
-
