@@ -17,6 +17,8 @@ class User < ActiveRecord::Base
   reverse_geocoded_by :latitude, :longitude
   after_validation :reverse_geocode
 
+  attr_reader :facebook_share_rating
+
   DISTANCE_IN_RADIUS     = 0.09144 # 100 yards in kilometers
   DISTANCE_OUT_OF_RADIUS = 8.047   # 5 miles in kilometers
 
@@ -102,7 +104,6 @@ class User < ActiveRecord::Base
     UserMailer.delay.forgot_password(self, password)
   end
 
-
   def send_facebook_password_email(password)
     UserMailer.delay.facebook_password(self, password)
   end
@@ -150,7 +151,7 @@ class User < ActiveRecord::Base
 
   def blocked_to(current_user_id)
     muted = Mute.where( "sender_id = ? AND receiver_id = ? OR sender_id = ? AND receiver_id = ?",
-                        self.id, current_user_id, current_user_id, self.id)
+                        self.id, current_user_id, current_user_id, self.id )
     if muted.blank?
       { blocked_to: 'No',
         blocked_status: 'No'}
