@@ -8,5 +8,3 @@ end
 node :last_message do
     partial("api/conversations/last_message", object: @history)
 end
-
-

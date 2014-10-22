@@ -144,8 +144,8 @@ class Api::ConversationsController < ApplicationController
   # :nocov:
 
   def history_of_digital_hello
-    conv_arel = Conversation.arel_table
-    @history_of_digital_hello = Conversation.where(conv_arel[:sender_id].eq(@current_user.id).or(conv_arel[:receiver_id].eq(@current_user.id)))
+    @history_of_digital_hello = Conversation.where('sender_id = ? OR receiver_id = ?', @current_user.id, @current_user.id)
+    @fb_share = @current_user.facebook_share_rating
   end
 
   private

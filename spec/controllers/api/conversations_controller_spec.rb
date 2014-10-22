@@ -131,13 +131,21 @@ describe Api::ConversationsController do
 
       end
 
+      it 'should have same json structure after refactoring' do
+        conv = FactoryGirl.create( :conversation, sender_id: user.id, receiver_id: user2.id, initial: 'initial',
+                                   reply: 'reply', finished: 'finished' )
+        post :history_of_digital_hello, authentication_token: user.sessions.first.auth_token, format: 'json'
+
+        expect( Oj.load(response.body)['data'] ).should =~ {"a" => 1, "b" => 2}
+      end
+
     end
 
     it 'should receive number of unread messages' do
       conv1 = FactoryGirl.create(:conversation, sender_id: user.id, initial: 'initial', reply: 'reply',
                                 finished: 'finished')
-      conv2 = FactoryGirl.create(:conversation, receiver_id: user.id, initial: 'initial', reply: 'reply',
-                                finished: 'finished')
+      conv2 = FactoryGirl.create( :conversation, receiver_id: user.id, initial: 'initial', reply: 'reply',
+                                  finished: 'finished' )
 
       conv1.reply_viewed = false
       conv1.finished_viewed = false
