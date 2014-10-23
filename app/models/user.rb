@@ -5,7 +5,7 @@ class User < ActiveRecord::Base
   has_many :conversations_his, class_name: Conversation, foreign_key: :receiver_id
 
   devise :database_authenticatable, :registerable, :confirmable,
-         :recoverable, :rememberable, :trackable, :validatable
+         :recoverable, :rememberable, :trackable, :validatable, :async
 
   has_attached_file :avatar, styles: { thumb: '200x200#' }, default_url: '/assets/avatar.png'
   validates_attachment :avatar, content_type: { content_type: ['image/jpg', 'image/jpeg', 'image/png', 'image/gif', 'application/octet-stream'] }
