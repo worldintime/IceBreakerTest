@@ -8,10 +8,6 @@ node :status do
   @status
 end
 
-node :blocked_to do
-    @blocked[:blocked_to]
-end
-
-node :blocked_status do
-    @blocked[:blocked_status]
+node :blocked do
+    @blocked
 end
