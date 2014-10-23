@@ -101,12 +101,10 @@ class User < ActiveRecord::Base
     self.update_attributes(password: password, password_confirmation: password)
     UserMailer.delay.forgot_password(self, password)
   end
-  handle_asynchronously :send_forgot_password_email!
 
   def send_facebook_password_email(password)
     UserMailer.delay.facebook_password(self, password)
   end
-  handle_asynchronously :send_facebook_password_email
 
   def facebook_share_rating
     self.facebook_rating.to_i >= 10 ? self.update_attributes(facebook_rating: self.facebook_rating.to_i - 10) : false
