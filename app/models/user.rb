@@ -5,7 +5,7 @@ class User < ActiveRecord::Base
   has_many :conversations_his, class_name: Conversation, foreign_key: :receiver_id
 
   devise :database_authenticatable, :registerable, :confirmable,
-         :recoverable, :rememberable, :trackable, :validatable
+         :recoverable, :rememberable, :trackable, :validatable, :async
 
   has_attached_file :avatar, styles: { thumb: '200x200#' }, default_url: '/assets/avatar.png'
   validates_attachment :avatar, content_type: { content_type: ['image/jpg', 'image/jpeg', 'image/png', 'image/gif', 'application/octet-stream'] }
@@ -101,11 +101,12 @@ class User < ActiveRecord::Base
     self.update_attributes(password: password, password_confirmation: password)
     UserMailer.delay.forgot_password(self, password)
   end
-
+  handle_asynchronously :send_forgot_password_email!
 
   def send_facebook_password_email(password)
     UserMailer.delay.facebook_password(self, password)
   end
+  handle_asynchronously :send_facebook_password_email
 
   def facebook_share_rating
     self.facebook_rating.to_i >= 10 ? self.update_attributes(facebook_rating: self.facebook_rating.to_i - 10) : false

@@ -1,5 +1,5 @@
 class UserMailer < Devise::Mailer
-  helper :application
+
   default from: "icebr8kr@gmail.com"
 
   def forgot_password(user, password)
