@@ -17,7 +17,7 @@ gem 'time_difference', '~> 0.3.2'
 gem 'delayed_job_active_record', '~> 4.0.2'
 gem 'daemons', '~> 1.1.9'
 gem 'mandrill_mailer', '~> 0.4.9'
-gem 'newrelic_rpm'
+gem 'newrelic_rpm', '~> 3.9.6.257'
 
 
 group :assets do
