@@ -89,6 +89,7 @@ GEM
     minitest (5.4.1)
     multi_json (1.10.1)
     netrc (0.7.7)
+    newrelic_rpm (3.9.6.257)
     oj (2.10.2)
     oj_mimic_json (1.0.1)
     orm_adapter (0.5.0)
@@ -201,6 +202,7 @@ DEPENDENCIES
   grocer (~> 0.6.0)
   letter_opener (~> 1.2.0)
   mandrill_mailer (~> 0.4.9)
+  newrelic_rpm
   oj (~> 2.10.2)
   oj_mimic_json (~> 1.0.1)
   paperclip (~> 4.2.0)
