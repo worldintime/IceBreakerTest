@@ -3,7 +3,6 @@ require 'rails_helper'
 describe Api::SessionsController do
 
   describe 'session' do
-
     describe '#create' do
       let(:auth){ {device: "iOS", device_token: '3n12j3khss'} }
 
@@ -13,7 +12,7 @@ describe Api::SessionsController do
 
       it 'should create session' do
         post :create, email: @user.email, password: '123456789'
-        expect( Oj.load(response.body)['success'] ).to eq true
+        expect( Oj.load(response.body)['success'] ).to be_truthy
       end
 
       it 'should create session and add device info' do
@@ -22,7 +21,7 @@ describe Api::SessionsController do
         session = @user.sessions.first
         expect(session.device).to eq auth[:device]
         expect(session.device_token).to eq auth[:device_token]
-        expect( Oj.load(response.body)['success'] ).to eq true
+        expect( Oj.load(response.body)['success'] ).to be_truthy
       end
 
       describe 'with invalid data' do
@@ -49,7 +48,7 @@ describe Api::SessionsController do
         user = create(:user, sessions: [ create(:session) ])
         expect_any_instance_of(Session).to receive(:destroy)
         delete :destroy, authentication_token: user.sessions.first.auth_token
-        expect( Oj.load(response.body)['success'] ).to eq true
+        expect( Oj.load(response.body)['success'] ).to be_truthy
       end
 
       it 'should return "Not Found" for invalid token' do

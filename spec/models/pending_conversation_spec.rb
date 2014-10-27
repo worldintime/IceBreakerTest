@@ -10,7 +10,7 @@ describe PendingConversation do
 
   it 'should create conversation' do
     pending_conversation = build :pending_conversation
-    expect(pending_conversation.save).to be true
+    expect(pending_conversation.save).to be_truthy
     expect(pending_conversation.sender_id).to be 1
     expect(pending_conversation.receiver_id).to be 2
     expect(pending_conversation.conversation_id).to be 1

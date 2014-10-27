@@ -43,7 +43,7 @@ describe User do
       end
 
       it 'via not exist email' do
-        expect(described_class.authenticate('zzz@mail.com')).to eq nil
+        expect(described_class.authenticate('zzz@mail.com')).to be_nil
       end
     end
 
@@ -197,17 +197,17 @@ describe User do
   end
 
   it 'should remove conversation from pending' do
-    user = create(:user, latitude: 40.7127, longitude: -74.0059)
+    user1 = create(:user, latitude: 40.7127, longitude: -74.0059)
     user2 = create(:user, latitude: 40.7127, longitude: -74.0059)
     user3 = create(:user, latitude: 40.0027, longitude: -74.6669)
-    conversation = create(:conversation, sender_id: user.id, receiver_id: user2.id)
+    conversation = create(:conversation, sender_id: user1.id, receiver_id: user2.id)
     # pending 1
-    create( :pending_conversation, sender_id: user.id, receiver_id: user2.id, conversation_id: conversation.id)
-    expect{ user.back_in_radius
+    create( :pending_conversation, sender_id: user1.id, receiver_id: user2.id, conversation_id: conversation.id)
+    expect{ user1.back_in_radius
     }.to change(PendingConversation, :count).by(-1)
     # pending 2
-    create( :pending_conversation, sender_id: user.id, receiver_id: user3.id, conversation_id: conversation.id)
-    expect{ user.back_in_radius
+    create( :pending_conversation, sender_id: user1.id, receiver_id: user3.id, conversation_id: conversation.id)
+    expect{ user1.back_in_radius
     }.to change(PendingConversation, :count).by(0)
   end
 
@@ -215,14 +215,14 @@ describe User do
     it 'should return true if facebook rating equals 10 or more' do
       user = create(:user, facebook_rating: 13)
 
-      expect( user.facebook_share_rating).to eq true
+      expect( user.facebook_share_rating).to be_truthy
       expect( user.facebook_rating).to eq 3
     end
 
     it 'should return false if facebook rating less then 10' do
       user = create(:user, facebook_rating: 9)
 
-      expect( user.facebook_share_rating).to eq false
+      expect( user.facebook_share_rating).to be_falsey
       expect( user.facebook_rating).to eq 9
     end
   end
@@ -231,7 +231,7 @@ describe User do
     user1 = create(:user, facebook_rating: 9)
     user2 = create(:user, facebook_rating: 13)
 
-    expect( User.rating_update( {sender: user1.id, receiver: user2.id, fb_rating: 1} ) ).to eq true
+    expect( User.rating_update( {sender: user1.id, receiver: user2.id, fb_rating: 1} ) ).to be_truthy
     user2.reload
     expect( user2.facebook_rating).to eq 14
   end
