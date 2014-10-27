@@ -138,6 +138,25 @@ class Api::UsersController < ApplicationController
     end
   end
 
+  swagger_api :feedback do
+    summary "Send feedback"
+    param :query, :authentication_token, :string, :required, "Authentication token"
+    param :query, :message, :string, :required, "Message"
+  end
+
+  def feedback
+    p "Controller 142"
+    if current_user.send_feedback(params[:message])
+      render json: { success: true,
+                     info: 'Feedback was sent successfully',
+                     status: 200 }
+    else
+      render json: { success: false,
+                     info: "Feedback wasn't sent",
+                     status: 200 }
+    end
+  end
+
   # :nocov:
   swagger_api :search do
     summary "Search designated Users"

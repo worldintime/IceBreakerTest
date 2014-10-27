@@ -21,6 +21,7 @@ class User < ActiveRecord::Base
 
   DISTANCE_IN_RADIUS     = 0.09144 # 100 yards in kilometers
   DISTANCE_OUT_OF_RADIUS = 8.047   # 5 miles in kilometers
+  FEEDBACK_EMAIL         = "icebr8kr@gmail.com"
 
   # TODO: #register_or_login need test
   def register_or_login(user_info = {})
@@ -106,6 +107,10 @@ class User < ActiveRecord::Base
 
   def send_facebook_password_email(password)
     UserMailer.delay.facebook_password(self, password)
+  end
+
+  def send_feedback(message)
+    UserMailer.delay.feedback(self, message)
   end
 
   def facebook_share_rating
