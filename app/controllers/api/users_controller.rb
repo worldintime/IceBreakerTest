@@ -119,7 +119,7 @@ class Api::UsersController < ApplicationController
 
   # :nocov:
   swagger_api :forgot_password do
-    summary "Search designated Users"
+    summary "Send generated password on email"
     param :query, :email, :string, :required, "Email"
   end
   # :nocov:
@@ -136,6 +136,20 @@ class Api::UsersController < ApplicationController
                      info: "Email doesn't exist",
                      status: 200 }
     end
+  end
+
+  swagger_api :feedback do
+    summary "Send feedback"
+    param :query, :authentication_token, :string, :required, "Authentication token"
+    param :query, :message, :string, :required, "Message"
+  end
+
+  def feedback
+    current_user.send_feedback(params[:message])
+
+    render json: { success: true,
+                   info: 'Feedback was sent successfully',
+                   status: 200 }
   end
 
   # :nocov:
