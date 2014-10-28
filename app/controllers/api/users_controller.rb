@@ -119,7 +119,7 @@ class Api::UsersController < ApplicationController
 
   # :nocov:
   swagger_api :forgot_password do
-    summary "Search designated Users"
+    summary "Send generated password on email"
     param :query, :email, :string, :required, "Email"
   end
   # :nocov:
@@ -145,16 +145,11 @@ class Api::UsersController < ApplicationController
   end
 
   def feedback
-    p "Controller 142"
-    if current_user.send_feedback(params[:message])
-      render json: { success: true,
-                     info: 'Feedback was sent successfully',
-                     status: 200 }
-    else
-      render json: { success: false,
-                     info: "Feedback wasn't sent",
-                     status: 200 }
-    end
+    current_user.send_feedback(params[:message])
+
+    render json: { success: true,
+                   info: 'Feedback was sent successfully',
+                   status: 200 }
   end
 
   # :nocov:

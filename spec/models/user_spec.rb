@@ -4,7 +4,7 @@ describe User do
   it 'should validate' do
     validate_uniqueness_of :email
     validate_uniqueness_of :user_name
-    
+
     validate_presence_of :user_name
     validate_presence_of :email
     validate_presence_of :first_name
@@ -59,11 +59,18 @@ describe User do
         expect(mail.subject).to match /New password for IceBr8kr account/
       end
 
-      it '#send_facebook_password_email!' do
+      it '#send_facebook_password_email' do
         @current_user.send_facebook_password_email(123)
         mail = ActionMailer::Base.deliveries.first
         expect(mail.to).to include @current_user.email
         expect(mail.subject).to match /Password and user name for IceBr8kr account/
+      end
+
+      it '#send_feedback' do
+        @current_user.send_feedback("I love IceBr8kr")
+        mail = ActionMailer::Base.deliveries.first
+        expect(mail.to).to include User::FEEDBACK_EMAIL
+        expect(mail.subject).to match /IceBr8kr Feedback/
       end
     end
 
