@@ -78,7 +78,7 @@ class Api::UsersController < ApplicationController
     user = User.find_by_email(params[:email])
     if user.update_attributes(avatar: params[:avatar])
       render json: { success: true,
-                     info: 'Image successfully uploaded.',
+                     info: 'Picture successfully updated.',
                      data: user.avatar.url(:thumb),
                      status: 200 }
     else
