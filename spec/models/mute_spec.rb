@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 describe Mute do
-  it 'should create user' do
+  it 'should create mute' do
     mute = build :mute
     expect(mute.save).to be true
   end
@@ -10,6 +10,5 @@ describe Mute do
     mute = Mute.create
     expect(mute.blocked_timer).to eq 60
   end
-
 end
 
