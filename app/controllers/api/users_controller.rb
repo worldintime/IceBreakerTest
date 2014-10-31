@@ -129,7 +129,7 @@ class Api::UsersController < ApplicationController
     if @user
       @user.send_forgot_password_email!
       render json: { success: true,
-                     info: 'New password was sent on your email',
+                     info: 'A new password was sent to your email',
                      status: 200 }
     else
       render json: { success: false,
