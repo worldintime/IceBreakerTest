@@ -69,9 +69,9 @@ describe Api::ConversationsController do
       end
 
       it 'should mute user' do
-        Mute.create!(sender_id: user.id, receiver_id: user2.id)
+        muted = Mute.create!(sender_id: user.id, receiver_id: user2.id)
         post :messaging, @params.merge(type: nil, msg: nil)
-        expect(Oj.load(response.body)['info']).to eq 'You have been muted with this user'
+        expect(Oj.load(response.body)['info']).to eq "You have #{muted.blocked_timer} minutes before another conversation can be started!"
       end
     end
 

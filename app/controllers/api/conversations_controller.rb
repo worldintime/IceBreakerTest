@@ -16,10 +16,11 @@ class Api::ConversationsController < ApplicationController
   # :nocov:
 
   def messaging
-    if Mute.where(sender_id: [params[:sender_id],params[:receiver_id]],
-                  receiver_id: [params[:receiver_id],params[:sender_id]]).any?
+    muted = Mute.where(sender_id: [params[:sender_id],params[:receiver_id]],
+                       receiver_id: [params[:receiver_id],params[:sender_id]])
+    if muted.any?
       render json: { success: false,
-                     info: 'You have been muted with this user' }
+                     info: "You have #{muted.first.blocked_timer} minutes before another conversation can be started!" }
     else
       message = "#{@current_user.user_name} : #{params[:msg]}"
       case params[:type]
