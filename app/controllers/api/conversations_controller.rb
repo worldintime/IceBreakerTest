@@ -145,8 +145,29 @@ class Api::ConversationsController < ApplicationController
   # :nocov:
 
   def history_of_digital_hello
-    @history_of_digital_hello = Conversation.where('sender_id = ? OR receiver_id = ?', @current_user.id, @current_user.id)
+    @history_of_digital_hello = Conversation.my_conversations(@current_user.id)
     @fb_share = @current_user.facebook_share_rating
+  end
+
+  # :nocov:
+  swagger_api :remove_conversation do
+    summary "Remove conversation"
+    param :query, :authentication_token, :string, :required, "Authentication token"
+    param :query, :conversation_id, :integer, :required, "Conversation id"
+  end
+  # :nocov:
+
+  def remove_conversation
+    conversation = Conversation.find(params[:conversation_id])
+    if conversation.remove_conversation(@current_user.id)
+      render json: { success: true,
+                     info: 'Conversation removed',
+                     status: 200 }
+    else
+      render json: { success: true,
+                     info: 'Failed',
+                     status: 200 }
+    end
   end
 
   private

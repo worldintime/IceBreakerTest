@@ -170,6 +170,18 @@ describe Api::ConversationsController do
       expect( Oj.load(response.body)['success'] ).to be_truthy
       expect( Oj.load(response.body)['data'] ).to eq 3
     end
+
+    it 'should remove conversation' do
+      conversation = conv1 = FactoryGirl.create(:conversation, sender_id: user.id,
+                                                initial: 'initial',
+                                                reply: 'reply',
+                                                finished: 'finished')
+      post :remove_conversation, authentication_token: auth_token, conversation_id: conversation.id
+      expect( Oj.load(response.body)['success']).to be_truthy
+      expect( Oj.load(response.body)['info']).to match /Conversation removed/
+      expect( Oj.load(response.body)['status']).to eq 200
+
+    end
   end
 
 end
