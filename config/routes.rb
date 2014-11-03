@@ -28,5 +28,6 @@ Rails.application.routes.draw do
     post 'messaging',                to: 'conversations#messaging'
     post 'history_of_digital_hello', to: 'conversations#history_of_digital_hello'
     post 'conversation_detail',      to: 'conversations#conversation_detail'
+    post 'remove_conversation',      to: 'conversations#remove_conversation'
   end
 end

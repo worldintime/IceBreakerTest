@@ -102,4 +102,48 @@ describe Conversation do
     expect(described_class.unread_messages(current_user.id)).to eq 8
   end
 
+  describe '#remove_conversation' do
+
+    it 'should receive users conversations ' do
+
+      user1 = create(:user_confirmed)
+      user2 = create(:user_confirmed)
+      conversation1 = create(:conversation, sender_id: user2.id, receiver_id: user1.id, removed_by_sender: true, removed_by_receiver: false)
+      conversation2 = create(:conversation, sender_id: user2.id, receiver_id: user1.id, removed_by_sender: false, removed_by_receiver: true)
+      conversation3 = create(:conversation, sender_id: user1.id, receiver_id: user2.id, removed_by_sender: true, removed_by_receiver: false)
+      conversation4 = create(:conversation, sender_id: user1.id, receiver_id: user2.id, removed_by_sender: false, removed_by_receiver: true)
+
+      expect(Conversation.my_conversations(user1.id).map.size).to eq 2
+    end
+
+    it 'should remove conversation for sender' do
+      user1 = create(:user_confirmed)
+      user2 = create(:user_confirmed)
+      conversation1 = create(:conversation, sender_id: user1.id, receiver_id: user2.id, removed_by_sender: false, removed_by_receiver: false)
+      conversation1.remove_conversation(user1.id)
+      expect(conversation1.removed_by_sender).to eq true
+
+    end
+
+    it 'should remove conversation for receiver' do
+      user1 = create(:user_confirmed)
+      user2 = create(:user_confirmed)
+      conversation1 = create(:conversation, sender_id: user2.id, receiver_id: user1.id, removed_by_sender: false, removed_by_receiver: false)
+      conversation1.remove_conversation(user1.id)
+      expect(conversation1.removed_by_receiver).to eq true
+
+    end
+
+    it 'should remove conversation for both users' do
+      user1 = create(:user_confirmed)
+      user2 = create(:user_confirmed)
+      conversation = create(:conversation, sender_id: user2.id, receiver_id: user1.id, removed_by_sender: true, removed_by_receiver: false)
+
+      expect{conversation.remove_conversation(user1.id)}.to change(Conversation, :count).by(-1)
+
+    end
+    
+  end
+
+
 end
