@@ -15,6 +15,10 @@ describe Api::SessionsController do
         expect( Oj.load(response.body)['success'] ).to be_truthy
       end
 
+      it 'should create session using insensitive user name' do
+        post :create, email: @user.user_name.upcase, password: '123456789'
+      end
+
       it 'should create session and add device info' do
         post :create, email: @user.email, password: '123456789', auth: auth
         @user.reload

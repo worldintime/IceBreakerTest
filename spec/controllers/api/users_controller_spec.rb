@@ -19,7 +19,7 @@ describe Api::UsersController do
                email: 'xz@mail.com',
                gender: 'Male',
                date_of_birth: 20.years.ago.strftime("%F"),
-               user_name: 'x_Z',
+               user_name: 'x_z',
                avatar: fixture_file_upload('files/photo.jpg', 'image/jpg') }
 
       post :edit_profile, authentication_token: auth_token, user: attr
