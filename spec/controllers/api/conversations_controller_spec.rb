@@ -183,6 +183,7 @@ describe Api::ConversationsController do
       expect(json['info']).to match /Conversation removed/
       expect(json['status']).to eq 200
 
+
     end
   end
 
