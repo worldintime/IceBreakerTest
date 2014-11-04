@@ -145,7 +145,7 @@ class Api::ConversationsController < ApplicationController
   # :nocov:
 
   def history_of_digital_hello
-    @history_of_digital_hello = Conversation.my_conversations(@current_user.id)
+    @history_of_digital_hello = @current_user.conversations_history
     @fb_share = @current_user.facebook_share_rating
   end
 
@@ -158,7 +158,7 @@ class Api::ConversationsController < ApplicationController
   # :nocov:
 
   def remove_conversation
-    conversation = Conversation.find(params[:conversation_id])
+    conversation = Conversation.find_by_id(params[:conversation_id])
     if conversation.remove_conversation(@current_user.id)
       render json: { success: true,
                      info: 'Conversation removed',

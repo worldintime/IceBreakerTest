@@ -243,4 +243,16 @@ describe User do
     expect( user2.facebook_rating).to eq 14
   end
 
+  it 'should receive users conversations ' do
+
+    user1 = create(:user_confirmed)
+    user2 = create(:user_confirmed)
+    conversation1 = create(:conversation, sender_id: user2.id, receiver_id: user1.id, removed_by_sender: true, removed_by_receiver: false)
+    conversation2 = create(:conversation, sender_id: user2.id, receiver_id: user1.id, removed_by_sender: false, removed_by_receiver: true)
+    conversation3 = create(:conversation, sender_id: user1.id, receiver_id: user2.id, removed_by_sender: true, removed_by_receiver: false)
+    conversation4 = create(:conversation, sender_id: user1.id, receiver_id: user2.id, removed_by_sender: false, removed_by_receiver: true)
+
+    expect(user1.conversations_history.map.size).to eq 2
+  end
+
 end

@@ -69,6 +69,10 @@ class User < ActiveRecord::Base
        status: 200 }
   end
 
+  def conversations_history
+    Conversation.where('(sender_id = ?  AND removed_by_sender = false) OR (receiver_id = ? AND removed_by_receiver = false)', self.id, self.id)
+  end
+
   def in_radius?(user_id)
     User.near([self.latitude, self.longitude], 0.1).where(id: user_id).present?
   end
