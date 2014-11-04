@@ -70,21 +70,6 @@ describe Conversation do
       end
     end
 
-    def my_message(current_user_id)
-      if self.sender_id != current_user_id
-        { reply: self.reply,
-          reply_sent_at: self.reply_created_at
-        }
-      else
-        { initial: self.initial,
-          initial_sent_at: self.initial_created_at,
-          finished: self.finished,
-          finished_sent_at: self.finished_created_at
-        }
-      end
-    end
-
-
     describe '#my_message' do
       before :each do
         @current_user = create(:user_confirmed)

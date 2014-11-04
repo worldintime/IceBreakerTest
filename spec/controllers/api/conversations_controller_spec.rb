@@ -127,8 +127,6 @@ describe Api::ConversationsController do
         expect( conversation0['last_message']['status'] ).to eq 'finished'
       end
 
-      render_views
-
       it 'should receive conversation detail' do
         conv = FactoryGirl.create(:conversation, sender_id: user.id,
                                   receiver_id: user2.id,
@@ -139,9 +137,9 @@ describe Api::ConversationsController do
         post :conversation_detail, authentication_token: auth_token, conversation_id: conv.id, format: 'json'
         conv.reload
 
-        json = Oj.load(response.body)['data']
-        opponent = json['opponent']
-        my_message = json['my_message']
+        json = Oj.load(response.body)
+        opponent = json['data']['opponent']
+        my_message = json['data']['my_message']
         expect( opponent['id'] ).to eq user2.id
         expect( opponent['first_name'] ).to eq user2.first_name
         expect( opponent['last_name'] ).to eq user2.last_name
@@ -154,8 +152,8 @@ describe Api::ConversationsController do
         expect( my_message['initial_sent_at'] ).to eq conv.initial_created_at
         expect( my_message['finished'] ).to eq 'finished'
         expect( my_message['finished_sent_at'] ).to eq conv.finished_created_at
-        expect(Oj.load(response.body)['conversation_id'] ).to eq conv.id
-        expect(Oj.load(response.body)['success'] ).to be_truthy
+        expect( json['conversation_id'] ).to eq conv.id
+        expect( json['success'] ).to be_truthy
       end
     end
 
