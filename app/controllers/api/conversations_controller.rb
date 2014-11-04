@@ -26,7 +26,7 @@ class Api::ConversationsController < ApplicationController
       case params[:type]
         when 'initial'
           conversation = Conversation.new(sender_id: params[:sender_id], receiver_id: params[:receiver_id],
-                                          initial: params[:msg], status: 'Closed')
+                                          initial: params[:msg], status: 'Closed', initial_created_at: Time.now)
           if @current_user.in_radius?(params[:receiver_id])
             if conversation.check_if_already_received?(params[:sender_id], params[:receiver_id])
               if conversation.save
@@ -48,7 +48,7 @@ class Api::ConversationsController < ApplicationController
         when 'reply'
           if @current_user.in_radius?(params[:receiver_id])
             conversation = Conversation.find(params[:conversation_id])
-            if conversation.update_attributes!(reply: params[:msg], reply_viewed: 0)
+            if conversation.update_attributes!(reply: params[:msg], reply_viewed: 0, reply_created_at: Time.now)
               User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id], fb_rating: 0})
               User.send_push_notification({user_id: params[:receiver_id], message: message})
               render json: { success: true,
@@ -65,7 +65,7 @@ class Api::ConversationsController < ApplicationController
         when 'finished'
           if @current_user.in_radius?(params[:receiver_id])
             conversation = Conversation.find(params[:conversation_id])
-            if conversation.update_attributes!(finished: params[:msg], finished_viewed: false, status: 'Open')
+            if conversation.update_attributes!(finished: params[:msg], finished_viewed: false, status: 'Open', finished_created_at: Time.now)
               User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id], fb_rating: 0})
               User.send_push_notification({user_id: params[:receiver_id], message: message})
               render json: { success: true,
@@ -103,17 +103,10 @@ class Api::ConversationsController < ApplicationController
   # :nocov:
 
   def conversation_detail
-    conversation = Conversation.find(params[:conversation_id])
-
-    if conversation
-      conversation.update_attributes!(conversation.existing_messages)
-      render json: { success: true,
-                     data: conversation.check_if_sender(@current_user.id),
-                     conversation_id: params[:conversation_id] }
-    else
-      render json: { success: false,
-                     info: 'No such conversation' }
-    end
+    @conversation = Conversation.find(params[:conversation_id])
+    @opponent = @conversation.opponent_identity(@current_user.id)
+    @my_message = @conversation.my_message(@current_user.id)
+    @opponent_message = @conversation.my_message(@opponent.id)
   end
 
   # :nocov:

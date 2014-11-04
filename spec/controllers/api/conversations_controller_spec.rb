@@ -93,29 +93,7 @@ describe Api::ConversationsController do
       expect(conv.reply).to be_nil
     end
 
-    it 'should receive conversation detail' do
-      conv = FactoryGirl.create(:conversation, sender_id: user.id,
-                                               receiver_id: user2.id,
-                                               initial: 'initial',
-                                               reply: 'reply',
-                                               finished: 'finished')
 
-      post :conversation_detail, authentication_token: auth_token,
-                                 conversation_id: conv.id
-
-      json = Oj.load(response.body)['data']
-      opponent = json['opponent']
-      my_message = json['my_message']
-      expect( opponent['id'] ).to eq user2.id
-      expect( opponent['first_name'] ).to eq user2.first_name
-      expect( opponent['last_name'] ).to eq user2.last_name
-      expect( opponent['email'] ).to eq user2.email
-      expect( opponent['reply'] ).to eq 'reply'
-
-      expect( my_message['id'] ).to eq user.id
-      expect( my_message['initial'] ).to eq 'initial'
-      expect( my_message['finished'] ).to eq 'finished'
-    end
 
     describe 'Rabl render' do
       render_views
@@ -147,6 +125,37 @@ describe Api::ConversationsController do
         expect( conversation0['last_message']['sender_id'] ).to eq user.id
         expect( conversation0['last_message']['text'] ).to eq 'finished'
         expect( conversation0['last_message']['status'] ).to eq 'finished'
+      end
+
+      render_views
+
+      it 'should receive conversation detail' do
+        conv = FactoryGirl.create(:conversation, sender_id: user.id,
+                                  receiver_id: user2.id,
+                                  initial: 'initial',
+                                  reply: 'reply',
+                                  finished: 'finished')
+
+        post :conversation_detail, authentication_token: auth_token, conversation_id: conv.id, format: 'json'
+        conv.reload
+
+        json = Oj.load(response.body)['data']
+        opponent = json['opponent']
+        my_message = json['my_message']
+        expect( opponent['id'] ).to eq user2.id
+        expect( opponent['first_name'] ).to eq user2.first_name
+        expect( opponent['last_name'] ).to eq user2.last_name
+        expect( opponent['email'] ).to eq user2.email
+        expect( opponent['reply'] ).to eq 'reply'
+        expect( opponent['reply_sent_at'] ).to eq conv.reply_created_at
+
+        expect( my_message['id'] ).to eq user.id
+        expect( my_message['initial'] ).to eq 'initial'
+        expect( my_message['initial_sent_at'] ).to eq conv.initial_created_at
+        expect( my_message['finished'] ).to eq 'finished'
+        expect( my_message['finished_sent_at'] ).to eq conv.finished_created_at
+        expect(Oj.load(response.body)['conversation_id'] ).to eq conv.id
+        expect(Oj.load(response.body)['success'] ).to be_truthy
       end
     end
 
