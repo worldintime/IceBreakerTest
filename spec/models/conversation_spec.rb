@@ -104,6 +104,15 @@ describe Conversation do
 
   describe '#remove_conversation' do
 
+    it 'should remove conversation for sender' do
+      user1 = create(:user_confirmed)
+      user2 = create(:user_confirmed)
+      conversation1 = create(:conversation, sender_id: user1.id, receiver_id: user2.id, removed_by_sender: false, removed_by_receiver: false)
+      conversation1.remove_conversation(user1.id)
+      expect(conversation1.removed_by_sender).to eq true
+
+    end
+
     it 'should remove conversation for receiver' do
       user1 = create(:user_confirmed)
       user2 = create(:user_confirmed)
