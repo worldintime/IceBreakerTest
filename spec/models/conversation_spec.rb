@@ -107,6 +107,7 @@ describe Conversation do
     it 'should remove conversation for sender' do
       user1 = create(:user_confirmed)
       user2 = create(:user_confirmed)
+
       conversation = create(:conversation, sender_id: user1.id, receiver_id: user2.id, removed_by_sender: false, removed_by_receiver: false)
 
       expect( conversation.remove_conversation(user1.id) ).to be_truthy
