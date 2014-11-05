@@ -252,7 +252,8 @@ describe User do
     conversation3 = create(:conversation, sender_id: user1.id, receiver_id: user2.id, removed_by_sender: true, removed_by_receiver: false)
     conversation4 = create(:conversation, sender_id: user1.id, receiver_id: user2.id, removed_by_sender: false, removed_by_receiver: true)
 
-    expect(user1.conversations_history.map.size).to eq 2
+    expect(user1.conversations_history).to eq [conversation1, conversation4]
+
   end
 
 end
