@@ -103,10 +103,15 @@ class Api::ConversationsController < ApplicationController
   # :nocov:
 
   def conversation_detail
-    @conversation = Conversation.find(params[:conversation_id])
-    @opponent = @conversation.opponent_identity(@current_user.id)
-    @my_message = @conversation.my_message(@current_user.id)
-    @opponent_message = @conversation.my_message(@opponent.id)
+    @conversation = Conversation.find_by_id(params[:conversation_id])
+    if @conversation
+      @opponent = @conversation.opponent_identity(@current_user.id)
+      @my_message = @conversation.my_message(@current_user.id)
+      @opponent_message = @conversation.my_message(@opponent.id)
+    else
+      render json: { success: false,
+                     info: 'Conversation not found' }
+    end
   end
 
   # :nocov:
