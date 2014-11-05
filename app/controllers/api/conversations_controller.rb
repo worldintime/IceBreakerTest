@@ -159,7 +159,7 @@ class Api::ConversationsController < ApplicationController
 
   def remove_conversation
     conversation = Conversation.find_by_id(params[:conversation_id])
-    if conversation.remove_conversation(@current_user.id)
+    if conversation && conversation.remove_conversation(@current_user.id)
       render json: { success: true,
                      info: 'Conversation removed',
                      status: 200 }
