@@ -177,9 +177,11 @@ describe Api::ConversationsController do
                                                 reply: 'reply',
                                                 finished: 'finished')
       post :remove_conversation, authentication_token: auth_token, conversation_id: conversation.id
-      expect( Oj.load(response.body)['success']).to be_truthy
-      expect( Oj.load(response.body)['info']).to match /Conversation removed/
-      expect( Oj.load(response.body)['status']).to eq 200
+      
+      json = Oj.load(response.body)
+      expect(json['success']).to be_truthy
+      expect(json['info']).to match /Conversation removed/
+      expect(json['status']).to eq 200
 
     end
   end
