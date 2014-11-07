@@ -86,37 +86,16 @@ class Conversation < ActiveRecord::Base
     end
   end
 
-  def check_if_sender(current_user_id)
-    receiver = User.find(self.receiver_id)
-    sender = User.find(self.sender_id)
-
+  def my_message(current_user_id)
     if self.sender_id != current_user_id
-      { opponent:  {id: sender.id,
-                    email: sender.email,
-                    first_name: sender.first_name,
-                    last_name: sender.last_name,
-                    avatar: sender.avatar.url(:thumb),
-                    initial: self.initial,
-                    finished: self.finished,
-                    user_name: sender.user_name,
-                    facebook_avatar: sender.facebook_avatar},
-        my_message: {id: receiver.id,
-                     reply: self.reply}
-
-
+      { reply: self.reply,
+        reply_sent_at: self.reply_created_at
       }
     else
-      { opponent:  {id: receiver.id,
-                    email: receiver.email,
-                    first_name: receiver.first_name,
-                    last_name: receiver.last_name,
-                    avatar: receiver.avatar.url(:thumb),
-                    reply: self.reply,
-                    user_name: receiver.user_name,
-                    facebook_avatar: receiver.facebook_avatar},
-        my_message: {id: sender.id,
-                     initial: self.initial,
-                     finished: self.finished}
+      { initial: self.initial,
+        initial_sent_at: self.initial_created_at,
+        finished: self.finished,
+        finished_sent_at: self.finished_created_at
       }
     end
   end

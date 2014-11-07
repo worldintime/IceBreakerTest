@@ -18,7 +18,7 @@ describe Conversation do
 
   describe 'with conversation' do
     before :each do
-      @conversation = create(:conversation)
+      @conversation = create(:conversation, initial: 'initial', reply: 'reply', finished: 'finished')
     end
 
     describe 'before_update' do
@@ -70,7 +70,7 @@ describe Conversation do
       end
     end
 
-    describe '#check_if_sender' do
+    describe '#my_message' do
       before :each do
         @current_user = create(:user_confirmed)
         @sender = create(:user_confirmed)
@@ -78,14 +78,18 @@ describe Conversation do
 
       it 'current_user is not sender' do
         @conversation.update(sender: @sender, receiver: @current_user)
-        h = @conversation.check_if_sender(@current_user.id)
-        expect(h[:opponent][:id]).to eq @conversation.sender_id
+        h = @conversation.my_message(@current_user.id)
+        expect(h[:reply]).to eq @conversation.reply
+        expect(h[:reply_sent_at]).to eq @conversation.reply_created_at
       end
 
       it 'current_user is sender' do
         @conversation.update(sender: @current_user, receiver: @sender)
-        h = @conversation.check_if_sender(@current_user.id)
-        expect(h[:opponent][:id]).to eq @conversation.receiver_id
+        h = @conversation.my_message(@current_user.id)
+        expect(h[:initial]).to eq @conversation.initial
+        expect(h[:initial_sent_at]).to eq @conversation.initial_created_at
+        expect(h[:finished]).to eq @conversation.finished
+        expect(h[:finished_sent_at]).to eq @conversation.finished_created_at
       end
     end
   end

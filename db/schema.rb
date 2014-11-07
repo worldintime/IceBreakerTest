@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20141103144336) do
+ActiveRecord::Schema.define(version: 20141104134830) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -35,6 +35,9 @@ ActiveRecord::Schema.define(version: 20141103144336) do
     t.string   "status"
     t.boolean  "removed_by_sender",   default: false
     t.boolean  "removed_by_receiver", default: false
+    t.datetime "initial_created_at"
+    t.datetime "reply_created_at"
+    t.datetime "finished_created_at"
   end
 
   add_index "conversations", ["receiver_id"], name: "index_conversations_on_receiver_id", using: :btree
