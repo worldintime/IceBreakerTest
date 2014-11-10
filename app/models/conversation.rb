@@ -12,6 +12,17 @@ class Conversation < ActiveRecord::Base
 
   include ActionView::Helpers::DateHelper
 
+  def remove_conversation(current_user_id)
+    case
+      when self.removed_by_sender == true && self.receiver_id == current_user_id
+        self.destroy
+      when self.removed_by_receiver == true && self.sender_id == current_user_id
+        self.destroy
+      when self.removed_by_sender == false && self.removed_by_receiver == false
+        self.sender_id == current_user_id ? self.update_attributes!(removed_by_sender: true) : self.update_attributes!(removed_by_receiver: true)
+    end
+  end
+
   def check_if_already_received?(sender_id, receiver_id)
     Conversation.where(sender_id: receiver_id, receiver_id: sender_id,
                        created_at: (30.minutes.ago..Time.now)).blank?
