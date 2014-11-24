@@ -105,6 +105,7 @@ class Api::ConversationsController < ApplicationController
   def conversation_detail
     @conversation = Conversation.find_by_id(params[:conversation_id])
     if @conversation
+      @conversation.existing_messages
       @opponent = @conversation.opponent_identity(@current_user.id)
       @my_message = @conversation.my_message(@current_user.id)
       @opponent_message = @conversation.my_message(@opponent.id)

@@ -55,11 +55,11 @@ class Conversation < ActiveRecord::Base
 
   def existing_messages
     if self.reply.nil? && self.finished.nil?
-      {initial_viewed: true}
+      self.update_attribute(:initial_viewed, true)
     elsif self.finished.nil?
-      {reply_viewed: true}
+      self.update_attributes!(initial_viewed: true, reply_viewed: true)
     else
-      {finished_viewed: true}
+      self.update_attributes!(initial_viewed: true, finished_viewed: true)
     end
   end
 
