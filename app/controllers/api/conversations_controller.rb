@@ -43,7 +43,7 @@ class Api::ConversationsController < ApplicationController
               render json: { success: false, info: 'This user already sent a digital hello to you few minutes ago'}
             end
           else
-            render json: { errors: 'You are out of radius'}
+            render json: { errors: 'User is out of radius'}
           end
         when 'reply'
           if @current_user.in_radius?(params[:receiver_id])
@@ -60,7 +60,7 @@ class Api::ConversationsController < ApplicationController
             end
           else
             @current_user.place_to_pending(params[:conversation_id], params[:receiver_id])
-            render json: { errors: 'You are out of radius'}
+            render json: { errors: 'User is out of radius'}
           end
         when 'finished'
           if @current_user.in_radius?(params[:receiver_id])
@@ -76,7 +76,7 @@ class Api::ConversationsController < ApplicationController
               render json: { errors: conversation.errors.full_messages, success: false }, status: 200
             end
           else
-            render json: { errors: 'You are out of radius'}
+            render json: { errors: 'User is out of radius'}
           end
         when 'ignore'
           conversation = Conversation.find(params[:conversation_id])
