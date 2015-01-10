@@ -23,6 +23,20 @@ describe User do
     expect( user.address ).to match /NY/
   end
 
+  describe '#update_location_timestamp' do
+    it 'should update location timestamp' do
+      user = create(:user, latitude: 40.7127, longitude: -74.0059)
+      expect(user.location_updated_at).to_not be_blank
+      expect{ user.update(latitude: 40.7122) }.to change(user, :location_updated_at)
+    end
+
+    it 'should not update location timestamp' do
+      user = create(:user)
+      expect(user.location_updated_at).to be_blank
+      expect{ user.update(user_name: 'Max') }.to_not change(user, :location_updated_at)
+    end
+  end
+
   describe 'with user' do
     before :each do
       @current_user = create(:user_confirmed)
@@ -254,6 +268,23 @@ describe User do
 
     expect(user1.conversations_history).to eq [conversation1, conversation4]
 
+  end
+
+  describe 'clear location data after 4 hours inactivity' do
+    it '#reset_location' do
+      user1 = create(:user_confirmed, latitude: 40.7127, longitude: -74.0059)
+      user2 = create(:user_confirmed, latitude: 40.7127, longitude: -74.0059)
+      user3 = create(:user_confirmed, latitude: 40.7127, longitude: -74.0059)
+
+      Timecop.freeze(3.hour.from_now) do
+        user2.update!(latitude: 40.7127, longitude: -74.0000)
+      end
+
+      Timecop.freeze(4.hour.from_now) do
+        described_class.reset_location
+        expect(described_class.order(:id).where(latitude: nil, longitude: nil, address: nil).to_a).to eq [user1, user3]
+      end
+    end
   end
 
 end

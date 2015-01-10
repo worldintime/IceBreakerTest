@@ -19,6 +19,8 @@ class User < ActiveRecord::Base
 
   attr_reader :facebook_share_rating
 
+  before_save :update_location_timestamp
+
   DISTANCE_IN_RADIUS     = 0.09144 # 100 yards in kilometers
   DISTANCE_OUT_OF_RADIUS = 8.047   # 5 miles in kilometers
   FEEDBACK_EMAIL         = "icebr8kr@gmail.com"
@@ -172,6 +174,12 @@ class User < ActiveRecord::Base
     end
   end
 
+  private
+
+  def update_location_timestamp
+    self.location_updated_at = Time.now if self.latitude_changed? || self.longitude_changed?
+  end
+
   class << self
     def authenticate(param)
       user = User.find_for_authentication(email: param)
@@ -223,6 +231,10 @@ class User < ActiveRecord::Base
       receiver = self.find user_ids[:receiver]
       sender.update_attributes(sent_rating: sender.sent_rating + 1)
       receiver.update_attributes(received_rating: receiver.received_rating + 1, facebook_rating: receiver.facebook_rating.to_i + user_ids[:fb_rating].to_i)
+    end
+
+    def reset_location
+      where(["date_part('hour', ? - location_updated_at) >= 4", Time.now]).update_all(latitude: nil, longitude: nil, address: nil)
     end
   end
 

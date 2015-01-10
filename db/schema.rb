@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20141104134830) do
+ActiveRecord::Schema.define(version: 20150109185728) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -129,10 +129,12 @@ ActiveRecord::Schema.define(version: 20141104134830) do
     t.integer  "sent_rating",            default: 0
     t.integer  "received_rating",        default: 0
     t.integer  "facebook_rating"
+    t.datetime "location_updated_at"
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
   add_index "users", ["latitude"], name: "index_users_on_latitude", using: :btree
+  add_index "users", ["location_updated_at"], name: "index_users_on_location_updated_at", using: :btree
   add_index "users", ["longitude"], name: "index_users_on_longitude", using: :btree
   add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true, using: :btree
 
