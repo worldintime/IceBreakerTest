@@ -270,11 +270,12 @@ describe User do
 
   end
 
-  describe 'clear location data after 4 hours inactivity' do
+  describe 'clear location data when 4 hours inactivity or location_updated_at == nil' do
     it '#reset_location' do
       user1 = create(:user_confirmed, latitude: 40.7127, longitude: -74.0059)
       user2 = create(:user_confirmed, latitude: 40.7127, longitude: -74.0059)
       user3 = create(:user_confirmed, latitude: 40.7127, longitude: -74.0059)
+      user4 = create(:user_confirmed, location_updated_at: nil)
 
       Timecop.freeze(3.hour.from_now) do
         user2.update!(latitude: 40.7127, longitude: -74.0000)
@@ -282,7 +283,7 @@ describe User do
 
       Timecop.freeze(4.hour.from_now) do
         described_class.reset_location
-        expect(described_class.order(:id).where(latitude: nil, longitude: nil, address: nil).to_a).to eq [user1, user3]
+        expect(described_class.order(:id).where(latitude: nil, longitude: nil, address: nil).to_a).to eq [user1, user3, user4]
       end
     end
   end
