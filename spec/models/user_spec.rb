@@ -270,12 +270,12 @@ describe User do
 
   end
 
-  describe 'clear location data when 4 hours inactivity or location_updated_at == nil' do
+  describe 'clear location data when 4 hours inactivity or location_updated_at not present' do
     it '#reset_location' do
       user1 = create(:user_confirmed, latitude: 40.7127, longitude: -74.0059)
       user2 = create(:user_confirmed, latitude: 40.7127, longitude: -74.0059)
       user3 = create(:user_confirmed, latitude: 40.7127, longitude: -74.0059)
-      user4 = create(:user_confirmed, location_updated_at: nil)
+      user4 = create(:user_confirmed)
 
       Timecop.freeze(3.hour.from_now) do
         user2.update!(latitude: 40.7127, longitude: -74.0000)
