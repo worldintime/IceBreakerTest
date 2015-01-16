@@ -7,6 +7,6 @@
 #
 # set :output, "/path/to/my/cron_log.log"
 
-every 4.hours do
+every 10.minutes do
   runner "User.reset_location"
 end
