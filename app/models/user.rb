@@ -234,7 +234,7 @@ class User < ActiveRecord::Base
     end
 
     def reset_location
-      where(["date_part('hour', ? - location_updated_at) >= 4", Time.now]).update_all(latitude: nil, longitude: nil, address: nil)
+      where(["location_updated_at = NULL OR date_part('hour', ? - location_updated_at) >= 4", Time.now]).update_all(latitude: nil, longitude: nil, address: nil)
     end
   end
 
