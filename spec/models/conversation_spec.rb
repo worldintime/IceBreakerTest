@@ -94,16 +94,30 @@ describe Conversation do
     end
   end
 
-  it '#unread_messages' do
-    user = create(:user_confirmed)
-    create(:conversation)
-    2.times{ create(:conversation, reply_viewed: false, sender: user) }
+  describe '#unread_messages' do
+    it 'should retrieve correct number' do
+      user = create(:user_confirmed)
+      create(:conversation)
+      2.times{ create(:conversation, reply_viewed: false, sender: user) }
 
-    current_user = create(:user_confirmed)
-    2.times{ create(:conversation, sender: current_user).update(reply_viewed: false) }
-    3.times{ create(:conversation, receiver: current_user).update(initial_viewed: false, finished_viewed: false) }
-    # reply_viewed + initial_viewed + finished_viewed
-    expect(described_class.unread_messages(current_user.id)).to eq 8
+      current_user = create(:user_confirmed)
+      2.times{ create(:conversation, sender: current_user).update(reply_viewed: false) }
+      3.times{ create(:conversation, receiver: current_user).update(initial_viewed: false, finished_viewed: false) }
+      # reply_viewed + initial_viewed + finished_viewed
+      expect(described_class.unread_messages(current_user.id)).to eq 8
+    end
+
+    it 'should retrieve correct number after conversation was removed' do
+      user = create(:user_confirmed)
+      create(:conversation)
+      2.times{ create(:conversation, reply_viewed: false, sender: user) }
+
+      current_user = create(:user_confirmed)
+      2.times{ create(:conversation, sender: current_user).update(reply_viewed: false, removed_by_sender: true) }
+      3.times{ create(:conversation, receiver: current_user).update(initial_viewed: false, finished_viewed: false, removed_by_receiver: true) }
+      # reply_viewed + initial_viewed + finished_viewed
+      expect(described_class.unread_messages(current_user.id)).to eq 0
+    end
   end
 
   describe '#remove_conversation' do
