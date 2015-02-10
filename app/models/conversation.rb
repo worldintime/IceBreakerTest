@@ -119,8 +119,8 @@ class Conversation < ActiveRecord::Base
 
   class << self
     def unread_messages(current_user_id)
-      query1 = "SELECT SUM((CASE WHEN reply_viewed = false THEN 1 ELSE 0 END)) AS reply_sum FROM conversations WHERE (conversations.sender_id = #{current_user_id})"
-      query2 = "SELECT SUM((CASE WHEN initial_viewed = false THEN 1 ELSE 0 END) + (CASE WHEN finished_viewed = false THEN 1 ELSE 0 END)) AS total_sum FROM conversations WHERE (conversations.receiver_id = #{current_user_id})"
+      query1 = "SELECT SUM((CASE WHEN reply_viewed = false THEN 1 ELSE 0 END)) AS reply_sum FROM conversations WHERE (conversations.sender_id = #{current_user_id} AND removed_by_sender = false)"
+      query2 = "SELECT SUM((CASE WHEN initial_viewed = false THEN 1 ELSE 0 END) + (CASE WHEN finished_viewed = false THEN 1 ELSE 0 END)) AS total_sum FROM conversations WHERE (conversations.receiver_id = #{current_user_id} AND removed_by_receiver = false)"
       reply = connection.execute(query1).to_a.first['reply_sum'].to_i
       initial = connection.execute(query2).to_a.first['total_sum'].to_i
       sum = initial + reply
