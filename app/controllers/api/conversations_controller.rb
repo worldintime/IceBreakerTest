@@ -11,7 +11,7 @@ class Api::ConversationsController < ApplicationController
     param :query, :receiver_id, :integer, :required, "Receiver id"
     param :query, :type, :string, :required, "Message type: initial/reply/finished/ignore"
     param :query, :msg, :string, :required, "Message"
-    param :query, :conversation_id, :integer, :required, "Conversation id. Receives after type:initial, and required for other types"
+    param :query, :conversation_id, :integer, :optional, "Conversation id. Receives after type:initial, and required for other types"
   end
   # :nocov:
 
@@ -43,7 +43,9 @@ class Api::ConversationsController < ApplicationController
               render json: { success: false, info: 'This user already sent a digital hello to you few minutes ago'}
             end
           else
-            render json: { errors: 'User is out of radius'}
+            receiver = User.find_by id: params[:receiver_id]
+            render json: { errors: 'User is out of radius',
+                           email: receiver.show_email ? receiver.email : '' }
           end
         when 'reply'
           if @current_user.in_radius?(params[:receiver_id])
@@ -60,7 +62,9 @@ class Api::ConversationsController < ApplicationController
             end
           else
             @current_user.place_to_pending(params[:conversation_id], params[:receiver_id])
-            render json: { errors: 'User is out of radius'}
+            receiver = User.find_by id: params[:receiver_id]
+            render json: { errors: 'User is out of radius',
+                           email: receiver.show_email ? receiver.email : '' }
           end
         when 'finished'
           if @current_user.in_radius?(params[:receiver_id])
@@ -76,7 +80,9 @@ class Api::ConversationsController < ApplicationController
               render json: { errors: conversation.errors.full_messages, success: false }, status: 200
             end
           else
-            render json: { errors: 'User is out of radius'}
+            receiver = User.find_by id: params[:receiver_id]
+            render json: { errors: 'User is out of radius',
+                           email: receiver.show_email ? receiver.email : '' }
           end
         when 'ignore'
           conversation = Conversation.find(params[:conversation_id])
