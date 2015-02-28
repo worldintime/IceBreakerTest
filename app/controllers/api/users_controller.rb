@@ -47,6 +47,7 @@ class Api::UsersController < ApplicationController
         u.avatar                = params[:avatar]
         u.facebook_uid          = params[:facebook_uid]
         u.facebook_avatar       = params[:facebook_avatar]
+        u.show_email            = params[:show_email]
       end
       user_info['new_fb_user'] = fb_user_id.present?
     end
@@ -100,6 +101,7 @@ class Api::UsersController < ApplicationController
     param :query, 'user[email]', :string, :required, "Email address"
     param :query, 'user[password]', :string, :optional, "Password"
     param :query, 'user[avatar]', :string, :optional, "User's avatar"
+    param :query, 'user[show_email]', :boolean, :optional, "Show User's email"
   end
   # :nocov:
 
@@ -248,7 +250,7 @@ class Api::UsersController < ApplicationController
 
   def user_params
     params.require(:user).permit(:first_name, :last_name, :email, :gender, :date_of_birth,
-                                 :user_name, :password, :password_confirmation, :avatar)
+                                 :user_name, :password, :password_confirmation, :avatar, :show_email)
   end
 
 end

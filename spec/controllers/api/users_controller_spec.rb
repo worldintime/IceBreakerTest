@@ -20,7 +20,8 @@ describe Api::UsersController do
                gender: 'Male',
                date_of_birth: 20.years.ago.strftime("%F"),
                user_name: 'x_z',
-               avatar: fixture_file_upload('files/photo.jpg', 'image/jpg') }
+               avatar: fixture_file_upload('files/photo.jpg', 'image/jpg'),
+               show_email: true }
 
       post :edit_profile, authentication_token: auth_token, user: attr
 
@@ -32,6 +33,7 @@ describe Api::UsersController do
       expect(user.date_of_birth.to_s).to eq attr[:date_of_birth]
       expect(user.user_name).to eq attr[:user_name]
       expect(user.avatar.url).to match /photo\.jpg/
+      expect(user.show_email).to be true
     end
 
     it '#set_location' do
