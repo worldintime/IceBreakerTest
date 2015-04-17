@@ -129,10 +129,16 @@ class Api::UsersController < ApplicationController
   def forgot_password
     @user = User.find_by_email(params[:email])
     if @user
-      @user.send_forgot_password_email!
-      render json: { success: true,
+      if @user.confirmed?
+        @user.send_forgot_password_email!
+        render json: { success: true,
                      info: 'A new password was sent to your email',
                      status: 200 }
+      else
+        render json: { success: true,
+                       info: 'Please confirm your email address',
+                       status: 200 }
+      end
     else
       render json: { success: false,
                      info: "Email doesn't exist",
