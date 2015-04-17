@@ -51,7 +51,6 @@ class Api::ConversationsController < ApplicationController
           if @current_user.in_radius?(params[:receiver_id])
             conversation = Conversation.find(params[:conversation_id])
             if conversation.update_attributes!(reply: params[:msg], reply_viewed: 0, reply_created_at: Time.now)
-              User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id], fb_rating: 0})
               User.send_push_notification({user_id: params[:receiver_id], message: message})
               render json: { success: true,
                              info: 'Message sent',
@@ -70,7 +69,6 @@ class Api::ConversationsController < ApplicationController
           if @current_user.in_radius?(params[:receiver_id])
             conversation = Conversation.find(params[:conversation_id])
             if conversation.update_attributes!(finished: params[:msg], finished_viewed: false, status: 'Open', finished_created_at: Time.now)
-              User.rating_update({sender: params[:sender_id], receiver: params[:receiver_id], fb_rating: 0})
               User.send_push_notification({user_id: params[:receiver_id], message: message})
               render json: { success: true,
                              info: 'Message sent',
