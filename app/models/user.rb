@@ -45,13 +45,13 @@ class User < ActiveRecord::Base
 
       if self.save(validate: false)
         self.send_facebook_password_email password
-        info_mail = 'Message with your new password was sent on your email'
+        info_mail = 'Message with your new password was sent to your email'
       else
         return { success: false, errors: self.errors.full_messages, status: 200 }
       end
     elsif new_regular_user
       if self.save
-        info_mail = 'Message with confirmation link was sent on your email'
+        info_mail = 'Message with confirmation link was sent to your email'
       else
         return { success: false, errors: self.errors.full_messages, status: 200 }
       end
