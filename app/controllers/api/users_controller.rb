@@ -147,35 +147,6 @@ class Api::UsersController < ApplicationController
     end
   end
 
-  # :nocov:
-  swagger_api :new_password_confirmation do
-    summary "Send generated password on email"
-    param :query, :secret_code, :string, :required, "Secret Code"
-    param :query, :password, :string, :required, "Password"
-    param :query, :password_confirmation, :string, :required, "Password_confirmation"
-  end
-  # :nocov:
-
-  def new_password_confirmation
-    @user = User.find_by(password_code: params[:secret_code])
-    if @user
-      if @user.update_attributes(password: params[:password], password_confirmation: params[:password_confirmation])
-        render json: { success: true,
-                       info: 'Please check your email for further instructions.',
-                       status: 200 }
-      else
-        render json: { success: false,
-                       info: @user.errors.full_messages,
-                       status: 200 }
-      end
-    else
-      render json: { success: false,
-                     info: "You don't have permission for this action",
-                     status: 200 }
-
-    end
-  end
-
   swagger_api :feedback do
     summary "Send feedback"
     param :query, :authentication_token, :string, :required, "Authentication token"
@@ -234,45 +205,6 @@ class Api::UsersController < ApplicationController
   def reset_location
     render json: @current_user.reset_location!
   end
-
-  # Temporarily action for client side testing
-  def test_push_notification
-    device = params[:device_type]
-    result = false
-    message = 'Hi IceBr8kr team!'
-    info = 'Something went wrong'
-
-    if device == 'IOS'
-      notification = Grocer::Notification.new(
-        device_token: params[:device_token],
-        alert:        message
-      )
-      IceBr8kr::Application::IOS_PUSHER.push(notification)
-      result = true
-      info = 'Pushed to IOS'
-    elsif device == 'Android'
-      require 'rest_client'
-      url = 'https://android.googleapis.com/gcm/send'
-      headers = {
-        'Authorization' => 'key=AIzaSyBCK9NX8gRY51g9UwtY1znEirJuZqTNmAU',
-        'Content-Type' => "application/json"
-      }
-      request = {
-        'registration_ids' => [params[:device_token]],
-        data: {
-          'message' => message
-        }
-      }
-
-      response = RestClient.post(url, request.to_json, headers)
-      response_hash = YAML.load(response)
-      result = true
-      info = 'Pushed to Android'
-    end
-
-    render json: { success: result.to_s, info: info }, status: 200
-  end
-
 
   private
 
