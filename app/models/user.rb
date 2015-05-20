@@ -7,7 +7,7 @@ class User < ActiveRecord::Base
   devise :database_authenticatable, :registerable, :confirmable,
          :recoverable, :rememberable, :trackable, :validatable, :async
 
-  has_attached_file :avatar, styles: { thumb: '200x200#' }, default_url: '/assets/avatar.png'
+  has_attached_file :avatar, styles: { thumb: '200x200#' }, default_url: '/assets/avatar.png', default_style: :thumb 
   validates_attachment :avatar, content_type: { content_type: ['image/jpg', 'image/jpeg', 'image/png', 'image/gif', 'application/octet-stream'] }
   validates_presence_of :first_name, :last_name, :gender, :email, :user_name
   validates_presence_of :password, on: :create
@@ -85,11 +85,23 @@ class User < ActiveRecord::Base
   end
 
   def back_in_radius
-    back = PendingConversation.where(sender_id: self.id).pluck(:receiver_id)
-    user = User.find(back)
-    if User.near([self.latitude, self.longitude], 0.1).where(id: back).present?
-      PendingConversation.where(receiver_id: back, sender_id: self.id).destroy_all
-      User.send_push_notification(user_id: self.id, message: "#{user.first.user_name} is back in radius")
+    returned_users = PendingConversation.where(sender_id: self.id).pluck(:receiver_id).uniq
+    returned_users.each do |user_id|
+      if User.near([self.latitude, self.longitude], 0.1).where(id: user_id).present?
+        user = User.find_by(id: user_id)
+        pending_conversation = PendingConversation.where(sender_id: self.id, receiver_id: user_id)
+        initial = Conversation.find_by(id: pending_conversation.pluck(:conversation_id).uniq.first)
+        not_muted = Mute.where(sender_id: [self.id, user_id], receiver_id: [self.id, user_id]).blank?
+        case not_muted
+          when pending_conversation.first.conversation_id == 0
+            User.send_push_notification(user_id: self.id, message: "#{user.user_name} is back in radius", back_in_radius: true)
+            pending_conversation.destroy_all
+          when initial.present?
+            User.send_push_notification(user_id: self.id, message: "#{user.user_name} is back in radius", back_in_radius: true)
+            User.send_push_notification(user_id: user.id, message: "#{self.user_name} is back in radius", back_in_radius: true)
+            pending_conversation.destroy_all
+        end
+      end
     end
   end
 
@@ -107,7 +119,7 @@ class User < ActiveRecord::Base
 
   def send_forgot_password_email!
     password = SecureRandom.hex(4)
-    self.update_attributes(password: password, password_confirmation: password)
+    self.update_attributes(password_code: password)
     UserMailer.delay.forgot_password(self, password)
   end
 
@@ -135,7 +147,7 @@ class User < ActiveRecord::Base
         info: 'Latitude or Longitude are missed',
         status: 200 }
     elsif self.update_attributes(latitude: lat.gsub(',', '.'), longitude: lng.gsub(',', '.'))
-      self.back_in_radius
+	self.back_in_radius
       { success: true,
         info: 'New location was set successfully',
         status: 200 }
@@ -169,7 +181,7 @@ class User < ActiveRecord::Base
     else
       start_time = muted.first.created_at.to_time
       passed_time = TimeDifference.between(Time.now, start_time).in_minutes
-      { blocked_to: 60.00 - passed_time,
+      { blocked_to: Mute::TIMER - passed_time,
         blocked_status: muted.first.status }
     end
   end
@@ -199,7 +211,10 @@ class User < ActiveRecord::Base
           if session.device.downcase == 'ios'
             notification = Grocer::Notification.new(
                 device_token: session.device_token,
-                alert:        message
+                alert:        message,
+		sound:        "default",
+                badge:        Conversation.unread_messages(options[:user_id]),
+		custom: {back_in_radius: options[:back_in_radius] ? true : false} 	
             )
             IceBr8kr::Application::IOS_PUSHER.push(notification)
             result = true
@@ -214,8 +229,10 @@ class User < ActiveRecord::Base
             request = {
                 'registration_ids' => [session.device_token],
                 data: {
-                    'message' => message
-                }
+		    'title' => 'IceBr8kr',			
+                    'message' => message,
+		    'back_in_radius' => options[:back_in_radius] ? true : false
+ 		}
             }
 
             response = RestClient.post(url, request.to_json, headers)
@@ -234,7 +251,7 @@ class User < ActiveRecord::Base
     end
 
     def reset_location
-      where(["location_updated_at IS NULL OR date_part('hour', ? - location_updated_at) >= 4", Time.now]).update_all(latitude: nil, longitude: nil, address: nil)
+      where(["location_updated_at < ? AND latitude IS NOT NULL AND longitude IS NOT NULL", (Time.now - 1.minute)]).update_all(latitude: nil, longitude: nil, address: nil)
     end
   end
 

@@ -25,8 +25,10 @@ class Api::ConversationsController < ApplicationController
       message = "#{@current_user.user_name} : #{params[:msg]}"
       case params[:type]
         when 'initial'
+          opponent = User.find_by(id: params[:receiver_id])
           conversation = Conversation.new(sender_id: params[:sender_id], receiver_id: params[:receiver_id],
-                                          initial: params[:msg], status: 'Closed', initial_created_at: Time.now)
+                                          initial: params[:msg], status: 'Closed', initial_created_at: Time.now,
+					  show_opponents_email: opponent.show_email)
           if @current_user.in_radius?(params[:receiver_id])
             if conversation.check_if_already_received?(params[:sender_id], params[:receiver_id])
               if conversation.save
@@ -43,9 +45,9 @@ class Api::ConversationsController < ApplicationController
               render json: { success: false, info: 'This user already sent a digital hello to you few minutes ago'}
             end
           else
+            @current_user.place_to_pending(0, params[:receiver_id])
             receiver = User.find_by id: params[:receiver_id]
-            render json: { errors: 'User is out of radius',
-                           email: receiver.show_email ? receiver.email : '' }
+            render json: { errors: 'User is out of radius' }
           end
         when 'reply'
           if @current_user.in_radius?(params[:receiver_id])
@@ -62,8 +64,7 @@ class Api::ConversationsController < ApplicationController
           else
             @current_user.place_to_pending(params[:conversation_id], params[:receiver_id])
             receiver = User.find_by id: params[:receiver_id]
-            render json: { errors: 'User is out of radius',
-                           email: receiver.show_email ? receiver.email : '' }
+            render json: { errors: 'User is out of radius' }
           end
         when 'finished'
           if @current_user.in_radius?(params[:receiver_id])
@@ -78,15 +79,14 @@ class Api::ConversationsController < ApplicationController
               render json: { errors: conversation.errors.full_messages, success: false }, status: 200
             end
           else
+            @current_user.place_to_pending(params[:conversation_id], params[:receiver_id])
             receiver = User.find_by id: params[:receiver_id]
-            render json: { errors: 'User is out of radius',
-                           email: receiver.show_email ? receiver.email : '' }
+            render json: { errors: 'User is out of radius' }
           end
         when 'ignore'
           conversation = Conversation.find(params[:conversation_id])
           if conversation
             conversation.update_attributes!(status: 'Open')
-            User.send_push_notification({user_id: params[:receiver_id]})
             conversation.ignore_user(params[:sender_id], params[:receiver_id])
             render json: { success: true,
                            info: 'You now ignore this user for 1 hours' }

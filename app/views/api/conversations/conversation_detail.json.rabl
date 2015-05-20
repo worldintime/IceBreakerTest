@@ -9,6 +9,10 @@ node :data do
     my_message: partial("api/conversations/conversation_detail/my_message", object: @current_user).merge(@my_message) }
 end
 
+node :status do 
+  @conversation.status  
+end
+
 node :conversation_id do
   @conversation.id
 end

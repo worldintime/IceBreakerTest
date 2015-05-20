@@ -1,5 +1,5 @@
 class Api::UsersController < ApplicationController
-  before_action :api_authenticate_user, except: [:create, :forgot_password, :upload_avatar, :test_push_notification]
+  before_action :api_authenticate_user, except: [:create, :forgot_password, :upload_avatar]
 
   swagger_controller :users, "User Management"
 
@@ -77,7 +77,7 @@ class Api::UsersController < ApplicationController
 
   def upload_avatar
     user = User.find_by_email(params[:email])
-    if user.update_attributes(avatar: params[:avatar])
+    if user && user.update_attributes(avatar: params[:avatar])
       render json: { success: true,
                      info: 'Picture successfully updated.',
                      data: user.avatar.url(:thumb),
@@ -102,6 +102,7 @@ class Api::UsersController < ApplicationController
     param :query, 'user[password]', :string, :optional, "Password"
     param :query, 'user[avatar]', :string, :optional, "User's avatar"
     param :query, 'user[show_email]', :boolean, :optional, "Show User's email"
+    param :query, 'user[show_popup]', :boolean, :optional, "Show popup"
   end
   # :nocov:
 
@@ -129,11 +130,11 @@ class Api::UsersController < ApplicationController
   def forgot_password
     @user = User.find_by_email(params[:email])
     if @user
-      if @user.confirmed?
+      if @user.confirmed?	
         @user.send_forgot_password_email!
         render json: { success: true,
-                     info: 'A new password was sent to your email',
-                     status: 200 }
+                       info: 'A new password was sent to your email',
+                       status: 200 }
       else
         render json: { success: true,
                        info: 'Please confirm your email address',
@@ -143,6 +144,35 @@ class Api::UsersController < ApplicationController
       render json: { success: false,
                      info: "Email doesn't exist",
                      status: 200 }
+    end
+  end
+
+  # :nocov:
+  swagger_api :new_password_confirmation do
+    summary "Send generated password on email"
+    param :query, :secret_code, :string, :required, "Secret Code"
+    param :query, :password, :string, :required, "Password"
+    param :query, :password_confirmation, :string, :required, "Password_confirmation"
+  end
+  # :nocov:
+
+  def new_password_confirmation
+    @user = User.find_by(password_code: params[:secret_code])
+    if @user
+      if @user.update_attributes(password: params[:password], password_confirmation: params[:password_confirmation])
+        render json: { success: true,
+                       info: 'Please check your email for further instructions.',
+                       status: 200 }
+      else
+        render json: { success: false,
+                       info: @user.errors.full_messages,
+                       status: 200 }
+      end
+    else
+      render json: { success: false,
+                     info: "You don't have permission for this action",
+                     status: 200 }
+
     end
   end
 
@@ -255,7 +285,7 @@ class Api::UsersController < ApplicationController
   end
 
   def user_params
-    params.require(:user).permit(:first_name, :last_name, :email, :gender, :date_of_birth,
+    params.require(:user).permit(:first_name, :last_name, :email, :gender, :date_of_birth, :show_popup,
                                  :user_name, :password, :password_confirmation, :avatar, :show_email)
   end
 
