@@ -7,7 +7,6 @@ Rails.application.routes.draw do
   end
 
   namespace :api, defaults: {format: 'json'} do
-    post 'test_push_notification', to: 'users#test_push_notification'
     post 'feedback', to: 'users#feedback'
 
     resources :users

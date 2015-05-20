@@ -8,11 +8,12 @@ class Conversation < ActiveRecord::Base
   before_create :attr_by_default
   before_update :mute_users
 
-  attr_reader :last_message_text, :last_message_status, :last_message_sender, :blocked_to, :opponent_identity
+  attr_reader :last_message_text, :last_message_status, :last_message_sender, :last_message_unread, :blocked_to, :opponent_identity
 
   include ActionView::Helpers::DateHelper
 
   def remove_conversation(current_user_id)
+    self.update_attributes!(status: 'Deleted')
     case
       when self.removed_by_sender == true && self.receiver_id == current_user_id
         self.destroy
@@ -24,20 +25,20 @@ class Conversation < ActiveRecord::Base
   end
 
   def check_if_already_received?(sender_id, receiver_id)
-    Conversation.where(sender_id: receiver_id, receiver_id: sender_id,
+    Conversation.where(sender_id: [receiver_id,sender_id], receiver_id: [sender_id,receiver_id],
                        created_at: (30.minutes.ago..Time.now)).blank?
   end
 
   def ignore_user sender_id, receiver_id
     ignore = Mute.new(sender_id: sender_id, receiver_id: receiver_id, conversation_id: self.id, status: 'Ignored')
     ignore.save
-    Mute.delay(run_at: 1.hour.from_now.getutc).destroy(ignore.id)
+    Mute.delay(run_at: Mute::TIMER.minutes.from_now.getutc).destroy(ignore.id)
   end
 
   def last_message_from_sender
-    @last_message ||= [{ text: self.initial, status: 'initial', sender_id: self.sender_id },
-                       { text: self.reply, status: 'reply', sender_id: receiver_id },
-                       {  text: self.finished, status: 'finished', sender_id: self.sender_id}
+    @last_message ||= [{ text: self.initial, status: 'initial', sender_id: self.sender_id, unread: self.initial_viewed },
+                       { text: self.reply, status: 'reply', sender_id: receiver_id, unread: self.reply_viewed },
+                       {  text: self.finished, status: 'finished', sender_id: self.sender_id, unread: self.finished_viewed}
                       ].delete_if{ |item| item[:text].blank? }.last
   end
 
@@ -53,13 +54,19 @@ class Conversation < ActiveRecord::Base
     last_message_from_sender[:sender_id]
   end
 
+  def last_message_unread
+    last_message_from_sender[:unread]
+  end
+
   def existing_messages
     if self.reply.nil? && self.finished.nil?
-      self.update_attribute(:initial_viewed, true)
+      self.update_column(:initial_viewed, true)
     elsif self.finished.nil?
-      self.update_attributes!(initial_viewed: true, reply_viewed: true)
+      self.update_column(:initial_viewed, true)
+      self.update_column(:reply_viewed, true)
     else
-      self.update_attributes!(initial_viewed: true, finished_viewed: true)
+      self.update_column(:initial_viewed, true)
+      self.update_column(:finished_viewed, true)
     end
   end
 
@@ -70,7 +77,7 @@ class Conversation < ActiveRecord::Base
         distance_of_time_in_words(start_time, Time.now)
       elsif self.mute.status == 'Ignored'
         start_time = self.mute.created_at
-        start_time = start_time + 1.hours
+        start_time = start_time + Mute::TIMER.minutes
         distance_of_time_in_words(start_time, Time.now)
       end
     else
@@ -110,10 +117,11 @@ class Conversation < ActiveRecord::Base
   end
 
   def mute_users
-    if self.finished_changed?
+    if self.finished_changed? || self.removed_by_receiver_changed? || self.removed_by_sender_changed?
+      return true if self.finished.present? && self.removed_by_receiver && self.removed_by_sender
       mute = Mute.new(sender_id: self.sender_id, receiver_id: self.receiver_id, conversation_id: self.id, status: 'Muted')
       mute.save
-      Mute.delay(run_at: 1.hour.from_now.getutc).destroy(mute.id)
+      Mute.delay(run_at: Mute::TIMER.minutes.from_now.getutc).destroy(mute.id)
     end
   end
 

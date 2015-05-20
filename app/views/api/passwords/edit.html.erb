@@ -1,0 +1,20 @@
+<div class="change-password" style="text-align: center">
+  <h2>Change your password</h2>
+
+  <%= form_for(@user, as: resource_name, url: password_path(resource_name), html: { method: :put }) do |f| %>
+      <% if flash[:notice] %>
+        <div class="notice" style="background-color: darkseagreen"><%= flash[:notice] %></div>
+      <% end %>
+      <%= devise_error_messages! %>
+      <%= f.hidden_field :reset_password_token, value: params[:reset_password_token] %>
+
+      <div><%= f.label :password, "New password" %><br />
+        <%= f.password_field :password, autofocus: true, required: true, autocomplete: "off" %></div>
+
+      <div><%= f.label :password_confirmation, "Confirm new password" %><br />
+        <%= f.password_field :password_confirmation, required: true, autocomplete: "off" %></div>
+
+      <div><%= f.submit "Change my password" %></div>
+  <% end %>
+</div>
+

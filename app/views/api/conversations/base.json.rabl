@@ -1,4 +1,4 @@
-attributes :updated_at, :blocked_to
+attributes :updated_at, :blocked_to, :show_opponents_email
 attribute :id => :conversation_id
 
 node :opponent do

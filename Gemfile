@@ -29,7 +29,7 @@ end
 
 group :development do
   gem 'letter_opener', '~> 1.2.0'
-  gem 'spring', '~> 1.1.3'
+  #gem 'spring', '~> 1.1.3'
 end
 
 group :test do
